@@ -1,0 +1,266 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { useEffect } from 'react';
+import type { UserSettings, KeyboardShortcut, ToastMessage } from '@/types';
+
+interface SettingsStore {
+  // User settings
+  settings: UserSettings;
+  
+  // UI state
+  isSettingsModalOpen: boolean;
+  isStatisticsModalOpen: boolean;
+  isFavoritesModalOpen: boolean;
+  sidebarCollapsed: boolean;
+  sidebarVisible: boolean;
+  
+  // Messages toast
+  toasts: ToastMessage[];
+  
+  // Raccourcis clavier
+  keyboardShortcuts: KeyboardShortcut[];
+  keyboardShortcutsEnabled: boolean;
+  
+  // Settings actions
+  updateSettings: (settings: Partial<UserSettings>) => void;
+  resetSettings: () => void;
+  
+  // Modal actions
+  openSettingsModal: () => void;
+  closeSettingsModal: () => void;
+  openStatisticsModal: () => void;
+  closeStatisticsModal: () => void;
+  openFavoritesModal: () => void;
+  closeFavoritesModal: () => void;
+  
+  // Sidebar actions
+  toggleSidebar: () => void;
+  toggleSidebarVisibility: () => void;
+  setSidebarCollapsed: (collapsed: boolean) => void;
+  setSidebarVisible: (visible: boolean) => void;
+  
+  // Toast actions
+  addToast: (toast: Omit<ToastMessage, 'id'>) => void;
+  removeToast: (id: string) => void;
+  clearToasts: () => void;
+  
+  // Keyboard shortcut actions
+  toggleKeyboardShortcuts: () => void;
+  executeShortcut: (key: string, modifiers: { ctrl?: boolean; alt?: boolean; shift?: boolean }) => void;
+  
+  // Utilitaires
+  getThemePreference: () => 'light' | 'dark';
+  applyTheme: () => void;
+}
+
+const defaultSettings: UserSettings = {
+  theme: 'system',
+  showExplanations: true,
+  autoProgress: false,
+  keyboardShortcuts: true,
+  soundEffects: false,
+  showDifficulty: true,
+  defaultView: 'list'
+};
+
+const generateToastId = () => Date.now().toString() + Math.random().toString(36).substr(2, 9);
+
+export const useSettingsStore = create<SettingsStore>()(
+  persist(
+    (set, get) => ({
+      // Initial state
+      settings: defaultSettings,
+      isSettingsModalOpen: false,
+      isStatisticsModalOpen: false,
+      isFavoritesModalOpen: false,
+      sidebarCollapsed: false,
+      sidebarVisible: true,
+      toasts: [],
+      keyboardShortcuts: [], // Will be initialized by components
+      keyboardShortcutsEnabled: true,
+
+      // Update settings
+      updateSettings: (newSettings: Partial<UserSettings>) => {
+        const { settings } = get();
+        const updatedSettings = { ...settings, ...newSettings };
+        
+        set({ settings: updatedSettings });
+        
+        // Apply theme if changed
+        if (newSettings.theme) {
+          get().applyTheme();
+        }
+        
+        // Afficher un toast de confirmation
+        get().addToast({
+          type: 'success',
+          title: 'Settings updated',
+          description: 'Your preferences have been saved',
+          duration: 3000
+        });
+      },
+
+      // Reset settings
+      resetSettings: () => {
+        set({ settings: defaultSettings });
+        get().applyTheme();
+        
+        get().addToast({
+          type: 'info',
+          title: 'Settings reset',
+          description: 'Default settings have been restored',
+          duration: 3000
+        });
+      },
+
+      // Gestion des modales
+      openSettingsModal: () => set({ isSettingsModalOpen: true }),
+      closeSettingsModal: () => set({ isSettingsModalOpen: false }),
+      openStatisticsModal: () => set({ isStatisticsModalOpen: true }),
+      closeStatisticsModal: () => set({ isStatisticsModalOpen: false }),
+      openFavoritesModal: () => set({ isFavoritesModalOpen: true }),
+      closeFavoritesModal: () => set({ isFavoritesModalOpen: false }),
+
+      // Gestion de la sidebar
+      toggleSidebar: () => {
+        const { sidebarCollapsed } = get();
+        set({ sidebarCollapsed: !sidebarCollapsed });
+      },
+
+      toggleSidebarVisibility: () => {
+        const { sidebarVisible } = get();
+        set({ sidebarVisible: !sidebarVisible });
+      },
+
+      setSidebarCollapsed: (collapsed: boolean) => {
+        set({ sidebarCollapsed: collapsed });
+      },
+
+      setSidebarVisible: (visible: boolean) => {
+        set({ sidebarVisible: visible });
+      },
+
+      // Gestion des toasts
+      addToast: (toast: Omit<ToastMessage, 'id'>) => {
+        const { toasts } = get();
+        const newToast: ToastMessage = {
+          ...toast,
+          id: generateToastId()
+        };
+        
+        set({ toasts: [...toasts, newToast] });
+        
+        // Auto-remove after specified duration
+        if (toast.duration && toast.duration > 0) {
+          setTimeout(() => {
+            get().removeToast(newToast.id);
+          }, toast.duration);
+        }
+      },
+
+      removeToast: (id: string) => {
+        const { toasts } = get();
+        set({ toasts: toasts.filter(toast => toast.id !== id) });
+      },
+
+      clearToasts: () => {
+        set({ toasts: [] });
+      },
+
+      // Gestion des raccourcis clavier
+      toggleKeyboardShortcuts: () => {
+        const { keyboardShortcutsEnabled } = get();
+        set({ keyboardShortcutsEnabled: !keyboardShortcutsEnabled });
+        
+        get().addToast({
+          type: 'info',
+          title: keyboardShortcutsEnabled ? 'Shortcuts disabled' : 'Shortcuts enabled',
+          description: keyboardShortcutsEnabled 
+            ? 'Keyboard shortcuts are now disabled'
+            : 'Keyboard shortcuts are now enabled',
+          duration: 2000
+        });
+      },
+
+      executeShortcut: (key: string, modifiers: { ctrl?: boolean; alt?: boolean; shift?: boolean }) => {
+        const { keyboardShortcuts, keyboardShortcutsEnabled, settings } = get();
+        
+        if (!keyboardShortcutsEnabled || !settings.keyboardShortcuts) {
+          return;
+        }
+
+        const shortcut = keyboardShortcuts.find(s => 
+          s.key.toLowerCase() === key.toLowerCase() &&
+          !!s.ctrlKey === !!modifiers.ctrl &&
+          !!s.altKey === !!modifiers.alt &&
+          !!s.shiftKey === !!modifiers.shift
+        );
+
+        if (shortcut) {
+          shortcut.action();
+        }
+      },
+
+      // Get theme preference
+      getThemePreference: (): 'light' | 'dark' => {
+        const { settings } = get();
+        
+        if (settings.theme === 'system') {
+          // Detect system preference
+          if (typeof window !== 'undefined') {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          return 'light';
+        }
+        
+        return settings.theme;
+      },
+
+      // Apply theme
+      applyTheme: () => {
+        if (typeof window === 'undefined') return;
+        
+        const theme = get().getThemePreference();
+        const root = document.documentElement;
+        
+        // Remove existing theme classes
+        root.classList.remove('light', 'dark');
+        
+        // Add new theme class
+        root.classList.add(theme);
+        
+        // Update meta tag for mobile status bar color
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+          metaThemeColor.setAttribute('content', theme === 'dark' ? '#0f172a' : '#ffffff');
+        }
+      }
+    }),
+    {
+      name: 'settings-store',
+      partialize: (state) => ({
+        settings: state.settings,
+        sidebarCollapsed: state.sidebarCollapsed,
+        sidebarVisible: state.sidebarVisible
+      })
+    }
+  )
+);
+
+// Hook to initialize theme on load
+export const useInitializeTheme = () => {
+  const { applyTheme, settings } = useSettingsStore();
+  
+  useEffect(() => {
+    applyTheme();
+    
+    // Listen for system preference changes
+    if (settings.theme === 'system' && typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = () => applyTheme();
+      
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+  }, [settings.theme, applyTheme]);
+};

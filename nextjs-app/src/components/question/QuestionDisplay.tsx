@@ -1,0 +1,428 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Heart, Star, MessageCircle, Eye, EyeOff, RotateCcw } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useExamStore } from '@/stores/examStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+import type { Question, DifficultyLevel } from '@/types';
+import { cn } from '@/lib/utils';
+
+interface QuestionDisplayProps {
+  question: Question;
+  questionIndex: number;
+}
+
+export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProps) {
+  const { 
+    questionStates, 
+    submitAnswer, 
+    toggleFavorite, 
+    setQuestionDifficulty,
+    markQuestionAsPreview,
+    resetQuestion,
+    getQuestionStatus 
+  } = useExamStore();
+
+  const { settings, addToast } = useSettingsStore();
+
+  const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const questionState = questionStates[questionIndex];
+  const status = getQuestionStatus(questionIndex);
+  const isFavorite = questionState?.isFavorite || false;
+  const difficulty = questionState?.difficulty;
+
+  // Determine if this is a multiple choice question
+  const isMultipleChoice = question.most_voted && question.most_voted.length > 1;
+
+  // Initialize selected answers
+  useEffect(() => {
+    if (questionState?.userAnswer) {
+      setSelectedAnswers(questionState.userAnswer.selectedAnswers);
+      setIsSubmitted(true);
+      if (settings.showExplanations) {
+        setShowExplanation(true);
+      }
+    } else {
+      setSelectedAnswers([]);
+      setIsSubmitted(false);
+      setShowExplanation(false);
+    }
+  }, [questionIndex, questionState, settings.showExplanations]);
+
+  const handleAnswerSelect = (answerLetter: string) => {
+    if (isSubmitted) return;
+
+    if (isMultipleChoice) {
+      setSelectedAnswers(prev => 
+        prev.includes(answerLetter) 
+          ? prev.filter(a => a !== answerLetter)
+          : [...prev, answerLetter]
+      );
+    } else {
+      setSelectedAnswers([answerLetter]);
+    }
+  };
+
+  const handleSubmit = () => {
+    if (selectedAnswers.length === 0) {
+      addToast({
+        type: 'warning',
+        title: 'Select an answer',
+        description: 'Please select at least one answer before submitting.',
+        duration: 3000
+      });
+      return;
+    }
+
+    submitAnswer(questionIndex, selectedAnswers);
+    setIsSubmitted(true);
+    
+    if (settings.showExplanations) {
+      setShowExplanation(true);
+    }
+
+    addToast({
+      type: 'success',
+      title: 'Answer saved',
+      description: 'Your answer has been saved successfully.',
+      duration: 2000
+    });
+  };
+
+  const handlePreview = () => {
+    markQuestionAsPreview(questionIndex);
+    setShowExplanation(true);
+    
+    addToast({
+      type: 'info',
+      title: 'Answer revealed',
+      description: 'The correct answer is now visible.',
+      duration: 2000
+    });
+  };
+
+  const handleReset = () => {
+    resetQuestion(questionIndex);
+    setSelectedAnswers([]);
+    setIsSubmitted(false);
+    setShowExplanation(false);
+    
+    addToast({
+      type: 'info',
+      title: 'Question reset',
+      description: 'You can now answer this question again.',
+      duration: 2000
+    });
+  };
+
+  const handleToggleFavorite = () => {
+    toggleFavorite(questionIndex);
+    
+    addToast({
+      type: isFavorite ? 'info' : 'success',
+      title: isFavorite ? 'Removed from favorites' : 'Added to favorites',
+      description: isFavorite 
+        ? 'This question has been removed from your favorites.'
+        : 'This question has been added to your favorites.',
+      duration: 2000
+    });
+  };
+
+  const handleDifficultyChange = (newDifficulty: DifficultyLevel) => {
+    setQuestionDifficulty(questionIndex, newDifficulty);
+    
+    addToast({
+      type: 'success',
+      title: 'Difficulty updated',
+      description: `Difficulty set to ${newDifficulty === 'easy' ? 'Easy' : newDifficulty === 'medium' ? 'Medium' : 'Hard'}.`,
+      duration: 2000
+    });
+  };
+
+  const getAnswerLetter = (index: number) => String.fromCharCode(65 + index); // A, B, C, D...
+
+  const isAnswerCorrect = (answerLetter: string) => {
+    return question.most_voted?.includes(answerLetter) || false;
+  };
+
+  const getAnswerStyle = (answerLetter: string) => {
+    if (!showExplanation) {
+      return selectedAnswers.includes(answerLetter) 
+        ? 'border-primary bg-primary/10' 
+        : '';
+    }
+
+    // Mode explanation
+    const isSelected = selectedAnswers.includes(answerLetter);
+    const isCorrect = isAnswerCorrect(answerLetter);
+
+    if (isCorrect) {
+      return 'border-green-500 bg-green-50 dark:bg-green-900/20';
+    } else if (isSelected && !isCorrect) {
+      return 'border-red-500 bg-red-50 dark:bg-red-900/20';
+    }
+
+    return '';
+  };
+
+  const difficultyColors = {
+    easy: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
+    medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
+    hard: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+  };
+
+  const statusColors = {
+    unanswered: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
+    answered: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
+    correct: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
+    incorrect: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300',
+    preview: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300'
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Question header */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-3">
+                <Badge variant="outline" className={statusColors[status]}>
+                  {status === 'unanswered' ? 'Unanswered' :
+                   status === 'answered' ? 'Answered' :
+                   status === 'correct' ? 'Correct' :
+                   status === 'incorrect' ? 'Incorrect' :
+                   'Preview'}
+                </Badge>
+                
+                {difficulty && (
+                  <Badge variant="secondary" className={difficultyColors[difficulty]}>
+                    {difficulty === 'easy' ? 'Easy' : 
+                     difficulty === 'medium' ? 'Medium' : 
+                     'Hard'}
+                  </Badge>
+                )}
+
+                {isMultipleChoice && (
+                  <Badge variant="outline">
+                    Multiple choice
+                  </Badge>
+                )}
+              </div>
+
+              <div 
+                className="prose dark:prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: question.question }}
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant={isFavorite ? "default" : "outline"}
+                size="sm"
+                onClick={handleToggleFavorite}
+                className={cn(
+                  "h-9 w-9 p-0",
+                  isFavorite && "text-red-500 border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                )}
+              >
+                <Heart className={cn("h-4 w-4", isFavorite && "fill-current")} />
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* Answers */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-3">
+            {question.answers.map((answer, index) => {
+              const answerLetter = getAnswerLetter(index);
+              const isSelected = selectedAnswers.includes(answerLetter);
+              
+              return (
+                <div
+                  key={index}
+                  className={cn(
+                    "p-4 border rounded-lg cursor-pointer transition-all duration-200",
+                    getAnswerStyle(answerLetter),
+                    !isSubmitted && !showExplanation && "hover:border-primary/50 hover:bg-muted/50"
+                  )}
+                  onClick={() => handleAnswerSelect(answerLetter)}
+                >
+                  <div className="flex items-start gap-3">
+                    {isMultipleChoice ? (
+                      <Checkbox
+                        checked={isSelected}
+                        disabled={isSubmitted || showExplanation}
+                        className="mt-1"
+                      />
+                    ) : (
+                      <div className="flex items-center mt-1">
+                        <div className={cn(
+                          "w-4 h-4 border-2 rounded-full",
+                          isSelected ? "border-primary bg-primary" : "border-muted-foreground"
+                        )}>
+                          {isSelected && <div className="w-2 h-2 bg-white rounded-full m-auto" />}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="flex-1">
+                      <div className="flex items-start gap-2">
+                        <span className="font-medium text-sm">{answerLetter}.</span>
+                        <span className="flex-1">{answer}</span>
+                        
+                        {showExplanation && isAnswerCorrect(answerLetter) && (
+                          <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
+                            Correct
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-between mt-6 pt-4 border-t">
+            <div className="flex items-center gap-2">
+              {/* Difficulty rating */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Difficulty:</span>
+                <div className="flex items-center gap-1">
+                  {(['easy', 'medium', 'hard'] as const).map((level) => (
+                    <Button
+                      key={level}
+                      variant={difficulty === level ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleDifficultyChange(level)}
+                      className="h-7 px-2 text-xs"
+                    >
+                      <Star className={cn(
+                        "h-3 w-3",
+                        difficulty === level && "fill-current"
+                      )} />
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {!isSubmitted && status !== 'preview' && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePreview}
+                    className="flex items-center gap-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                    View answer
+                  </Button>
+                  
+                  <Button 
+                    onClick={handleSubmit}
+                    disabled={selectedAnswers.length === 0}
+                    className="flex items-center gap-2"
+                  >
+                    Submit
+                  </Button>
+                </>
+              )}
+
+              {(isSubmitted || status === 'preview') && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowExplanation(!showExplanation)}
+                    className="flex items-center gap-2"
+                  >
+                    {showExplanation ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showExplanation ? 'Hide' : 'Show'} explanation
+                  </Button>
+                  
+                  {isSubmitted && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleReset}
+                      className="flex items-center gap-2"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                      Retry
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Explanation */}
+      {showExplanation && question.explanation && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5" />
+              <span className="font-semibold">Explanation</span>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div 
+              className="prose dark:prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: question.explanation }}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Community comments */}
+      {question.comments && question.comments.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5" />
+              <span className="font-semibold">Community comments</span>
+              <Badge variant="secondary">{question.comments.length}</Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {question.comments.slice(0, 5).map((comment, index) => (
+                <div key={index} className="border-l-2 border-muted pl-4">
+                  <div className="text-sm text-muted-foreground mb-1">
+                    {comment.selected_answer && (
+                      <span>Selected answer: <strong>{comment.selected_answer}</strong></span>
+                    )}
+                  </div>
+                  <p className="text-sm">{comment.content}</p>
+                </div>
+              ))}
+              
+              {question.comments.length > 5 && (
+                <div className="text-sm text-muted-foreground text-center pt-2 border-t">
+                  And {question.comments.length - 5} other comment(s)...
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
