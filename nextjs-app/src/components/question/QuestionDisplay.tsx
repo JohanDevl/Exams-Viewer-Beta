@@ -231,23 +231,21 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
   };
 
   const getAnswerStyle = (answerLetter: string) => {
-    if (!showExplanation) {
-      return selectedAnswers.includes(answerLetter) 
-        ? 'border-primary bg-primary/10' 
-        : '';
-    }
-
-    // Mode explanation
     const isSelected = selectedAnswers.includes(answerLetter);
     const isCorrect = isAnswerCorrect(answerLetter);
-
-    if (isCorrect) {
-      return 'border-green-500 bg-green-50 dark:bg-green-900/20';
-    } else if (isSelected && !isCorrect) {
-      return 'border-red-500 bg-red-50 dark:bg-red-900/20';
+    
+    // Show answer feedback if explanation is shown OR if answer has been submitted
+    if (showExplanation || isSubmitted) {
+      if (isCorrect) {
+        return 'border-green-500 bg-green-50 dark:bg-green-900/20';
+      } else if (isSelected && !isCorrect) {
+        return 'border-red-500 bg-red-50 dark:bg-red-900/20';
+      }
+      return '';
     }
-
-    return '';
+    
+    // Default selection styling when not submitted yet
+    return isSelected ? 'border-primary bg-primary/10' : '';
   };
 
   const difficultyColors = {
@@ -362,7 +360,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                       <div className="flex items-start gap-2">
                         <span className="flex-1">{answer}</span>
                         
-                        {showExplanation && isAnswerCorrect(answerLetter) && (
+                        {(showExplanation || isSubmitted) && isAnswerCorrect(answerLetter) && (
                           <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
                             Correct
                           </Badge>
