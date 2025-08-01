@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useExamStore } from "@/stores/examStore";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { cn } from "@/lib/utils";
 import type { QuestionStatus, DifficultyLevel } from "@/types";
 
@@ -34,6 +35,8 @@ export function Sidebar() {
 
   const { sidebarCollapsed, setSidebarCollapsed, toggleSidebarVisibility, currentView, toggleView } =
     useSettingsStore();
+  
+  const { playSound } = useSoundEffects();
 
   if (!currentExam) return null;
 
@@ -86,6 +89,7 @@ export function Sidebar() {
 
   const handleQuestionClick = (questionIndex: number) => {
     setCurrentQuestion(questionIndex);
+    playSound('navigation');
   };
 
   const toggleCollapse = () => {

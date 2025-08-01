@@ -9,6 +9,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useExamStore } from '@/stores/examStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { useToastWithSound } from '@/hooks/useToastWithSound';
 import type { Question, DifficultyLevel } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -30,7 +32,9 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     currentExam
   } = useExamStore();
 
-  const { settings, addToast } = useSettingsStore();
+  const { settings } = useSettingsStore();
+  const { playSound } = useSoundEffects();
+  const { addToast } = useToastWithSound();
 
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
   const [showExplanation, setShowExplanation] = useState(false);
@@ -91,6 +95,18 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     }
   };
 
+  const checkAnswerCorrectness = (userAnswers: string[], question: Question): boolean => {
+    const correctAnswers = question.correct_answers || (question.correct_answer ? [question.correct_answer] : []);
+    if (correctAnswers.length === 0) return true; // No correct answer defined
+    
+    // Sort both arrays to compare them properly
+    const sortedUserAnswers = [...userAnswers].sort();
+    const sortedCorrectAnswers = [...correctAnswers].sort();
+    
+    return sortedUserAnswers.length === sortedCorrectAnswers.length &&
+           sortedUserAnswers.every((answer, index) => answer === sortedCorrectAnswers[index]);
+  };
+
   const handleSubmit = () => {
     if (selectedAnswers.length === 0) {
       addToast({
@@ -105,14 +121,20 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     submitAnswer(questionIndex, selectedAnswers);
     setIsSubmitted(true);
     
+    // Check if answer is correct and play appropriate sound
+    const isCorrect = checkAnswerCorrectness(selectedAnswers, question);
+    playSound(isCorrect ? 'correct' : 'incorrect');
+    
     if (settings.showExplanations) {
       setShowExplanation(true);
     }
 
     addToast({
-      type: 'success',
-      title: 'Answer saved',
-      description: 'Your answer has been saved successfully.',
+      type: isCorrect ? 'success' : 'info',
+      title: isCorrect ? 'Correct answer!' : 'Answer saved',
+      description: isCorrect 
+        ? 'Well done! You got it right.' 
+        : 'Your answer has been saved successfully.',
       duration: 2000
     });
 
@@ -163,6 +185,9 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
 
   const handleToggleFavorite = () => {
     toggleFavorite(questionIndex);
+    
+    // Play favorite sound
+    playSound('favorite');
     
     addToast({
       type: isFavorite ? 'info' : 'success',
