@@ -74,11 +74,11 @@ export function Sidebar() {
 
     switch (difficulty) {
       case 'easy':
-        return <ThumbsDown className="h-3 w-3 text-red-500" />;
+        return <ThumbsUp className="h-3 w-3 text-green-500" />;
       case 'medium':
         return <Minus className="h-3 w-3 text-yellow-500" />;
       case 'hard':
-        return <ThumbsUp className="h-3 w-3 text-green-500" />;
+        return <ThumbsDown className="h-3 w-3 text-red-500" />;
       default:
         return null;
     }
