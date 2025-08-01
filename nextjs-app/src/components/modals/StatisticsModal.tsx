@@ -5,7 +5,8 @@ import {
   Dialog, 
   DialogContent, 
   DialogHeader, 
-  DialogTitle 
+  DialogTitle,
+  DialogDescription 
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -150,6 +151,9 @@ export function StatisticsModal() {
               <Badge variant="outline">{currentExamInfo.name}</Badge>
             )}
           </DialogTitle>
+          <DialogDescription>
+            View detailed statistics and performance metrics for your exam progress
+          </DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="h-[600px] w-full">

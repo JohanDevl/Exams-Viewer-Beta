@@ -6,6 +6,7 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle,
+  DialogDescription,
   DialogFooter 
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,9 @@ export function SettingsModal() {
               <Settings className="h-5 w-5 text-gray-500" />
               Application Settings
             </DialogTitle>
+            <DialogDescription>
+              Customize your application preferences and behavior
+            </DialogDescription>
           </DialogHeader>
 
           <ScrollArea className="h-[500px] w-full pr-4">

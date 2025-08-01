@@ -5,7 +5,8 @@ import {
   Dialog, 
   DialogContent, 
   DialogHeader, 
-  DialogTitle 
+  DialogTitle,
+  DialogDescription 
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -78,6 +79,9 @@ export function FavoritesModal() {
               <Badge variant="outline">{currentExamInfo.name}</Badge>
             )}
           </DialogTitle>
+          <DialogDescription>
+            View and manage your saved favorite questions
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
