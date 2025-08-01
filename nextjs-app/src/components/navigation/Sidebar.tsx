@@ -270,6 +270,16 @@ export function Sidebar() {
                 </span>
               </div>
               <div className="flex items-center gap-1">
+                <Eye className="h-3 w-3 text-orange-600" />
+                <span>
+                  {
+                    filteredQuestionIndices.filter(
+                      (i) => getFirstAnswerStatus(i) === "preview"
+                    ).length
+                  }
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
                 <Heart className="h-3 w-3 text-red-500" />
                 <span>
                   {

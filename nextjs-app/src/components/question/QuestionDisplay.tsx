@@ -53,7 +53,10 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     } else {
       setSelectedAnswers([]);
       setIsSubmitted(false);
-      setShowExplanation(false);
+      // Ne pas réinitialiser showExplanation si on est en mode preview
+      if (questionState?.status !== 'preview') {
+        setShowExplanation(false);
+      }
     }
   }, [questionIndex, questionState, settings.showExplanations]);
 
@@ -105,6 +108,17 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
       type: 'info',
       title: 'Answer revealed',
       description: 'The correct answer is now visible.',
+      duration: 2000
+    });
+  };
+
+  const handleHideAnswer = () => {
+    setShowExplanation(false);
+    
+    addToast({
+      type: 'info',
+      title: 'Answer hidden',
+      description: 'You can now answer this question.',
       duration: 2000
     });
   };
@@ -279,7 +293,6 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                     
                     <div className="flex-1">
                       <div className="flex items-start gap-2">
-                        <span className="font-medium text-sm">{answerLetter}.</span>
                         <span className="flex-1">{answer}</span>
                         
                         {showExplanation && isAnswerCorrect(answerLetter) && (
@@ -343,30 +356,52 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                 </>
               )}
 
-              {(isSubmitted || status === 'preview') && (
+              {status === 'preview' && !isSubmitted && (
                 <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowExplanation(!showExplanation)}
-                    className="flex items-center gap-2"
-                  >
-                    {showExplanation ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    {showExplanation ? 'Hide' : 'Show'} explanation
-                  </Button>
-                  
-                  {isSubmitted && (
+                  {showExplanation ? (
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={handleReset}
+                      onClick={handleHideAnswer}
                       className="flex items-center gap-2"
                     >
-                      <RotateCcw className="h-4 w-4" />
-                      Retry
+                      <EyeOff className="h-4 w-4" />
+                      Hide answer
                     </Button>
+                  ) : (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handlePreview}
+                        className="flex items-center gap-2"
+                      >
+                        <Eye className="h-4 w-4" />
+                        View answer
+                      </Button>
+                      
+                      <Button 
+                        onClick={handleSubmit}
+                        disabled={selectedAnswers.length === 0}
+                        className="flex items-center gap-2"
+                      >
+                        Submit
+                      </Button>
+                    </>
                   )}
                 </>
+              )}
+              
+              {isSubmitted && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReset}
+                  className="flex items-center gap-2"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Retry
+                </Button>
               )}
             </div>
           </div>

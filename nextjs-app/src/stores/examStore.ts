@@ -208,12 +208,23 @@ export const useExamStore = create<ExamStore>()(
       // Mark a question as preview
       markQuestionAsPreview: (questionIndex: number) => {
         const { questionStates } = get();
+        const currentState = questionStates[questionIndex];
+        
+        // Si c'est la première action sur cette question, enregistrer comme firstAnswer
+        const isFirstAction = !currentState?.firstAnswer;
+        const previewAnswer: UserAnswer = {
+          selectedAnswers: [], // Aucune réponse sélectionnée pour une action preview
+          timestamp: new Date(),
+          isCorrect: undefined // Non défini pour une action preview
+        };
         
         const newQuestionStates = {
           ...questionStates,
           [questionIndex]: {
-            ...questionStates[questionIndex],
-            status: 'preview' as QuestionStatus
+            ...currentState,
+            status: 'preview' as QuestionStatus,
+            // Enregistrer comme firstAnswer seulement si c'est la première action
+            firstAnswer: isFirstAction ? previewAnswer : currentState?.firstAnswer
           }
         };
 
@@ -401,8 +412,22 @@ export const useExamStore = create<ExamStore>()(
       getFirstAnswerStatus: (questionIndex: number): QuestionStatus => {
         const { questionStates } = get();
         const state = questionStates[questionIndex];
-        if (!state?.firstAnswer) return 'unanswered';
-        return state.firstAnswer.isCorrect ? 'correct' : 'incorrect';
+        
+        // Si on a une première réponse, on l'utilise pour les stats
+        if (state?.firstAnswer) {
+          // Si isCorrect est undefined, c'est une action preview
+          if (state.firstAnswer.isCorrect === undefined) {
+            return 'preview';
+          }
+          return state.firstAnswer.isCorrect ? 'correct' : 'incorrect';
+        }
+        
+        // Sinon, on regarde le statut actuel
+        if (state?.status === 'preview') {
+          return 'preview';
+        }
+        
+        return 'unanswered';
       },
 
       // Get progress
