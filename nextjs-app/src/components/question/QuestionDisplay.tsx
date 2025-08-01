@@ -25,7 +25,9 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     setQuestionDifficulty,
     markQuestionAsPreview,
     resetQuestion,
-    getQuestionStatus 
+    getQuestionStatus,
+    goToNextQuestion,
+    currentExam
   } = useExamStore();
 
   const { settings, addToast } = useSettingsStore();
@@ -113,6 +115,13 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
       description: 'Your answer has been saved successfully.',
       duration: 2000
     });
+
+    // Auto progress: move to next question if enabled
+    if (settings.autoProgress && currentExam && questionIndex < currentExam.questions.length - 1) {
+      setTimeout(() => {
+        goToNextQuestion();
+      }, 1500); // Small delay to let user see the result
+    }
   };
 
   const handlePreview = () => {
