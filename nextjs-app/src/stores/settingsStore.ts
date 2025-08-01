@@ -13,6 +13,7 @@ interface SettingsStore {
   isFavoritesModalOpen: boolean;
   sidebarCollapsed: boolean;
   sidebarVisible: boolean;
+  currentView: "list" | "card";
   
   // Messages toast
   toasts: ToastMessage[];
@@ -38,6 +39,10 @@ interface SettingsStore {
   toggleSidebarVisibility: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
   setSidebarVisible: (visible: boolean) => void;
+
+  // View actions
+  setCurrentView: (view: "list" | "card") => void;
+  toggleView: () => void;
   
   // Toast actions
   addToast: (toast: Omit<ToastMessage, 'id'>) => void;
@@ -75,6 +80,7 @@ export const useSettingsStore = create<SettingsStore>()(
       isFavoritesModalOpen: false,
       sidebarCollapsed: false,
       sidebarVisible: true,
+      currentView: defaultSettings.defaultView,
       toasts: [],
       keyboardShortcuts: [], // Will be initialized by components
       keyboardShortcutsEnabled: true,
@@ -90,6 +96,11 @@ export const useSettingsStore = create<SettingsStore>()(
         if (newSettings.theme) {
           get().applyTheme();
         }
+
+        // Update current view if defaultView changed
+        if (newSettings.defaultView) {
+          set({ currentView: newSettings.defaultView });
+        }
         
         // Afficher un toast de confirmation
         get().addToast({
@@ -102,7 +113,10 @@ export const useSettingsStore = create<SettingsStore>()(
 
       // Reset settings
       resetSettings: () => {
-        set({ settings: defaultSettings });
+        set({ 
+          settings: defaultSettings,
+          currentView: defaultSettings.defaultView 
+        });
         get().applyTheme();
         
         get().addToast({
@@ -138,6 +152,24 @@ export const useSettingsStore = create<SettingsStore>()(
 
       setSidebarVisible: (visible: boolean) => {
         set({ sidebarVisible: visible });
+      },
+
+      // Gestion des vues
+      setCurrentView: (view: "list" | "card") => {
+        set({ currentView: view });
+      },
+
+      toggleView: () => {
+        const { currentView } = get();
+        const newView = currentView === "list" ? "card" : "list";
+        set({ currentView: newView });
+        
+        get().addToast({
+          type: 'info',
+          title: `Switched to ${newView} view`,
+          description: `Questions are now displayed in ${newView} format`,
+          duration: 2000
+        });
       },
 
       // Gestion des toasts
@@ -241,7 +273,8 @@ export const useSettingsStore = create<SettingsStore>()(
       partialize: (state) => ({
         settings: state.settings,
         sidebarCollapsed: state.sidebarCollapsed,
-        sidebarVisible: state.sidebarVisible
+        sidebarVisible: state.sidebarVisible,
+        currentView: state.currentView
       })
     }
   )

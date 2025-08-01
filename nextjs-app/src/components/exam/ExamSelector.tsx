@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Search, Calendar, FileText, Loader2 } from 'lucide-react';
+import { Search, Calendar, FileText, Loader2, Grid, List } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useExamStore } from '@/stores/examStore';
 import { useStatisticsStore } from '@/stores/statisticsStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import type { Manifest, ExamInfo } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +21,7 @@ export function ExamSelector() {
 
   const { loadExam } = useExamStore();
   const { getExamStatistics } = useStatisticsStore();
+  const { currentView, toggleView } = useSettingsStore();
 
   // Load manifest on mount
   useEffect(() => {
@@ -110,15 +112,37 @@ export function ExamSelector() {
 
   return (
     <div className="space-y-6">
-      {/* Search bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search exams (code, name, description)..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
-        />
+      {/* Search bar and view toggle */}
+      <div className="flex gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search exams (code, name, description)..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        
+        <Button
+          variant="outline"
+          size="default"
+          onClick={toggleView}
+          className="flex items-center gap-2 px-4"
+          title={`Switch to ${currentView === 'list' ? 'card' : 'list'} view`}
+        >
+          {currentView === "list" ? (
+            <>
+              <Grid className="h-4 w-4" />
+              Cards
+            </>
+          ) : (
+            <>
+              <List className="h-4 w-4" />
+              List
+            </>
+          )}
+        </Button>
       </div>
 
       {/* Results */}
@@ -134,12 +158,18 @@ export function ExamSelector() {
             {filteredExams.length} exam{filteredExams.length > 1 ? 's' : ''} found
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className={cn(
+            "gap-4",
+            currentView === "card" 
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
+              : "space-y-4"
+          )}>
             {filteredExams.map((exam) => {
               const stats = getExamStatistics(exam.code);
               const isLoadingThis = loadingExam === exam.code;
 
-              return (
+              return currentView === "card" ? (
+                // Card view (existing)
                 <Card 
                   key={exam.code} 
                   className={cn(
@@ -228,6 +258,96 @@ export function ExamSelector() {
                           'Start'
                         )}
                       </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                // List view (compact horizontal)
+                <Card
+                  key={exam.code}
+                  className={cn(
+                    "cursor-pointer transition-all duration-200 hover:shadow-md border-2",
+                    "hover:border-primary/20 group",
+                    isLoadingThis && "opacity-75 cursor-not-allowed"
+                  )}
+                  onClick={() => !isLoadingThis && handleSelectExam(exam.code)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between gap-4">
+                      {/* Left side - Exam info */}
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className="flex flex-col gap-1">
+                          <Badge 
+                            variant="secondary" 
+                            className={cn("text-xs font-medium w-fit", getExamTypeColor(exam.code))}
+                          >
+                            {exam.code}
+                          </Badge>
+                          {stats.answered > 0 && (
+                            <Badge variant="outline" className="text-xs w-fit">
+                              {Math.round(stats.accuracy)}% success
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold group-hover:text-primary transition-colors truncate">
+                            {exam.name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground truncate">
+                            {exam.description}
+                          </p>
+                          <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <FileText className="h-3 w-3" />
+                              <span>{exam.questionCount} questions</span>
+                            </div>
+                            {stats.answered > 0 && (
+                              <span>{stats.answered}/{exam.questionCount} answered</span>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              <span>{formatDate(exam.lastUpdated)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right side - Progress and button */}
+                      <div className="flex items-center gap-4 flex-shrink-0">
+                        {stats.answered > 0 && (
+                          <div className="text-right min-w-20">
+                            <div className="text-sm font-medium">
+                              {Math.round((stats.answered / exam.questionCount) * 100)}%
+                            </div>
+                            <div className="h-1 bg-muted rounded-full overflow-hidden w-20">
+                              <div 
+                                className="h-full bg-primary transition-all duration-300"
+                                style={{ width: `${(stats.answered / exam.questionCount) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                        
+                        <Button 
+                          disabled={isLoadingThis}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isLoadingThis) handleSelectExam(exam.code);
+                          }}
+                        >
+                          {isLoadingThis ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Loading...
+                            </>
+                          ) : stats.answered > 0 ? (
+                            'Continue'
+                          ) : (
+                            'Start'
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

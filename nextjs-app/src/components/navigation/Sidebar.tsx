@@ -10,6 +10,8 @@ import {
   Heart,
   Circle,
   Star,
+  Grid,
+  List,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -30,7 +32,7 @@ export function Sidebar() {
     getFirstAnswerStatus,
   } = useExamStore();
 
-  const { sidebarCollapsed, setSidebarCollapsed, toggleSidebarVisibility } =
+  const { sidebarCollapsed, setSidebarCollapsed, toggleSidebarVisibility, currentView, toggleView } =
     useSettingsStore();
 
   if (!currentExam) return null;
@@ -108,15 +110,31 @@ export function Sidebar() {
 
         <div className="flex items-center gap-1">
           {!sidebarCollapsed && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleSidebarVisibility}
-              className="h-8 w-8 p-0"
-              title="Hide sidebar"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleView}
+                className="h-8 w-8 p-0"
+                title={`Switch to ${currentView === 'list' ? 'card' : 'list'} view`}
+              >
+                {currentView === "list" ? (
+                  <Grid className="h-4 w-4" />
+                ) : (
+                  <List className="h-4 w-4" />
+                )}
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleSidebarVisibility}
+                className="h-8 w-8 p-0"
+                title="Hide sidebar"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </>
           )}
 
           <Button
@@ -171,8 +189,8 @@ export function Sidebar() {
               })}
             </div>
           </ScrollArea>
-        ) : (
-          /* Detailed view */
+        ) : currentView === "list" ? (
+          /* List view */
           <ScrollArea className="h-full">
             <div className="p-2 space-y-2">
               {filteredQuestionIndices.map((questionIndex) => {
@@ -221,6 +239,61 @@ export function Sidebar() {
                           ...
                         </div>
                       </div>
+                    </div>
+                  </Button>
+                );
+              })}
+            </div>
+          </ScrollArea>
+        ) : (
+          /* Card view */
+          <ScrollArea className="h-full">
+            <div className="p-2 grid grid-cols-2 gap-2">
+              {filteredQuestionIndices.map((questionIndex) => {
+                const status = getFirstAnswerStatus(questionIndex);
+                const questionState = questionStates[questionIndex];
+                const isActive = questionIndex === currentQuestionIndex;
+                const isFavorite = questionState?.isFavorite;
+                const difficulty = questionState?.difficulty;
+
+                return (
+                  <Button
+                    key={questionIndex}
+                    variant="ghost"
+                    onClick={() => handleQuestionClick(questionIndex)}
+                    className={cn(
+                      "w-full h-20 p-2 border justify-start text-left overflow-hidden flex-col",
+                      getStatusColor(status, isActive)
+                    )}
+                  >
+                    <div className="flex items-center justify-between w-full mb-1">
+                      <div className="flex items-center gap-1">
+                        <div className="flex-shrink-0">
+                          {getStatusIcon(status)}
+                        </div>
+                        <span className="font-medium text-xs truncate">
+                          Q{questionIndex + 1}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        {difficulty && getDifficultyIcon(difficulty)}
+                        {isFavorite && (
+                          <Heart className="h-2 w-2 text-red-500 fill-current" />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Question excerpt */}
+                    <div className="text-xs text-muted-foreground text-left w-full overflow-hidden" style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical'
+                    }}>
+                      {currentExam.questions[questionIndex]?.question
+                        .replace(/<[^>]*>/g, "") // Remove HTML tags
+                        .substring(0, 60)}
+                      ...
                     </div>
                   </Button>
                 );
