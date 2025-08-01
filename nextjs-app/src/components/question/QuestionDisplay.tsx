@@ -438,7 +438,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {question.comments.slice(0, 5).map((comment, index) => (
+              {question.comments.map((comment, index) => (
                 <div key={index} className="border-l-2 border-muted pl-4">
                   <div className="text-sm text-muted-foreground mb-1">
                     {comment.selected_answer && (
@@ -448,12 +448,6 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                   <p className="text-sm">{comment.content}</p>
                 </div>
               ))}
-              
-              {question.comments.length > 5 && (
-                <div className="text-sm text-muted-foreground text-center pt-2 border-t">
-                  And {question.comments.length - 5} other comment(s)...
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>
