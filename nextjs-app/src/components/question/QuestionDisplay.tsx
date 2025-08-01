@@ -60,6 +60,21 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     }
   }, [questionIndex, questionState, settings.showExplanations]);
 
+  // Auto-activate View answer when showExplanations setting is enabled
+  useEffect(() => {
+    if (settings.showExplanations && !isSubmitted && status !== 'preview' && !questionState?.userAnswer) {
+      markQuestionAsPreview(questionIndex);
+      setShowExplanation(true);
+      
+      addToast({
+        type: 'info',
+        title: 'Answer revealed',
+        description: 'Answers are automatically shown based on your settings.',
+        duration: 2000
+      });
+    }
+  }, [questionIndex, settings.showExplanations, isSubmitted, status, questionState, markQuestionAsPreview, addToast]);
+
   const handleAnswerSelect = (answerLetter: string) => {
     if (isSubmitted) return;
 

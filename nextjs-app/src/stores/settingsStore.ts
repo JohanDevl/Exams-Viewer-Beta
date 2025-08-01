@@ -55,7 +55,7 @@ interface SettingsStore {
 
 const defaultSettings: UserSettings = {
   theme: 'system',
-  showExplanations: true,
+  showExplanations: false,
   autoProgress: false,
   keyboardShortcuts: true,
   soundEffects: false,
