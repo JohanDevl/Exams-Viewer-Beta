@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -9,13 +8,14 @@ import {
   Eye,
   Heart,
   Circle,
-  Star,
   Grid,
   List,
+  ThumbsDown,
+  Minus,
+  ThumbsUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
 import { useExamStore } from "@/stores/examStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { cn } from "@/lib/utils";
@@ -72,13 +72,16 @@ export function Sidebar() {
   const getDifficultyIcon = (difficulty: DifficultyLevel) => {
     if (!difficulty) return null;
 
-    const colors = {
-      easy: "text-green-500",
-      medium: "text-yellow-500",
-      hard: "text-red-500",
-    };
-
-    return <Star className={cn("h-3 w-3", colors[difficulty])} />;
+    switch (difficulty) {
+      case 'easy':
+        return <ThumbsDown className="h-3 w-3 text-red-500" />;
+      case 'medium':
+        return <Minus className="h-3 w-3 text-yellow-500" />;
+      case 'hard':
+        return <ThumbsUp className="h-3 w-3 text-green-500" />;
+      default:
+        return null;
+    }
   };
 
   const handleQuestionClick = (questionIndex: number) => {

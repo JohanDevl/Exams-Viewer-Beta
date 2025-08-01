@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Heart, Star, MessageCircle, Eye, EyeOff, RotateCcw } from 'lucide-react';
+import { Heart, MessageCircle, Eye, EyeOff, RotateCcw, ThumbsDown, Minus, ThumbsUp } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -178,6 +178,19 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
 
   const getAnswerLetter = (index: number) => String.fromCharCode(65 + index); // A, B, C, D...
 
+  const getDifficultyIcon = (level: DifficultyLevel) => {
+    switch (level) {
+      case 'easy':
+        return <ThumbsDown className="h-3 w-3 text-red-500" />;
+      case 'medium':
+        return <Minus className="h-3 w-3 text-yellow-500" />;
+      case 'hard':
+        return <ThumbsUp className="h-3 w-3 text-green-500" />;
+      default:
+        return null;
+    }
+  };
+
   const isAnswerCorrect = (answerLetter: string) => {
     return question.most_voted?.includes(answerLetter) || false;
   };
@@ -233,7 +246,11 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                 </Badge>
                 
                 {difficulty && (
-                  <Badge variant="secondary" className={difficultyColors[difficulty]}>
+                  <Badge variant="secondary" className={cn(
+                    "flex items-center gap-1",
+                    difficultyColors[difficulty]
+                  )}>
+                    {getDifficultyIcon(difficulty)}
                     {difficulty === 'easy' ? 'Easy' : 
                      difficulty === 'medium' ? 'Medium' : 
                      'Hard'}
@@ -336,12 +353,15 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                       variant={difficulty === level ? "default" : "outline"}
                       size="sm"
                       onClick={() => handleDifficultyChange(level)}
-                      className="h-7 px-2 text-xs"
+                      className={cn(
+                        "h-7 px-2 text-xs",
+                        difficulty === level && level === 'easy' && "bg-red-500 hover:bg-red-600 text-white border-red-500",
+                        difficulty === level && level === 'medium' && "bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500",
+                        difficulty === level && level === 'hard' && "bg-green-500 hover:bg-green-600 text-white border-green-500"
+                      )}
+                      title={`Mark as ${level} difficulty`}
                     >
-                      <Star className={cn(
-                        "h-3 w-3",
-                        difficulty === level && "fill-current"
-                      )} />
+                      {getDifficultyIcon(level)}
                     </Button>
                   ))}
                 </div>
