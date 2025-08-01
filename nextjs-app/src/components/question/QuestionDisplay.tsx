@@ -11,7 +11,7 @@ import { useExamStore } from '@/stores/examStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useToastWithSound } from '@/hooks/useToastWithSound';
-import { LinkifiedText, LinkifiedHtml } from '@/utils/linkUtils';
+import { LinkifiedText, LinkifiedHtml, QuestionContent } from '@/utils/linkUtils';
 import type { Question, DifficultyLevel } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -297,10 +297,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                 )}
               </div>
 
-              <div 
-                className="prose dark:prose-invert max-w-none"
-                dangerouslySetInnerHTML={{ __html: question.question }}
-              />
+              <QuestionContent content={question.question} />
             </div>
 
             <div className="flex items-center gap-2">
