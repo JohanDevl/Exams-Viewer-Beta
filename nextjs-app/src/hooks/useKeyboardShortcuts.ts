@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useExamStore } from '@/stores/examStore';
-import { useRouter } from 'next/navigation';
 
 export function useKeyboardShortcuts() {
   const { settings } = useSettingsStore();
@@ -17,8 +16,6 @@ export function useKeyboardShortcuts() {
     toggleFavorite,
     setQuestionDifficulty
   } = useExamStore();
-  const { openSettingsModal, openFavoritesModal, openStatisticsModal } = useSettingsStore();
-  const router = useRouter();
 
   useEffect(() => {
     if (!settings.keyboardShortcuts) {
@@ -86,32 +83,6 @@ export function useKeyboardShortcuts() {
         }
       }
 
-      // Modal shortcuts (with Ctrl)
-      if (event.ctrlKey) {
-        if (key === 's') {
-          event.preventDefault();
-          openSettingsModal();
-          return;
-        }
-
-        if (key === 'f') {
-          event.preventDefault();
-          openFavoritesModal();
-          return;
-        }
-
-        if (key === 't') {
-          event.preventDefault();
-          openStatisticsModal();
-          return;
-        }
-
-        if (key === 'h') {
-          event.preventDefault();
-          router.push('/');
-          return;
-        }
-      }
 
 
       // Escape key to close modals or go back
@@ -136,11 +107,7 @@ export function useKeyboardShortcuts() {
     goToPreviousQuestion,
     submitAnswer,
     toggleFavorite,
-    setQuestionDifficulty,
-    openSettingsModal,
-    openFavoritesModal,
-    openStatisticsModal,
-    router
+    setQuestionDifficulty
   ]);
 
   // Return the available shortcuts for display
@@ -154,10 +121,6 @@ export function useKeyboardShortcuts() {
       { key: '2', description: 'Mark as medium' },
       { key: '3', description: 'Mark as hard' }
     ] : []),
-    { key: 'Ctrl+S', description: 'Open settings' },
-    { key: 'Ctrl+F', description: 'Open favorites' },
-    { key: 'Ctrl+T', description: 'Open statistics' },
-    { key: 'Ctrl+H', description: 'Go to home' },
     { key: 'Esc', description: 'Close modal/Go back' }
   ];
 
