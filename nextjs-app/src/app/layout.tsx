@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeInitializer } from "@/components/providers/ThemeInitializer";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { ModalsProvider } from "@/components/providers/ModalsProvider";
+import { KeyboardShortcutsProvider } from "@/components/providers/KeyboardShortcutsProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -65,6 +66,7 @@ export default function RootLayout({
         <ThemeInitializer />
         <ToastProvider />
         <ModalsProvider />
+        <KeyboardShortcutsProvider />
         <div id="root" className="min-h-screen bg-background text-foreground">
           {children}
         </div>

@@ -24,6 +24,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { ClientOnly } from '@/components/ui/ClientOnly';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 export function SettingsModal() {
   const { 
@@ -33,6 +34,8 @@ export function SettingsModal() {
     updateSettings, 
     resetSettings 
   } = useSettingsStore();
+  
+  const { shortcuts } = useKeyboardShortcuts();
 
   const handleSettingChange = (key: keyof typeof settings, value: string | boolean) => {
     updateSettings({ [key]: value });
@@ -257,30 +260,12 @@ export function SettingsModal() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                      <div className="flex justify-between">
-                        <span>Next question</span>
-                        <code className="bg-muted px-1 rounded">→</code>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Previous question</span>
-                        <code className="bg-muted px-1 rounded">←</code>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Add to favorites</span>
-                        <code className="bg-muted px-1 rounded">F</code>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Submit answer</span>
-                        <code className="bg-muted px-1 rounded">Enter</code>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Show statistics</span>
-                        <code className="bg-muted px-1 rounded">S</code>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Show settings</span>
-                        <code className="bg-muted px-1 rounded">Ctrl+,</code>
-                      </div>
+                      {shortcuts.map((shortcut, index) => (
+                        <div key={index} className="flex justify-between">
+                          <span>{shortcut.description}</span>
+                          <code className="bg-muted px-1 rounded">{shortcut.key}</code>
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useEffect } from 'react';
-import type { UserSettings, KeyboardShortcut, ToastMessage } from '@/types';
+import type { UserSettings, ToastMessage } from '@/types';
 
 interface SettingsStore {
   // User settings
@@ -18,9 +18,6 @@ interface SettingsStore {
   // Messages toast
   toasts: ToastMessage[];
   
-  // Raccourcis clavier
-  keyboardShortcuts: KeyboardShortcut[];
-  keyboardShortcutsEnabled: boolean;
   
   // Settings actions
   updateSettings: (settings: Partial<UserSettings>) => void;
@@ -49,9 +46,6 @@ interface SettingsStore {
   removeToast: (id: string) => void;
   clearToasts: () => void;
   
-  // Keyboard shortcut actions
-  toggleKeyboardShortcuts: () => void;
-  executeShortcut: (key: string, modifiers: { ctrl?: boolean; alt?: boolean; shift?: boolean }) => void;
   
   // Utilitaires
   getThemePreference: () => 'light' | 'dark';
@@ -82,8 +76,6 @@ export const useSettingsStore = create<SettingsStore>()(
       sidebarVisible: true,
       currentView: defaultSettings.defaultView,
       toasts: [],
-      keyboardShortcuts: [], // Will be initialized by components
-      keyboardShortcutsEnabled: true,
 
       // Update settings
       updateSettings: (newSettings: Partial<UserSettings>) => {
@@ -199,39 +191,6 @@ export const useSettingsStore = create<SettingsStore>()(
         set({ toasts: [] });
       },
 
-      // Gestion des raccourcis clavier
-      toggleKeyboardShortcuts: () => {
-        const { keyboardShortcutsEnabled } = get();
-        set({ keyboardShortcutsEnabled: !keyboardShortcutsEnabled });
-        
-        get().addToast({
-          type: 'info',
-          title: keyboardShortcutsEnabled ? 'Shortcuts disabled' : 'Shortcuts enabled',
-          description: keyboardShortcutsEnabled 
-            ? 'Keyboard shortcuts are now disabled'
-            : 'Keyboard shortcuts are now enabled',
-          duration: 2000
-        });
-      },
-
-      executeShortcut: (key: string, modifiers: { ctrl?: boolean; alt?: boolean; shift?: boolean }) => {
-        const { keyboardShortcuts, keyboardShortcutsEnabled, settings } = get();
-        
-        if (!keyboardShortcutsEnabled || !settings.keyboardShortcuts) {
-          return;
-        }
-
-        const shortcut = keyboardShortcuts.find(s => 
-          s.key.toLowerCase() === key.toLowerCase() &&
-          !!s.ctrlKey === !!modifiers.ctrl &&
-          !!s.altKey === !!modifiers.alt &&
-          !!s.shiftKey === !!modifiers.shift
-        );
-
-        if (shortcut) {
-          shortcut.action();
-        }
-      },
 
       // Get theme preference
       getThemePreference: (): 'light' | 'dark' => {
