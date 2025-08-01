@@ -11,6 +11,7 @@ import { useExamStore } from '@/stores/examStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useToastWithSound } from '@/hooks/useToastWithSound';
+import { LinkifiedText, LinkifiedHtml } from '@/utils/linkUtils';
 import type { Question, DifficultyLevel } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -489,9 +490,9 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
             </div>
           </CardHeader>
           <CardContent>
-            <div 
+            <LinkifiedHtml 
+              content={question.explanation}
               className="prose dark:prose-invert max-w-none"
-              dangerouslySetInnerHTML={{ __html: question.explanation }}
             />
           </CardContent>
         </Card>
@@ -516,7 +517,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                       <span>Selected answer: <strong>{comment.selected_answer}</strong></span>
                     )}
                   </div>
-                  <p className="text-sm">{comment.content}</p>
+                  <LinkifiedText className="text-sm">{comment.content}</LinkifiedText>
                 </div>
               ))}
             </div>
