@@ -33,7 +33,7 @@ export function Sidebar() {
     getFirstAnswerStatus,
   } = useExamStore();
 
-  const { sidebarCollapsed, setSidebarCollapsed, toggleSidebarVisibility, currentView, toggleView } =
+  const { sidebarCollapsed, setSidebarCollapsed, toggleSidebarVisibility, currentView, toggleView, settings } =
     useSettingsStore();
   
   const { playSound } = useSoundEffects();
@@ -231,7 +231,7 @@ export function Sidebar() {
                           </span>
 
                           <div className="flex items-center gap-1 flex-shrink-0">
-                            {difficulty && getDifficultyIcon(difficulty)}
+                            {difficulty && settings.showDifficulty && getDifficultyIcon(difficulty)}
                             {isFavorite && (
                               <Heart className="h-3 w-3 text-red-500 fill-current" />
                             )}
@@ -284,7 +284,7 @@ export function Sidebar() {
                       </div>
 
                       <div className="flex items-center gap-1 flex-shrink-0">
-                        {difficulty && getDifficultyIcon(difficulty)}
+                        {difficulty && settings.showDifficulty && getDifficultyIcon(difficulty)}
                         {isFavorite && (
                           <Heart className="h-2 w-2 text-red-500 fill-current" />
                         )}

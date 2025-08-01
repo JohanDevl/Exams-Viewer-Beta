@@ -279,7 +279,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                    'Preview'}
                 </Badge>
                 
-                {difficulty && (
+                {difficulty && settings.showDifficulty && (
                   <Badge variant="secondary" className={cn(
                     "flex items-center gap-1",
                     difficultyColors[difficulty]
@@ -378,28 +378,30 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
           <div className="flex items-center justify-between mt-6 pt-4 border-t">
             <div className="flex items-center gap-2">
               {/* Difficulty rating */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Difficulty:</span>
-                <div className="flex items-center gap-1">
-                  {(['easy', 'medium', 'hard'] as const).map((level) => (
-                    <Button
-                      key={level}
-                      variant={difficulty === level ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handleDifficultyChange(level)}
-                      className={cn(
-                        "h-7 px-2 text-xs",
-                        difficulty === level && level === 'easy' && "bg-green-500 hover:bg-green-600 text-white border-green-500",
-                        difficulty === level && level === 'medium' && "bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500",
-                        difficulty === level && level === 'hard' && "bg-red-500 hover:bg-red-600 text-white border-red-500"
-                      )}
-                      title={`Mark as ${level} difficulty`}
-                    >
-                      {getDifficultyIcon(level, difficulty === level)}
-                    </Button>
-                  ))}
+              {settings.showDifficulty && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Difficulty:</span>
+                  <div className="flex items-center gap-1">
+                    {(['easy', 'medium', 'hard'] as const).map((level) => (
+                      <Button
+                        key={level}
+                        variant={difficulty === level ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleDifficultyChange(level)}
+                        className={cn(
+                          "h-7 px-2 text-xs",
+                          difficulty === level && level === 'easy' && "bg-green-500 hover:bg-green-600 text-white border-green-500",
+                          difficulty === level && level === 'medium' && "bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500",
+                          difficulty === level && level === 'hard' && "bg-red-500 hover:bg-red-600 text-white border-red-500"
+                        )}
+                        title={`Mark as ${level} difficulty`}
+                      >
+                        {getDifficultyIcon(level, difficulty === level)}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="flex items-center gap-2">

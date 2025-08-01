@@ -65,23 +65,25 @@ export function useKeyboardShortcuts() {
         return;
       }
 
-      // Difficulty shortcuts
-      if (key === '1') {
-        event.preventDefault();
-        setQuestionDifficulty(currentQuestionIndex, 'easy');
-        return;
-      }
+      // Difficulty shortcuts (only if difficulty display is enabled)
+      if (settings.showDifficulty) {
+        if (key === '1') {
+          event.preventDefault();
+          setQuestionDifficulty(currentQuestionIndex, 'easy');
+          return;
+        }
 
-      if (key === '2') {
-        event.preventDefault();
-        setQuestionDifficulty(currentQuestionIndex, 'medium');
-        return;
-      }
+        if (key === '2') {
+          event.preventDefault();
+          setQuestionDifficulty(currentQuestionIndex, 'medium');
+          return;
+        }
 
-      if (key === '3') {
-        event.preventDefault();
-        setQuestionDifficulty(currentQuestionIndex, 'hard');
-        return;
+        if (key === '3') {
+          event.preventDefault();
+          setQuestionDifficulty(currentQuestionIndex, 'hard');
+          return;
+        }
       }
 
       // Modal shortcuts (with Ctrl)
@@ -111,16 +113,6 @@ export function useKeyboardShortcuts() {
         }
       }
 
-      // Number shortcuts for direct question navigation (1-9, 0 for 10th)
-      if (key >= '0' && key <= '9' && event.ctrlKey) {
-        event.preventDefault();
-        const questionNum = key === '0' ? 10 : parseInt(key);
-        const questionIndex = questionNum - 1;
-        if (currentExam && questionIndex >= 0 && questionIndex < currentExam.questions.length) {
-          setCurrentQuestion(questionIndex);
-        }
-        return;
-      }
 
       // Escape key to close modals or go back
       if (key === 'escape') {
@@ -136,6 +128,7 @@ export function useKeyboardShortcuts() {
     };
   }, [
     settings.keyboardShortcuts,
+    settings.showDifficulty,
     currentQuestionIndex,
     currentExam,
     setCurrentQuestion,
@@ -155,15 +148,16 @@ export function useKeyboardShortcuts() {
     { key: '←/A', description: 'Previous question' },
     { key: '→/D', description: 'Next question' },
     { key: 'F', description: 'Toggle favorite' },
-    { key: '1', description: 'Mark as easy' },
-    { key: '2', description: 'Mark as medium' },
-    { key: '3', description: 'Mark as hard' },
+    // Only show difficulty shortcuts if difficulty display is enabled
+    ...(settings.showDifficulty ? [
+      { key: '1', description: 'Mark as easy' },
+      { key: '2', description: 'Mark as medium' },
+      { key: '3', description: 'Mark as hard' }
+    ] : []),
     { key: 'Ctrl+S', description: 'Open settings' },
     { key: 'Ctrl+F', description: 'Open favorites' },
     { key: 'Ctrl+T', description: 'Open statistics' },
     { key: 'Ctrl+H', description: 'Go to home' },
-    { key: 'Ctrl+1-9', description: 'Go to question 1-9' },
-    { key: 'Ctrl+0', description: 'Go to question 10' },
     { key: 'Esc', description: 'Close modal/Go back' }
   ];
 
