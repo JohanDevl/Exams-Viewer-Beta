@@ -14,6 +14,8 @@ export interface Question {
   explanation?: string;
   most_voted?: string;
   correct_answer?: string;
+  images?: Record<string, { webp: string; jpeg: string }>;
+  question_number?: string;
 }
 
 export interface ExamData {

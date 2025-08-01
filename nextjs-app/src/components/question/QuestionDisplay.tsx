@@ -269,6 +269,15 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
         <CardHeader>
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
+              {/* Question number */}
+              {question.question_number && (
+                <div className="mb-4">
+                  <span className="text-lg font-semibold text-muted-foreground">
+                    Question {question.question_number}
+                  </span>
+                </div>
+              )}
+              
               <div className="flex items-center gap-2 mb-3">
                 <Badge variant="outline" className={statusColors[status]}>
                   {status === 'unanswered' ? 'Unanswered' :
@@ -297,7 +306,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                 )}
               </div>
 
-              <QuestionContent content={question.question} />
+              <QuestionContent content={question.question} images={question.images} />
             </div>
 
             <div className="flex items-center gap-2">
@@ -487,6 +496,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
           <CardContent>
             <LinkifiedHtml 
               content={question.explanation}
+              images={question.images}
               className="prose dark:prose-invert max-w-none"
             />
           </CardContent>
@@ -512,7 +522,11 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                       <span>Selected answer: <strong>{comment.selected_answer}</strong></span>
                     )}
                   </div>
-                  <LinkifiedText className="text-sm">{comment.content}</LinkifiedText>
+                  <LinkifiedHtml 
+                    content={comment.content}
+                    images={question.images}
+                    className="text-sm"
+                  />
                 </div>
               ))}
             </div>
