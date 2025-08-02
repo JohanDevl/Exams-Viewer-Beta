@@ -11,6 +11,7 @@ interface SettingsStore {
   isSettingsModalOpen: boolean;
   isStatisticsModalOpen: boolean;
   isFavoritesModalOpen: boolean;
+  isExportModalOpen: boolean;
   sidebarCollapsed: boolean;
   sidebarVisible: boolean;
   currentView: "list" | "card";
@@ -30,6 +31,8 @@ interface SettingsStore {
   closeStatisticsModal: () => void;
   openFavoritesModal: () => void;
   closeFavoritesModal: () => void;
+  openExportModal: () => void;
+  closeExportModal: () => void;
   
   // Sidebar actions
   toggleSidebar: () => void;
@@ -72,6 +75,7 @@ export const useSettingsStore = create<SettingsStore>()(
       isSettingsModalOpen: false,
       isStatisticsModalOpen: false,
       isFavoritesModalOpen: false,
+      isExportModalOpen: false,
       sidebarCollapsed: false,
       sidebarVisible: true,
       currentView: defaultSettings.defaultView,
@@ -126,6 +130,8 @@ export const useSettingsStore = create<SettingsStore>()(
       closeStatisticsModal: () => set({ isStatisticsModalOpen: false }),
       openFavoritesModal: () => set({ isFavoritesModalOpen: true }),
       closeFavoritesModal: () => set({ isFavoritesModalOpen: false }),
+      openExportModal: () => set({ isExportModalOpen: true }),
+      closeExportModal: () => set({ isExportModalOpen: false }),
 
       // Gestion de la sidebar
       toggleSidebar: () => {

@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Moon, Sun, Settings, BarChart3, Heart, Menu, Github, ExternalLink } from 'lucide-react';
+import { Moon, Sun, Settings, BarChart3, Heart, Menu, Github, ExternalLink, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ClientOnly } from '@/components/ui/ClientOnly';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useExamStore } from '@/stores/examStore';
 import { cn } from '@/lib/utils';
 
 export function AppHeader() {
@@ -13,10 +14,18 @@ export function AppHeader() {
     openSettingsModal, 
     openStatisticsModal, 
     openFavoritesModal,
+    openExportModal,
     getThemePreference 
   } = useSettingsStore();
+  
+  const { currentExam, questionStates } = useExamStore();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Check if we have data to enable/disable certain buttons
+  const hasExamData = !!currentExam;
+  const hasFavorites = hasExamData && Object.values(questionStates).some(state => state?.isFavorite);
+  const hasUserActivity = hasExamData && Object.values(questionStates).some(state => state?.userAnswer || state?.isFavorite);
 
   const toggleTheme = () => {
     const currentTheme = getThemePreference();
@@ -28,22 +37,25 @@ export function AppHeader() {
     onClick, 
     icon: Icon, 
     label, 
-    className 
+    className,
+    disabled = false
   }: { 
     onClick: () => void; 
     icon: React.ComponentType<{ className?: string }>; 
     label: string; 
     className?: string;
+    disabled?: boolean;
   }) => (
     <Button
       variant="ghost"
       size="sm"
       onClick={onClick}
+      disabled={disabled}
       className={cn("h-9 w-9 p-0", className)}
-      title={label}
+      title={disabled ? `${label} (No data available)` : label}
       aria-label={label}
     >
-      <Icon className="h-4 w-4" />
+      <Icon className={cn("h-4 w-4", disabled && "opacity-50")} />
     </Button>
   );
 
@@ -78,12 +90,21 @@ export function AppHeader() {
               onClick={openFavoritesModal}
               icon={Heart}
               label="Favorites"
+              disabled={!hasExamData}
             />
 
             <HeaderButton
               onClick={openStatisticsModal}
               icon={BarChart3}
               label="Statistics"
+              disabled={!hasUserActivity}
+            />
+
+            <HeaderButton
+              onClick={openExportModal}
+              icon={Download}
+              label="Export"
+              disabled={!hasExamData}
             />
 
             <ClientOnly>
@@ -151,6 +172,7 @@ export function AppHeader() {
                   }}
                   icon={Heart}
                   label="Favorites"
+                  disabled={!hasExamData}
                 />
 
                 <HeaderButton
@@ -160,6 +182,17 @@ export function AppHeader() {
                   }}
                   icon={BarChart3}
                   label="Statistics"
+                  disabled={!hasUserActivity}
+                />
+
+                <HeaderButton
+                  onClick={() => {
+                    openExportModal();
+                    setMobileMenuOpen(false);
+                  }}
+                  icon={Download}
+                  label="Export"
+                  disabled={!hasExamData}
                 />
 
                 <ClientOnly>
