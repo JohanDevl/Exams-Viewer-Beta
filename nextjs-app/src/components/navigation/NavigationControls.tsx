@@ -13,7 +13,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useExamStore } from '@/stores/examStore';
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
 
 export function NavigationControls() {
   const { 
@@ -23,8 +22,7 @@ export function NavigationControls() {
     setSearchFilters,
     goToPreviousQuestion,
     goToNextQuestion,
-    goToRandomQuestion,
-    updateFilteredQuestions
+    goToRandomQuestion
   } = useExamStore();
 
   const [showFilters, setShowFilters] = useState(false);

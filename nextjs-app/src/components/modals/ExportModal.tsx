@@ -143,8 +143,6 @@ export function ExportModal() {
       count = Object.values(questionStates).filter(state => state?.isFavorite).length;
     } else if (contentFilter === 'answered') {
       count = Object.values(questionStates).filter(state => state?.userAnswer).length;
-    } else if (contentFilter === 'notes') {
-      count = Object.values(questionStates).filter(state => state?.notes).length;
     }
     
     return count;
@@ -290,7 +288,7 @@ export function ExportModal() {
                           "p-3 border rounded-lg cursor-pointer transition-all text-left group hover:border-primary/50",
                           isSelected ? "border-primary bg-primary/10 ring-1 ring-primary/20" : "border-border hover:bg-muted/50"
                         )}
-                        onClick={() => handleContentFilterChange(filter.key as any)}
+                        onClick={() => handleOptionChange(filter.key as keyof ExportOptions, !exportOptions[filter.key as keyof ExportOptions])}
                       >
                         <div className="flex items-center gap-3">
                           <div className={cn(

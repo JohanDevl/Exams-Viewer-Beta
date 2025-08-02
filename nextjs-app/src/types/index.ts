@@ -74,6 +74,8 @@ export interface ExamProgress {
   totalTimeSpent: number;
 }
 
+export type SidebarPosition = "hidden" | "collapsed" | "expanded";
+
 export interface UserSettings {
   theme: "light" | "dark" | "system";
   showExplanations: boolean;
@@ -82,6 +84,7 @@ export interface UserSettings {
   soundEffects: boolean;
   showDifficulty: boolean;
   defaultView: "list" | "card";
+  defaultSidebarPosition: SidebarPosition;
 }
 
 export interface Statistics {

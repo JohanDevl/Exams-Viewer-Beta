@@ -4,11 +4,14 @@ import { useEffect } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
 
 export function ThemeInitializer() {
-  const { applyTheme, settings } = useSettingsStore();
+  const { applyTheme, applyDefaultSidebarPosition, settings } = useSettingsStore();
   
   useEffect(() => {
     // Apply initial theme
     applyTheme();
+    
+    // Apply initial sidebar position
+    applyDefaultSidebarPosition();
     
     // Listen for system preference changes if theme is set to "system"
     if (settings.theme === 'system') {
@@ -18,8 +21,8 @@ export function ThemeInitializer() {
       mediaQuery.addEventListener('change', handleChange);
       return () => mediaQuery.removeEventListener('change', handleChange);
     }
-  }, [settings.theme, applyTheme]);
+  }, [settings.theme, settings.defaultSidebarPosition, applyTheme, applyDefaultSidebarPosition]);
 
-  // This component renders nothing, it just serves to initialize the theme
+  // This component renders nothing, it just serves to initialize theme and sidebar
   return null;
 }

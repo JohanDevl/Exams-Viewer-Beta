@@ -53,6 +53,7 @@ interface SettingsStore {
   // Utilitaires
   getThemePreference: () => 'light' | 'dark';
   applyTheme: () => void;
+  applyDefaultSidebarPosition: () => void;
 }
 
 const defaultSettings: UserSettings = {
@@ -62,7 +63,8 @@ const defaultSettings: UserSettings = {
   keyboardShortcuts: true,
   soundEffects: false,
   showDifficulty: true,
-  defaultView: 'list'
+  defaultView: 'list',
+  defaultSidebarPosition: 'collapsed'
 };
 
 const generateToastId = () => Date.now().toString() + Math.random().toString(36).substr(2, 9);
@@ -97,6 +99,11 @@ export const useSettingsStore = create<SettingsStore>()(
         if (newSettings.defaultView) {
           set({ currentView: newSettings.defaultView });
         }
+
+        // Apply sidebar position if changed
+        if (newSettings.defaultSidebarPosition) {
+          get().applyDefaultSidebarPosition();
+        }
         
         // Afficher un toast de confirmation
         get().addToast({
@@ -114,6 +121,7 @@ export const useSettingsStore = create<SettingsStore>()(
           currentView: defaultSettings.defaultView 
         });
         get().applyTheme();
+        get().applyDefaultSidebarPosition();
         
         get().addToast({
           type: 'info',
@@ -231,6 +239,24 @@ export const useSettingsStore = create<SettingsStore>()(
         if (metaThemeColor) {
           metaThemeColor.setAttribute('content', theme === 'dark' ? '#0f172a' : '#ffffff');
         }
+      },
+
+      // Apply default sidebar position
+      applyDefaultSidebarPosition: () => {
+        const { settings } = get();
+        const { defaultSidebarPosition } = settings;
+        
+        switch (defaultSidebarPosition) {
+          case 'hidden':
+            set({ sidebarVisible: false, sidebarCollapsed: false });
+            break;
+          case 'collapsed':
+            set({ sidebarVisible: true, sidebarCollapsed: true });
+            break;
+          case 'expanded':
+            set({ sidebarVisible: true, sidebarCollapsed: false });
+            break;
+        }
       }
     }),
     {
@@ -261,4 +287,13 @@ export const useInitializeTheme = () => {
       return () => mediaQuery.removeEventListener('change', handleChange);
     }
   }, [settings.theme, applyTheme]);
+};
+
+// Hook to initialize sidebar position on load
+export const useInitializeSidebar = () => {
+  const { applyDefaultSidebarPosition, settings } = useSettingsStore();
+  
+  useEffect(() => {
+    applyDefaultSidebarPosition();
+  }, [settings.defaultSidebarPosition, applyDefaultSidebarPosition]);
 };

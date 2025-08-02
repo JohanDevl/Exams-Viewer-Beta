@@ -107,15 +107,16 @@ export class ExportService {
         const originalIndex = indices[index];
         const state = questionStates[originalIndex];
         
-        const exportQuestion: any = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const exportQuestion: Record<string, any> = {
           questionNumber: question.question_number || (originalIndex + 1).toString(),
           question: options.includeAnswers ? question.question : this.cleanHtml(question.question),
         };
 
         if (options.includeAnswers) {
           exportQuestion.answers = question.answers;
-          exportQuestion.correctAnswers = question.correct_answers || question.correct_answer ? [question.correct_answer] : [];
-          exportQuestion.mostVoted = question.most_voted;
+          exportQuestion.correctAnswers = question.correct_answers || (question.correct_answer ? [question.correct_answer] : []);
+          exportQuestion.mostVoted = question.most_voted || '';
         }
 
         if (options.includeExplanations && question.explanation) {

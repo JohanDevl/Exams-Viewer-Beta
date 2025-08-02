@@ -329,10 +329,16 @@ export const useExamStore = create<ExamStore>()(
 
       // Set search filters
       setSearchFilters: (filters: Partial<SearchFilters>) => {
-        const { searchFilters } = get();
+        const { searchFilters, currentQuestionIndex } = get();
         const newFilters = { ...searchFilters, ...filters };
         set({ searchFilters: newFilters });
         get().updateFilteredQuestions();
+        
+        // Auto-navigate to first filtered question if current question is not in filtered results
+        const { filteredQuestionIndices: newFilteredIndices } = get();
+        if (newFilteredIndices.length > 0 && !newFilteredIndices.includes(currentQuestionIndex)) {
+          set({ currentQuestionIndex: newFilteredIndices[0] });
+        }
       },
 
       // Update filtered questions

@@ -1,6 +1,6 @@
 'use client';
 
-import { Settings, Palette, Eye, Navigation, Keyboard, Volume2, Star, Grid, List, RotateCcw } from 'lucide-react';
+import { Settings, Palette, Eye, Navigation, Keyboard, Volume2, Star, Grid, List, RotateCcw, Sidebar } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent, 
@@ -25,6 +25,7 @@ import { Separator } from '@/components/ui/separator';
 import { ClientOnly } from '@/components/ui/ClientOnly';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import type { SidebarPosition } from '@/types';
 
 export function SettingsModal() {
   const { 
@@ -118,6 +119,43 @@ export function SettingsModal() {
                         </SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="defaultSidebarPosition">Default sidebar position</Label>
+                    <Select 
+                      value={settings.defaultSidebarPosition} 
+                      onValueChange={(value: SidebarPosition) => 
+                        handleSettingChange('defaultSidebarPosition', value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="hidden">
+                          <div className="flex items-center gap-2">
+                            <Eye className="h-4 w-4 opacity-50" />
+                            Hidden
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="collapsed">
+                          <div className="flex items-center gap-2">
+                            <Sidebar className="h-4 w-4" />
+                            Collapsed
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="expanded">
+                          <div className="flex items-center gap-2">
+                            <Navigation className="h-4 w-4" />
+                            Expanded
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Choose the default sidebar position when the app loads
+                    </p>
                   </div>
                 </CardContent>
               </Card>
