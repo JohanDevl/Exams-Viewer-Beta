@@ -1,6 +1,6 @@
 'use client';
 
-import { Settings, Palette, Eye, Navigation, Keyboard, Volume2, Star, Grid, List, RotateCcw, Sidebar } from 'lucide-react';
+import { Settings, Palette, Eye, Navigation, Keyboard, Volume2, Star, Grid, List, RotateCcw, Sidebar, MessageCircle } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent, 
@@ -204,6 +204,29 @@ export function SettingsModal() {
                       checked={settings.showDifficulty}
                       onCheckedChange={(checked) => 
                         handleSettingChange('showDifficulty', checked)
+                      }
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="showComments">
+                        <div className="flex items-center gap-2">
+                          <MessageCircle className="h-4 w-4" />
+                          Show comments
+                        </div>
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Displays community comments for questions
+                      </p>
+                    </div>
+                    <Switch
+                      id="showComments"
+                      checked={settings.showComments}
+                      onCheckedChange={(checked) => 
+                        handleSettingChange('showComments', checked)
                       }
                     />
                   </div>

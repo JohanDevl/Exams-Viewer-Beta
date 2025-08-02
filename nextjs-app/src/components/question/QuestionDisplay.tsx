@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Heart, MessageCircle, Eye, EyeOff, RotateCcw, ThumbsDown, Minus, ThumbsUp } from 'lucide-react';
+import { Heart, MessageCircle, Eye, EyeOff, RotateCcw, ThumbsDown, Minus, ThumbsUp, ChevronDown, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -40,6 +40,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
   const [showExplanation, setShowExplanation] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [commentsExpanded, setCommentsExpanded] = useState(settings.showComments);
 
   const questionState = questionStates[questionIndex];
   const status = getQuestionStatus(questionIndex);
@@ -81,6 +82,11 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
       });
     }
   }, [questionIndex, settings.showExplanations, isSubmitted, status, questionState, markQuestionAsPreview, addToast]);
+
+  // Update comments expanded state when settings change
+  useEffect(() => {
+    setCommentsExpanded(settings.showComments);
+  }, [settings.showComments]);
 
   const handleAnswerSelect = (answerLetter: string) => {
     if (isSubmitted) return;
@@ -209,6 +215,10 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
       description: `Difficulty set to ${newDifficulty === 'easy' ? 'Easy' : newDifficulty === 'medium' ? 'Medium' : 'Hard'}.`,
       duration: 2000
     });
+  };
+
+  const toggleComments = () => {
+    setCommentsExpanded(!commentsExpanded);
   };
 
   const getAnswerLetter = (index: number) => String.fromCharCode(65 + index); // A, B, C, D...
@@ -507,30 +517,46 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
       {question.comments && question.comments.length > 0 && (
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
-              <span className="font-semibold">Community comments</span>
-              <Badge variant="secondary">{question.comments.length}</Badge>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5" />
+                <span className="font-semibold">Community comments</span>
+                <Badge variant="secondary">{question.comments.length}</Badge>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleComments}
+                className="h-8 w-8 p-0"
+              >
+                {commentsExpanded ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </Button>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {question.comments.map((comment, index) => (
-                <div key={index} className="border-l-2 border-muted pl-4">
-                  <div className="text-sm text-muted-foreground mb-1">
-                    {comment.selected_answer && (
-                      <span>Selected answer: <strong>{comment.selected_answer}</strong></span>
-                    )}
+          {commentsExpanded && (
+            <CardContent>
+              <div className="space-y-4">
+                {question.comments.map((comment, index) => (
+                  <div key={index} className="border-l-2 border-muted pl-4">
+                    <div className="text-sm text-muted-foreground mb-1">
+                      {comment.selected_answer && (
+                        <span>Selected answer: <strong>{comment.selected_answer}</strong></span>
+                      )}
+                    </div>
+                    <LinkifiedHtml 
+                      content={comment.content}
+                      images={question.images}
+                      className="text-sm"
+                    />
                   </div>
-                  <LinkifiedHtml 
-                    content={comment.content}
-                    images={question.images}
-                    className="text-sm"
-                  />
-                </div>
-              ))}
-            </div>
-          </CardContent>
+                ))}
+              </div>
+            </CardContent>
+          )}
         </Card>
       )}
     </div>

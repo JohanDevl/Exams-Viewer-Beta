@@ -63,6 +63,7 @@ const defaultSettings: UserSettings = {
   keyboardShortcuts: true,
   soundEffects: false,
   showDifficulty: true,
+  showComments: false,
   defaultView: 'card',
   defaultSidebarPosition: 'hidden'
 };

@@ -83,6 +83,7 @@ export interface UserSettings {
   keyboardShortcuts: boolean;
   soundEffects: boolean;
   showDifficulty: boolean;
+  showComments: boolean;
   defaultView: "list" | "card";
   defaultSidebarPosition: SidebarPosition;
 }
