@@ -87,6 +87,24 @@ export interface UserSettings {
   defaultSidebarPosition: SidebarPosition;
 }
 
+export interface ExamSession {
+  id: string;
+  examCode: string;
+  examName: string;
+  startTime: Date;
+  endTime?: Date;
+  questionsAnswered: number;
+  correctAnswers: number;
+  accuracy: number;
+  timeSpent: number;
+  completionPercentage: number;
+  difficultyBreakdown: Record<string, {
+    answered: number;
+    correct: number;
+    total: number;
+  }>;
+}
+
 export interface Statistics {
   totalQuestionsAnswered: number;
   correctAnswers: number;
@@ -105,6 +123,7 @@ export interface Statistics {
     timeSpent: number;
     accuracy: number;
   }>;
+  sessions: ExamSession[];
 }
 
 export interface SearchFilters {

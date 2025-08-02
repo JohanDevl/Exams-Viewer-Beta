@@ -147,6 +147,30 @@ export const useExamStore = create<ExamStore>()(
             filteredQuestionIndices: Array.from({ length: examData.questions.length }, (_, i) => i)
           });
 
+          // Start a new session in statistics store
+          if (typeof window !== 'undefined') {
+            const { useStatisticsStore } = await import('@/stores/statisticsStore');
+            const { startSession, finalizePendingSessions, getCurrentSession } = useStatisticsStore.getState();
+            
+            // Finalize any pending sessions first
+            finalizePendingSessions();
+            
+            // Check if there's already an active session for this exam
+            const existingSession = getCurrentSession(examCode);
+            
+            let actualSessionId;
+            if (existingSession) {
+              // Use existing session
+              actualSessionId = existingSession.id;
+            } else {
+              // Create new session
+              actualSessionId = startSession(examCode, examInfo.name);
+            }
+            
+            // Update the sessionId to match what was actually created/found
+            set(state => ({ ...state, sessionId: actualSessionId }));
+          }
+
           // Update filtered questions
           get().updateFilteredQuestions();
           
@@ -203,6 +227,55 @@ export const useExamStore = create<ExamStore>()(
         };
 
         set({ questionStates: newQuestionStates });
+
+        // Update current session in real-time
+        if (typeof window !== 'undefined') {
+          import('@/stores/statisticsStore').then(({ useStatisticsStore }) => {
+            const { updateCurrentSession, getCurrentSession } = useStatisticsStore.getState();
+            const { sessionId, currentExamInfo } = get();
+            
+            if (currentExamInfo) {
+              // Try to get the current session to make sure we have the right ID
+              const currentSession = getCurrentSession(currentExamInfo.code);
+              const actualSessionId = currentSession?.id || sessionId;
+              
+              if (actualSessionId) {
+                const progress = get().getProgress();
+                const difficultyBreakdown: Record<string, { answered: number; correct: number; total: number; }> = {};
+                
+                // Calculate difficulty breakdown
+                Object.entries(get().questionStates).forEach(([index, state]) => {
+                  const difficulty = state.difficulty || 'unrated';
+                  if (!difficultyBreakdown[difficulty]) {
+                    difficultyBreakdown[difficulty] = { answered: 0, correct: 0, total: 0 };
+                  }
+                  difficultyBreakdown[difficulty].total++;
+                  
+                  if (state.firstAnswer) {
+                    difficultyBreakdown[difficulty].answered++;
+                    if (state.firstAnswer.isCorrect) {
+                      difficultyBreakdown[difficulty].correct++;
+                    }
+                  }
+                });
+                
+                // Get session start time to calculate total time spent
+                const sessionStartTime = currentSession ? new Date(currentSession.startTime).getTime() : Date.now();
+                
+                const sessionUpdate = {
+                  questionsAnswered: progress.answered,
+                  correctAnswers: progress.correct,
+                  timeSpent: Date.now() - sessionStartTime,
+                  completionPercentage: progress.total > 0 ? (progress.answered / progress.total) * 100 : 0,
+                  difficultyBreakdown
+                };
+                
+                
+                updateCurrentSession(actualSessionId, sessionUpdate);
+              }
+            }
+          });
+        }
       },
 
       // Mark a question as preview
@@ -229,6 +302,47 @@ export const useExamStore = create<ExamStore>()(
         };
 
         set({ questionStates: newQuestionStates });
+
+        // Update current session for preview action
+        if (typeof window !== 'undefined') {
+          import('@/stores/statisticsStore').then(({ useStatisticsStore }) => {
+            const { updateCurrentSession } = useStatisticsStore.getState();
+            const { sessionId, currentExamInfo } = get();
+            
+            if (sessionId && currentExamInfo) {
+              const progress = get().getProgress();
+              const difficultyBreakdown: Record<string, { answered: number; correct: number; total: number; }> = {};
+              
+              // Calculate difficulty breakdown
+              Object.entries(get().questionStates).forEach(([index, state]) => {
+                const difficulty = state.difficulty || 'unrated';
+                if (!difficultyBreakdown[difficulty]) {
+                  difficultyBreakdown[difficulty] = { answered: 0, correct: 0, total: 0 };
+                }
+                difficultyBreakdown[difficulty].total++;
+                
+                if (state.firstAnswer) {
+                  difficultyBreakdown[difficulty].answered++;
+                  if (state.firstAnswer.isCorrect) {
+                    difficultyBreakdown[difficulty].correct++;
+                  }
+                }
+              });
+              
+              // Get session start time to calculate total time spent
+              const currentSession = useStatisticsStore.getState().getCurrentSession(currentExamInfo.code);
+              const sessionStartTime = currentSession ? new Date(currentSession.startTime).getTime() : Date.now();
+              
+              updateCurrentSession(sessionId, {
+                questionsAnswered: progress.answered,
+                correctAnswers: progress.correct,
+                timeSpent: Date.now() - sessionStartTime,
+                completionPercentage: progress.total > 0 ? (progress.answered / progress.total) * 100 : 0,
+                difficultyBreakdown
+              });
+            }
+          });
+        }
       },
 
       // Reset a question (keep first answer)
@@ -391,10 +505,49 @@ export const useExamStore = create<ExamStore>()(
 
       // Reset exam
       resetExam: () => {
+        // End current session before resetting
+        const { currentExamInfo, sessionId, questionStates } = get();
+        if (currentExamInfo && sessionId && typeof window !== 'undefined') {
+          import('@/stores/statisticsStore').then(({ useStatisticsStore }) => {
+            const { endSession, getCurrentSession } = useStatisticsStore.getState();
+            const currentSession = getCurrentSession(currentExamInfo.code);
+            
+            if (currentSession && currentSession.id === sessionId) {
+              const progress = get().getProgress();
+              const difficultyBreakdown: Record<string, { answered: number; correct: number; total: number; }> = {};
+              
+              // Calculate difficulty breakdown
+              Object.entries(questionStates).forEach(([index, state]) => {
+                const difficulty = state.difficulty || 'unrated';
+                if (!difficultyBreakdown[difficulty]) {
+                  difficultyBreakdown[difficulty] = { answered: 0, correct: 0, total: 0 };
+                }
+                difficultyBreakdown[difficulty].total++;
+                
+                if (state.firstAnswer) {
+                  difficultyBreakdown[difficulty].answered++;
+                  if (state.firstAnswer.isCorrect) {
+                    difficultyBreakdown[difficulty].correct++;
+                  }
+                }
+              });
+              
+              endSession(sessionId, {
+                questionsAnswered: progress.answered,
+                correctAnswers: progress.correct,
+                timeSpent: Date.now() - new Date(currentSession.startTime).getTime(),
+                completionPercentage: progress.total > 0 ? (progress.answered / progress.total) * 100 : 0,
+                difficultyBreakdown
+              });
+            }
+          });
+        }
+        
         set({
           currentExam: null,
           currentExamInfo: null,
           currentQuestionIndex: 0,
+          sessionId: null,
           questionStates: {},
           searchFilters: {
             query: '',

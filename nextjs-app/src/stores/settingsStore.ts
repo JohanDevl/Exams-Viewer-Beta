@@ -63,8 +63,8 @@ const defaultSettings: UserSettings = {
   keyboardShortcuts: true,
   soundEffects: false,
   showDifficulty: true,
-  defaultView: 'list',
-  defaultSidebarPosition: 'collapsed'
+  defaultView: 'card',
+  defaultSidebarPosition: 'hidden'
 };
 
 const generateToastId = () => Date.now().toString() + Math.random().toString(36).substr(2, 9);

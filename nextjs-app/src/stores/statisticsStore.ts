@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Statistics } from '@/types';
+import type { Statistics, ExamSession } from '@/types';
 
 interface StatisticsStore {
   // Statistical data
@@ -12,6 +12,27 @@ interface StatisticsStore {
   addFavorite: (examCode: string) => void;
   removeFavorite: (examCode: string) => void;
   recordTimeSpent: (examCode: string, timeSpent: number) => void;
+  
+  // Session management
+  startSession: (examCode: string, examName: string) => string;
+  endSession: (sessionId: string, currentStats: {
+    questionsAnswered: number;
+    correctAnswers: number;
+    timeSpent: number;
+    completionPercentage: number;
+    difficultyBreakdown: Record<string, { answered: number; correct: number; total: number; }>;
+  }) => void;
+  updateCurrentSession: (sessionId: string, currentStats: {
+    questionsAnswered: number;
+    correctAnswers: number;
+    timeSpent: number;
+    completionPercentage: number;
+    difficultyBreakdown: Record<string, { answered: number; correct: number; total: number; }>;
+  }) => void;
+  getCurrentSession: (examCode: string) => ExamSession | null;
+  getSessionHistory: (examCode?: string) => ExamSession[];
+  finalizePendingSessions: () => void;
+  clearSessionHistory: (examCode?: string) => void;
   
   // Actions to get statistics
   getExamStatistics: (examCode: string) => {
@@ -65,12 +86,14 @@ const defaultStatistics: Statistics = {
   timeSpent: 0,
   favoriteQuestions: 0,
   examProgress: {},
-  dailyProgress: {}
+  dailyProgress: {},
+  sessions: []
 };
 
 const formatDateKey = (date: Date): string => {
   return date.toISOString().split('T')[0];
 };
+
 
 export const useStatisticsStore = create<StatisticsStore>()(
   persist(
@@ -348,6 +371,179 @@ export const useStatisticsStore = create<StatisticsStore>()(
         return JSON.stringify(statistics, null, 2);
       },
 
+      // Session management
+      startSession: (examCode: string, examName: string) => {
+        const sessionId = `${examCode}-${Date.now()}`;
+        const newSession: ExamSession = {
+          id: sessionId,
+          examCode,
+          examName,
+          startTime: new Date(),
+          questionsAnswered: 0,
+          correctAnswers: 0,
+          accuracy: 0,
+          timeSpent: 0,
+          completionPercentage: 0,
+          difficultyBreakdown: {}
+        };
+        
+        const { statistics } = get();
+        set({
+          statistics: {
+            ...statistics,
+            sessions: [...statistics.sessions, newSession]
+          }
+        });
+        
+        return sessionId;
+      },
+
+      endSession: (sessionId: string, currentStats) => {
+        const { statistics } = get();
+        const sessions = statistics.sessions.map(session => {
+          if (session.id === sessionId) {
+            return {
+              ...session,
+              endTime: new Date(),
+              questionsAnswered: currentStats.questionsAnswered,
+              correctAnswers: currentStats.correctAnswers,
+              accuracy: currentStats.questionsAnswered > 0 
+                ? (currentStats.correctAnswers / currentStats.questionsAnswered) * 100 
+                : 0,
+              timeSpent: currentStats.timeSpent,
+              completionPercentage: currentStats.completionPercentage,
+              difficultyBreakdown: currentStats.difficultyBreakdown
+            };
+          }
+          return session;
+        });
+        
+        set({
+          statistics: {
+            ...statistics,
+            sessions
+          }
+        });
+      },
+
+      updateCurrentSession: (sessionId: string, currentStats) => {
+        const { statistics } = get();
+        const sessions = statistics.sessions.map(session => {
+          if (session.id === sessionId) {
+            return {
+              ...session,
+              questionsAnswered: currentStats.questionsAnswered,
+              correctAnswers: currentStats.correctAnswers,
+              accuracy: currentStats.questionsAnswered > 0 
+                ? (currentStats.correctAnswers / currentStats.questionsAnswered) * 100 
+                : 0,
+              timeSpent: currentStats.timeSpent,
+              completionPercentage: currentStats.completionPercentage,
+              difficultyBreakdown: currentStats.difficultyBreakdown
+            };
+          }
+          return session;
+        });
+        
+        set({
+          statistics: {
+            ...statistics,
+            sessions
+          }
+        });
+      },
+
+      getCurrentSession: (examCode: string) => {
+        const { statistics } = get();
+        return statistics.sessions.find(session => 
+          session.examCode === examCode && !session.endTime
+        ) || null;
+      },
+
+      getSessionHistory: (examCode?: string) => {
+        const { statistics } = get();
+        
+        let sessions = [...statistics.sessions]
+          .filter(session => session.endTime); // Only include completed sessions
+        
+        if (examCode) {
+          sessions = sessions.filter(session => session.examCode === examCode);
+        }
+        
+        // Sort by end time (newest first)
+        return sessions.sort((a, b) => {
+          return new Date(b.endTime!).getTime() - new Date(a.endTime!).getTime();
+        });
+      },
+
+      finalizePendingSessions: () => {
+        const { statistics } = get();
+        const now = new Date();
+        
+        const sessions = statistics.sessions.map(session => {
+          // Auto-finalize sessions that are older than 1 hour and not ended
+          if (!session.endTime && 
+              (now.getTime() - new Date(session.startTime).getTime()) > 60 * 60 * 1000) {
+            return {
+              ...session,
+              endTime: new Date(new Date(session.startTime).getTime() + session.timeSpent)
+            };
+          }
+          return session;
+        });
+        
+        set({
+          statistics: {
+            ...statistics,
+            sessions
+          }
+        });
+      },
+
+      clearSessionHistory: (examCode?: string) => {
+        const { statistics } = get();
+        
+        let sessions = [...statistics.sessions];
+        
+        if (examCode) {
+          // Clear sessions for specific exam, but keep the latest one
+          const examSessions = sessions
+            .filter(session => session.examCode === examCode)
+            .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+          
+          const latestExamSession = examSessions[0]; // Keep the most recent session
+          
+          // Filter out all sessions for this exam, then add back only the latest
+          sessions = sessions.filter(session => session.examCode !== examCode);
+          if (latestExamSession) {
+            sessions.push(latestExamSession);
+          }
+        } else {
+          // Clear all sessions but keep the latest for each exam
+          const examGroups = sessions.reduce((groups, session) => {
+            if (!groups[session.examCode]) {
+              groups[session.examCode] = [];
+            }
+            groups[session.examCode].push(session);
+            return groups;
+          }, {} as Record<string, typeof sessions>);
+          
+          // Keep only the latest session for each exam
+          sessions = Object.values(examGroups).map(examSessions => {
+            return examSessions.sort((a, b) => 
+              new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+            )[0]; // Keep the most recent
+          });
+        }
+        
+        set({
+          statistics: {
+            ...statistics,
+            sessions
+          }
+        });
+      },
+
       // Importer les statistiques
       importStatistics: (data: string) => {
         try {
@@ -357,6 +553,11 @@ export const useStatisticsStore = create<StatisticsStore>()(
           if (typeof imported.totalQuestionsAnswered === 'number' &&
               typeof imported.correctAnswers === 'number' &&
               typeof imported.incorrectAnswers === 'number') {
+            
+            // Ensure sessions array exists
+            if (!imported.sessions) {
+              imported.sessions = [];
+            }
             
             set({ statistics: imported });
             return true;

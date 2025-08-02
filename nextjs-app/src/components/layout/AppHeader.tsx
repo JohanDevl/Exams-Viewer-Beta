@@ -66,8 +66,15 @@ export function AppHeader() {
           {/* Logo and title */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">EV</span>
+              <div className="h-8 w-8">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" className="h-8 w-8">
+                  <rect width="32" height="32" fill="#2563eb" rx="4"/>
+                  <rect x="6" y="8" width="20" height="16" fill="white" rx="2"/>
+                  <rect x="9" y="12" width="14" height="1" fill="#2563eb"/>
+                  <rect x="9" y="15" width="10" height="1" fill="#2563eb"/>
+                  <rect x="9" y="18" width="12" height="1" fill="#2563eb"/>
+                  <circle cx="20" cy="18" r="2" fill="#10b981"/>
+                </svg>
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-xl font-bold text-foreground">
