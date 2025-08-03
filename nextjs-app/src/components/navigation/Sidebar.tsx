@@ -100,7 +100,7 @@ export function Sidebar() {
     <div
       className={cn(
         "fixed right-0 top-16 h-[calc(100vh-4rem)] bg-background border-l transition-all duration-300 z-30 overflow-hidden",
-        sidebarCollapsed ? "w-16" : "w-64 sm:w-72 lg:w-80 xl:w-84"
+        sidebarCollapsed ? "w-16" : "w-full sm:w-64 md:w-72 lg:w-80 xl:w-84"
       )}
     >
       {/* Header */}

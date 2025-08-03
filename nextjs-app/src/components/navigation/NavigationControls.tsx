@@ -62,10 +62,10 @@ export function NavigationControls() {
 
   return (
     <div className="border-b bg-background">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
+      <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-3">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4">
           {/* Navigation */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto justify-center sm:justify-start">
             <Button
               variant="outline"
               size="sm"
@@ -101,7 +101,7 @@ export function NavigationControls() {
           </div>
 
           {/* Search and filters */}
-          <div className="flex items-center gap-2 flex-1 max-w-md">
+          <div className="flex items-center gap-2 w-full sm:flex-1 max-w-md">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -144,15 +144,15 @@ export function NavigationControls() {
 
         {/* Filter panel */}
         {showFilters && (
-          <div className="mt-4 p-4 border rounded-lg bg-muted/50">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="mt-3 sm:mt-4 p-3 sm:p-4 border rounded-lg bg-muted/50">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {/* Filter by status */}
               <div>
                 <label className="text-sm font-medium mb-2 block">Status</label>
                 <select
                   value={searchFilters.status}
                   onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-md bg-background"
+                  className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border rounded-md bg-background"
                 >
                   <option value="all">All</option>
                   <option value="unanswered">Unanswered</option>
@@ -169,7 +169,7 @@ export function NavigationControls() {
                 <select
                   value={searchFilters.difficulty || 'all'}
                   onChange={(e) => handleFilterChange('difficulty', e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-md bg-background"
+                  className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border rounded-md bg-background"
                 >
                   <option value="all">All</option>
                   <option value="easy">Easy</option>

@@ -55,13 +55,22 @@ export function Toast({ type, title, description, duration, onClose }: ToastProp
   return (
     <div
       className={cn(
-        'transform transition-all duration-200 ease-in-out',
-        'border rounded-lg shadow-lg p-4 max-w-sm w-full',
+        'transform transition-all duration-200 ease-in-out will-change-transform',
+        'border rounded-lg shadow-lg p-3 sm:p-4 max-w-sm w-full',
         toastStyles[type],
-        isVisible && !isLeaving ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+        isVisible && !isLeaving ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
       )}
       role="alert"
       aria-live="polite"
+      style={{ 
+        // Use transform3d for better mobile performance
+        transform: isVisible && !isLeaving 
+          ? 'translate3d(0, 0, 0)' 
+          : 'translate3d(0, -100%, 0)',
+        // Prevent layout shift on mobile
+        position: 'relative',
+        zIndex: 1
+      }}
     >
       <div className="flex items-start gap-3">
         <Icon className="h-5 w-5 flex-shrink-0 mt-0.5" />

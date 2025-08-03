@@ -40,7 +40,7 @@ export function ExamViewer() {
 
       {/* Current question */}
       <div className="flex-1 overflow-y-auto">
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-6">
           <QuestionDisplay 
             question={currentQuestion}
             questionIndex={currentQuestionIndex}

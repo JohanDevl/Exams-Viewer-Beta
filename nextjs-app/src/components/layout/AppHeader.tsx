@@ -61,7 +61,7 @@ export function AppHeader() {
 
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-2 sm:px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo and title */}
           <div className="flex items-center gap-4">
@@ -164,14 +164,16 @@ export function AppHeader() {
 
         {/* Extended mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t py-4 space-y-4">
-            <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md">
+          <div className="md:hidden border-t py-3 sm:py-4 space-y-3 sm:space-y-4">
+            <div className="text-xs text-muted-foreground bg-muted/50 p-2 sm:p-3 rounded-md">
               Data from ExamTopics.com for educational purposes only
             </div>
             
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Actions</span>
-              <div className="flex items-center gap-2">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Actions</span>
+              </div>
+              <div className="grid grid-cols-5 gap-2 justify-items-center">
                 <HeaderButton
                   onClick={() => {
                     openFavoritesModal();
@@ -180,6 +182,7 @@ export function AppHeader() {
                   icon={Heart}
                   label="Favorites"
                   disabled={!hasExamData}
+                  className="w-10 h-10"
                 />
 
                 <HeaderButton
@@ -190,6 +193,7 @@ export function AppHeader() {
                   icon={BarChart3}
                   label="Statistics"
                   disabled={!hasUserActivity}
+                  className="w-10 h-10"
                 />
 
                 <HeaderButton
@@ -200,6 +204,7 @@ export function AppHeader() {
                   icon={Download}
                   label="Export"
                   disabled={!hasExamData}
+                  className="w-10 h-10"
                 />
 
                 <ClientOnly>
@@ -207,6 +212,7 @@ export function AppHeader() {
                     onClick={toggleTheme}
                     icon={getThemePreference() === 'dark' ? Sun : Moon}
                     label={getThemePreference() === 'dark' ? 'Light mode' : 'Dark mode'}
+                    className="w-10 h-10"
                   />
                 </ClientOnly>
 
@@ -217,12 +223,12 @@ export function AppHeader() {
                   }}
                   icon={Settings}
                   label="Settings"
+                  className="w-10 h-10"
                 />
               </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Links</span>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Links</span>
               <Button
                 variant="ghost"
                 size="sm"
@@ -241,6 +247,7 @@ export function AppHeader() {
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </Button>
+              </div>
             </div>
           </div>
         )}

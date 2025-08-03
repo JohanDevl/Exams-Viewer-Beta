@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Heart, MessageCircle, Eye, EyeOff, RotateCcw, ThumbsDown, Minus, ThumbsUp, ChevronDown, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { useExamStore } from '@/stores/examStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useToastWithSound } from '@/hooks/useToastWithSound';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import { LinkifiedText, LinkifiedHtml, QuestionContent } from '@/utils/linkUtils';
 import type { Question, DifficultyLevel } from '@/types';
 import { cn } from '@/lib/utils';
@@ -36,11 +37,16 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
   const { settings } = useSettingsStore();
   const { playSound } = useSoundEffects();
   const { addToast } = useToastWithSound();
+  const { withScrollLock, withInvisibleScrollLock } = useScrollLock();
 
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
   const [showExplanation, setShowExplanation] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [commentsExpanded, setCommentsExpanded] = useState(settings.showComments);
+  
+  // Ref to maintain scroll position on mobile
+  const containerRef = useRef<HTMLDivElement>(null);
+  
 
   const questionState = questionStates[questionIndex];
   const status = getQuestionStatus(questionIndex);
@@ -88,9 +94,15 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     setCommentsExpanded(settings.showComments);
   }, [settings.showComments]);
 
-  const handleAnswerSelect = (answerLetter: string) => {
+  const handleAnswerSelect = withInvisibleScrollLock((answerLetter: string, event?: React.MouseEvent) => {
     if (isSubmitted) return;
-
+    
+    // Prevent default behavior and stop propagation to avoid scroll issues on mobile
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
     if (isMultipleChoice) {
       setSelectedAnswers(prev => 
         prev.includes(answerLetter) 
@@ -100,7 +112,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     } else {
       setSelectedAnswers([answerLetter]);
     }
-  };
+  });
 
   const checkAnswerCorrectness = (userAnswers: string[], question: Question): boolean => {
     const correctAnswers = question.correct_answers || (question.correct_answer ? [question.correct_answer] : []);
@@ -114,7 +126,12 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
            sortedUserAnswers.every((answer, index) => answer === sortedCorrectAnswers[index]);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (event?: React.MouseEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
     if (selectedAnswers.length === 0) {
       addToast({
         type: 'warning',
@@ -125,25 +142,27 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
       return;
     }
 
-    submitAnswer(questionIndex, selectedAnswers);
-    setIsSubmitted(true);
-    
-    // Check if answer is correct and play appropriate sound
-    const isCorrect = checkAnswerCorrectness(selectedAnswers, question);
-    playSound(isCorrect ? 'correct' : 'incorrect');
-    
-    if (settings.showExplanations) {
-      setShowExplanation(true);
-    }
+    withScrollLock(() => {
+      submitAnswer(questionIndex, selectedAnswers);
+      setIsSubmitted(true);
+      
+      // Check if answer is correct and play appropriate sound
+      const isCorrect = checkAnswerCorrectness(selectedAnswers, question);
+      playSound(isCorrect ? 'correct' : 'incorrect');
+      
+      if (settings.showExplanations) {
+        setShowExplanation(true);
+      }
 
-    addToast({
-      type: isCorrect ? 'success' : 'info',
-      title: isCorrect ? 'Correct answer!' : 'Answer saved',
-      description: isCorrect 
-        ? 'Well done! You got it right.' 
-        : 'Your answer has been saved successfully.',
-      duration: 2000
-    });
+      addToast({
+        type: isCorrect ? 'success' : 'info',
+        title: isCorrect ? 'Correct answer!' : 'Answer saved',
+        description: isCorrect 
+          ? 'Well done! You got it right.' 
+          : 'Your answer has been saved successfully.',
+        duration: 2000
+      });
+    })();
 
     // Auto progress: move to next question if enabled
     if (settings.autoProgress && currentExam && questionIndex < currentExam.questions.length - 1) {
@@ -153,44 +172,70 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     }
   };
 
-  const handlePreview = () => {
-    markQuestionAsPreview(questionIndex);
-    setShowExplanation(true);
+  const handlePreview = (event?: React.MouseEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     
-    addToast({
-      type: 'info',
-      title: 'Answer revealed',
-      description: 'The correct answer is now visible.',
-      duration: 2000
-    });
+    withScrollLock(() => {
+      markQuestionAsPreview(questionIndex);
+      setShowExplanation(true);
+      
+      addToast({
+        type: 'info',
+        title: 'Answer revealed',
+        description: 'The correct answer is now visible.',
+        duration: 2000
+      });
+    })();
   };
 
-  const handleHideAnswer = () => {
-    setShowExplanation(false);
+  const handleHideAnswer = (event?: React.MouseEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     
-    addToast({
-      type: 'info',
-      title: 'Answer hidden',
-      description: 'You can now answer this question.',
-      duration: 2000
-    });
+    withScrollLock(() => {
+      setShowExplanation(false);
+      
+      addToast({
+        type: 'info',
+        title: 'Answer hidden',
+        description: 'You can now answer this question.',
+        duration: 2000
+      });
+    })();
   };
 
-  const handleReset = () => {
-    resetQuestion(questionIndex);
-    setSelectedAnswers([]);
-    setIsSubmitted(false);
-    setShowExplanation(false);
+  const handleReset = (event?: React.MouseEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     
-    addToast({
-      type: 'info',
-      title: 'Question reset',
-      description: 'You can now answer this question again.',
-      duration: 2000
-    });
+    withScrollLock(() => {
+      resetQuestion(questionIndex);
+      setSelectedAnswers([]);
+      setIsSubmitted(false);
+      setShowExplanation(false);
+      
+      addToast({
+        type: 'info',
+        title: 'Question reset',
+        description: 'You can now answer this question again.',
+        duration: 2000
+      });
+    })();
   };
 
-  const handleToggleFavorite = () => {
+  const handleToggleFavorite = (event?: React.MouseEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
     toggleFavorite(questionIndex);
     
     // Play favorite sound
@@ -206,7 +251,12 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     });
   };
 
-  const handleDifficultyChange = (newDifficulty: DifficultyLevel) => {
+  const handleDifficultyChange = (newDifficulty: DifficultyLevel, event?: React.MouseEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
     setQuestionDifficulty(questionIndex, newDifficulty);
     
     addToast({
@@ -217,7 +267,12 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     });
   };
 
-  const toggleComments = () => {
+  const toggleComments = (event?: React.MouseEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
     setCommentsExpanded(!commentsExpanded);
   };
 
@@ -273,7 +328,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div ref={containerRef} className="max-w-4xl mx-auto space-y-3 sm:space-y-6">
       {/* Question header */}
       <Card>
         <CardHeader>
@@ -288,7 +343,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                 </div>
               )}
               
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
                 <Badge variant="outline" className={statusColors[status]}>
                   {status === 'unanswered' ? 'Unanswered' :
                    status === 'answered' ? 'Answered' :
@@ -319,11 +374,11 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
               <QuestionContent content={question.question} images={question.images} />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <Button
                 variant={isFavorite ? "default" : "outline"}
                 size="sm"
-                onClick={handleToggleFavorite}
+                onClick={(e) => handleToggleFavorite(e)}
                 className={cn(
                   "h-9 w-9 p-0",
                   isFavorite && "text-red-500 border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
@@ -339,7 +394,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
       {/* Answers */}
       <Card>
         <CardContent className="pt-6">
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {question.answers.map((answer, index) => {
               const answerLetter = getAnswerLetter(index);
               const isSelected = selectedAnswers.includes(answerLetter);
@@ -348,21 +403,22 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                 <div
                   key={index}
                   className={cn(
-                    "p-4 border rounded-lg cursor-pointer transition-all duration-200",
+                    "answer-option p-3 sm:p-4 border rounded-lg cursor-pointer transition-all duration-200",
                     getAnswerStyle(answerLetter),
                     !isSubmitted && !showExplanation && "hover:border-primary/50 hover:bg-muted/50"
                   )}
-                  onClick={() => handleAnswerSelect(answerLetter)}
+                  onClick={(e) => handleAnswerSelect(answerLetter, e)}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-2 sm:gap-3">
                     {isMultipleChoice ? (
                       <Checkbox
                         checked={isSelected}
                         disabled={isSubmitted || showExplanation}
                         className="mt-1"
+                        onClick={(e) => e.stopPropagation()}
                       />
                     ) : (
-                      <div className="flex items-center mt-1">
+                      <div className="flex items-center mt-1" onClick={(e) => e.stopPropagation()}>
                         <div className={cn(
                           "w-4 h-4 border-2 rounded-full",
                           isSelected ? "border-primary bg-primary" : "border-muted-foreground"
@@ -390,11 +446,11 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-between mt-6 pt-4 border-t">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mt-4 sm:mt-6 pt-3 sm:pt-4 border-t">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               {/* Difficulty rating */}
               {settings.showDifficulty && (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="text-sm text-muted-foreground">Difficulty:</span>
                   <div className="flex items-center gap-1">
                     {(['easy', 'medium', 'hard'] as const).map((level) => (
@@ -402,7 +458,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                         key={level}
                         variant={difficulty === level ? "default" : "outline"}
                         size="sm"
-                        onClick={() => handleDifficultyChange(level)}
+                        onClick={(e) => handleDifficultyChange(level, e)}
                         className={cn(
                           "h-7 px-2 text-xs",
                           difficulty === level && level === 'easy' && "bg-green-500 hover:bg-green-600 text-white border-green-500",
@@ -419,23 +475,24 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
               {!isSubmitted && status !== 'preview' && (
                 <>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handlePreview}
-                    className="flex items-center gap-2"
+                    onClick={(e) => handlePreview(e)}
+                    className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
                   >
-                    <Eye className="h-4 w-4" />
-                    View answer
+                    <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">View answer</span>
+                    <span className="sm:hidden">View</span>
                   </Button>
                   
                   <Button 
-                    onClick={handleSubmit}
+                    onClick={(e) => handleSubmit(e)}
                     disabled={selectedAnswers.length === 0}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
                   >
                     Submit
                   </Button>
@@ -448,28 +505,30 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={handleHideAnswer}
-                      className="flex items-center gap-2"
+                      onClick={(e) => handleHideAnswer(e)}
+                      className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
                     >
-                      <EyeOff className="h-4 w-4" />
-                      Hide answer
+                      <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">Hide answer</span>
+                      <span className="sm:hidden">Hide</span>
                     </Button>
                   ) : (
                     <>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={handlePreview}
-                        className="flex items-center gap-2"
+                        onClick={(e) => handlePreview(e)}
+                        className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
                       >
-                        <Eye className="h-4 w-4" />
-                        View answer
+                        <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">View answer</span>
+                        <span className="sm:hidden">View</span>
                       </Button>
                       
                       <Button 
-                        onClick={handleSubmit}
+                        onClick={(e) => handleSubmit(e)}
                         disabled={selectedAnswers.length === 0}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
                       >
                         Submit
                       </Button>
@@ -482,11 +541,12 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleReset}
-                  className="flex items-center gap-2"
+                  onClick={(e) => handleReset(e)}
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
                 >
-                  <RotateCcw className="h-4 w-4" />
-                  Retry
+                  <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Retry</span>
+                  <span className="sm:hidden">Retry</span>
                 </Button>
               )}
             </div>
@@ -526,7 +586,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={toggleComments}
+                onClick={(e) => toggleComments(e)}
                 className="h-8 w-8 p-0"
               >
                 {commentsExpanded ? (
