@@ -55,7 +55,7 @@ export function AppHeader() {
       title={disabled ? `${label} (No data available)` : label}
       aria-label={label}
     >
-      <Icon className={cn("h-4 w-4", disabled && "opacity-50")} suppressHydrationWarning={true} />
+      <Icon className={cn("h-4 w-4", disabled && "opacity-50")} />
     </Button>
   );
 
