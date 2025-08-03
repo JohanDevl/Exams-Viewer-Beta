@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   // Enable static export for GitHub Pages
   output: 'export',
   
+  // Configure basePath for GitHub Pages (repository name)
+  basePath: '/Exams-Viewer-Beta',
+  
   // Disable server-side image optimization for static export
   images: {
     unoptimized: true,

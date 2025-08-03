@@ -142,9 +142,9 @@ export function AppHeader() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2"
               >
-                <Github className="h-4 w-4" suppressHydrationWarning={true} />
+                <Github className="h-4 w-4" />
                 <span className="hidden lg:inline">GitHub</span>
-                <ExternalLink className="h-3 w-3" suppressHydrationWarning={true} />
+                <ExternalLink className="h-3 w-3" />
               </a>
             </Button>
           </div>
@@ -157,7 +157,7 @@ export function AppHeader() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="h-9 w-9 p-0"
             >
-              <Menu className="h-4 w-4" suppressHydrationWarning={true} />
+              <Menu className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -242,9 +242,9 @@ export function AppHeader() {
                   className="flex items-center gap-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <Github className="h-4 w-4" suppressHydrationWarning={true} />
+                  <Github className="h-4 w-4" />
                   <span>GitHub</span>
-                  <ExternalLink className="h-3 w-3" suppressHydrationWarning={true} />
+                  <ExternalLink className="h-3 w-3" />
                 </a>
               </Button>
               </div>
