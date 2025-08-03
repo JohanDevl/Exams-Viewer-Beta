@@ -55,7 +55,7 @@ export function AppHeader() {
       title={disabled ? `${label} (No data available)` : label}
       aria-label={label}
     >
-      <Icon className={cn("h-4 w-4", disabled && "opacity-50")} />
+      <Icon className={cn("h-4 w-4", disabled && "opacity-50")} suppressHydrationWarning={true} />
     </Button>
   );
 
@@ -142,9 +142,9 @@ export function AppHeader() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2"
               >
-                <Github className="h-4 w-4" />
+                <Github className="h-4 w-4" suppressHydrationWarning={true} />
                 <span className="hidden lg:inline">GitHub</span>
-                <ExternalLink className="h-3 w-3" />
+                <ExternalLink className="h-3 w-3" suppressHydrationWarning={true} />
               </a>
             </Button>
           </div>
@@ -157,7 +157,7 @@ export function AppHeader() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="h-9 w-9 p-0"
             >
-              <Menu className="h-4 w-4" />
+              <Menu className="h-4 w-4" suppressHydrationWarning={true} />
             </Button>
           </div>
         </div>
@@ -242,9 +242,9 @@ export function AppHeader() {
                   className="flex items-center gap-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <Github className="h-4 w-4" />
+                  <Github className="h-4 w-4" suppressHydrationWarning={true} />
                   <span>GitHub</span>
-                  <ExternalLink className="h-3 w-3" />
+                  <ExternalLink className="h-3 w-3" suppressHydrationWarning={true} />
                 </a>
               </Button>
               </div>
