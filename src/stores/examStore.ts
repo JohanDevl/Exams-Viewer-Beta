@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { getDataPath } from '@/lib/assets';
 import type { 
   ExamData, 
   ExamInfo, 
@@ -87,7 +88,7 @@ export const useExamStore = create<ExamStore>()(
         
         try {
           // Charger les infos de l'examen depuis le manifest
-          const manifestResponse = await fetch('/data/manifest.json');
+          const manifestResponse = await fetch(getDataPath('manifest.json'));
           const manifest = await manifestResponse.json();
           const examInfo = manifest.exams.find((exam: ExamInfo) => exam.code === examCode);
           
@@ -96,7 +97,7 @@ export const useExamStore = create<ExamStore>()(
           }
 
           // Load exam data
-          const examResponse = await fetch(`/data/${examCode}/exam.json`);
+          const examResponse = await fetch(getDataPath(`${examCode}/exam.json`));
           const examData: ExamData = await examResponse.json();
 
           // Reset question states for a new attempt

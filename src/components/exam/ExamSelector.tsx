@@ -11,6 +11,7 @@ import { useStatisticsStore } from '@/stores/statisticsStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import type { Manifest, ExamInfo } from '@/types';
 import { cn } from '@/lib/utils';
+import { getDataPath } from '@/lib/assets';
 
 export function ExamSelector() {
   const [manifest, setManifest] = useState<Manifest | null>(null);
@@ -27,7 +28,7 @@ export function ExamSelector() {
   useEffect(() => {
     const fetchManifest = async () => {
       try {
-        const response = await fetch('/data/manifest.json');
+        const response = await fetch(getDataPath('manifest.json'));
         const data: Manifest = await response.json();
         setManifest(data);
         setFilteredExams(data.exams);
@@ -95,7 +96,7 @@ export function ExamSelector() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="flex items-center gap-3">
-          <Loader2 className="h-6 w-6 animate-spin" suppressHydrationWarning={true} />
+          <Loader2 className="h-6 w-6 animate-spin"  />
           <span className="text-muted-foreground">Loading exams...</span>
         </div>
       </div>
@@ -115,7 +116,7 @@ export function ExamSelector() {
       {/* Search bar and view toggle */}
       <div className="flex gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" suppressHydrationWarning={true} />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"  />
           <Input
             placeholder="Search exams (code, name, description)..."
             value={searchQuery}
@@ -133,12 +134,12 @@ export function ExamSelector() {
         >
           {currentView === "list" ? (
             <>
-              <Grid className="h-4 w-4" suppressHydrationWarning={true} />
+              <Grid className="h-4 w-4"  />
               Cards
             </>
           ) : (
             <>
-              <List className="h-4 w-4" suppressHydrationWarning={true} />
+              <List className="h-4 w-4"  />
               List
             </>
           )}
@@ -206,7 +207,7 @@ export function ExamSelector() {
                       {/* Statistics */}
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-1 text-muted-foreground">
-                          <FileText className="h-4 w-4" suppressHydrationWarning={true} />
+                          <FileText className="h-4 w-4"  />
                           <span>{exam.questionCount} questions</span>
                         </div>
                         {stats.answered > 0 && (
@@ -234,7 +235,7 @@ export function ExamSelector() {
 
                       {/* Last updated date */}
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3" suppressHydrationWarning={true} />
+                        <Calendar className="h-3 w-3"  />
                         <span>Updated on {formatDate(exam.lastUpdated)}</span>
                       </div>
 
@@ -249,7 +250,7 @@ export function ExamSelector() {
                       >
                         {isLoadingThis ? (
                           <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" suppressHydrationWarning={true} />
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin"  />
                             Loading...
                           </>
                         ) : stats.answered > 0 ? (
@@ -299,14 +300,14 @@ export function ExamSelector() {
                           </p>
                           <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
                             <div className="flex items-center gap-1">
-                              <FileText className="h-3 w-3" suppressHydrationWarning={true} />
+                              <FileText className="h-3 w-3"  />
                               <span>{exam.questionCount} questions</span>
                             </div>
                             {stats.answered > 0 && (
                               <span>{stats.answered}/{exam.questionCount} answered</span>
                             )}
                             <div className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" suppressHydrationWarning={true} />
+                              <Calendar className="h-3 w-3"  />
                               <span>{formatDate(exam.lastUpdated)}</span>
                             </div>
                           </div>
@@ -338,7 +339,7 @@ export function ExamSelector() {
                         >
                           {isLoadingThis ? (
                             <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" suppressHydrationWarning={true} />
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin"  />
                               Loading...
                             </>
                           ) : stats.answered > 0 ? (
