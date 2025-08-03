@@ -6,6 +6,9 @@ import { ToastProvider } from "@/components/providers/ToastProvider";
 import { ModalsProvider } from "@/components/providers/ModalsProvider";
 import { KeyboardShortcutsProvider } from "@/components/providers/KeyboardShortcutsProvider";
 
+// Base path for GitHub Pages deployment
+const BASE_PATH = process.env.NODE_ENV === 'production' ? '/Exams-Viewer-Beta' : '';
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -35,11 +38,11 @@ export const metadata: Metadata = {
     title: "Exams Viewer - ServiceNow Certification Training",
     description: "Modern platform for ServiceNow certification exam preparation",
   },
-  manifest: "/manifest.json",
+  manifest: `${BASE_PATH}/manifest.json`,
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: `${BASE_PATH}/favicon.ico`, sizes: "any" },
+      { url: `${BASE_PATH}/favicon.svg`, type: "image/svg+xml" },
     ],
   },
 };
