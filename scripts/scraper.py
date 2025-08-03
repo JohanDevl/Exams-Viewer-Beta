@@ -524,7 +524,7 @@ def check_for_updates(exam_code, progress, skip_online_check=False):
     Checks if exam files need to be updated by comparing 
     existing links with newly available links
     """
-    exam_dir = f"data/{exam_code}"
+    exam_dir = f"public/data/{exam_code}"
     questions_path = f"{exam_dir}/exam.json"
     links_path = f"{exam_dir}/links.json"
     
@@ -740,7 +740,7 @@ def create_chunks_for_exam_data(exam_code, questions, chunk_size=50):
     total_chunks = math.ceil(total_questions / chunk_size)
     
     # Create exam directory structure (should already exist from update_exam_data)
-    exam_dir = f"data/{exam_code}"
+    exam_dir = f"public/data/{exam_code}"
     chunks_dir = f"{exam_dir}/chunks"
     metadata_file = f"{exam_dir}/metadata.json"
     
@@ -798,7 +798,7 @@ def update_exam_data(exam_code, progress, rapid_scraping=False, force_rescan=Fal
     Updates exam data by scraping new questions with automatic chunking
     """
     # Create exam directory structure
-    exam_dir = f"data/{exam_code}"
+    exam_dir = f"public/data/{exam_code}"
     os.makedirs(exam_dir, exist_ok=True)
     os.makedirs(f"{exam_dir}/chunks", exist_ok=True)
     

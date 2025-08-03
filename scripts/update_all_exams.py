@@ -26,8 +26,8 @@ class ProgressTracker:
 def get_available_exam_codes():
     """Get all exam codes from existing exam directories"""
     exam_codes = set()
-    # Update path to go up one level to find data directory
-    data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+    # Update path to go up one level to find public/data directory
+    data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "public", "data")
     
     if not os.path.exists(data_dir):
         print(f"❌ Data directory '{data_dir}' not found")
