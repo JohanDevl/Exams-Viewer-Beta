@@ -1,5 +1,5 @@
 # Workflow for building and deploying a Next.js site to GitHub Pages
-# Optimized for Exams Viewer with pnpm and Python data scripts
+# Pure Next.js deployment without Python data processing
 
 name: Deploy Next.js site to Pages
 
@@ -30,22 +30,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-          
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          
-      - name: Update exam data
-        run: |
-          echo "Updating exam data..."
-          python scripts/update_manifest.py
-          echo "Exam data updated successfully"
           
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
