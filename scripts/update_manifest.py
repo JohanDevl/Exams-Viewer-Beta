@@ -123,7 +123,7 @@ def generate_manifest():
         dict: Generated manifest data
     """
     project_root = get_project_root()
-    data_dir = project_root / "data"
+    data_dir = project_root / "public" / "data"
     
     if not data_dir.exists():
         print(f"❌ Data directory not found: {data_dir}")
@@ -180,12 +180,12 @@ def save_manifest(manifest):
         return False
         
     project_root = get_project_root()
-    manifest_path = project_root / "data" / "manifest.json"
+    manifest_path = project_root / "public" / "data" / "manifest.json"
     
     try:
         # Create backup of existing manifest
         if manifest_path.exists():
-            backup_path = project_root / "data" / "manifest.json.backup"
+            backup_path = project_root / "public" / "data" / "manifest.json.backup"
             # Copy instead of rename to preserve original
             import shutil
             shutil.copy2(manifest_path, backup_path)

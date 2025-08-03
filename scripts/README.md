@@ -42,7 +42,7 @@ The manifest system provides significant performance improvements:
 ## Requirements
 - Python 3.6+
 - No external dependencies required
-- Write access to `data/` directory
+- Write access to `public/data/` directory
 
 ## Documentation
 See [docs/scripts/SCRIPTS_DOCUMENTATION.md](../docs/scripts/SCRIPTS_DOCUMENTATION.md) for detailed documentation.
