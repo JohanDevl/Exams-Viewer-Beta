@@ -40,10 +40,9 @@ next-env.d.ts
 # Turbo
 .turbo
 
-# Package locks (allow npm to generate its own)
+# Package locks (npm/yarn can regenerate, but pnpm-lock.yaml should be committed)
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
 
 # Editor directories and files
 .vscode/
