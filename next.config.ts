@@ -1,6 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Enable static export for GitHub Pages
+  output: 'export',
+  
+  // Disable server-side image optimization for static export
+  images: {
+    unoptimized: true,
+  },
+  
+  // Add trailing slash for better GitHub Pages compatibility
+  trailingSlash: true,
+  
   typescript: {
     // Allow build to complete even with TypeScript warnings (not errors)
     ignoreBuildErrors: false,
@@ -9,20 +20,7 @@ const nextConfig: NextConfig = {
     // Allow build to complete even with ESLint warnings
     ignoreDuringBuilds: false,
   },
-  // Add support for static assets caching
-  async headers() {
-    return [
-      {
-        source: '/data/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=3600, stale-while-revalidate=86400',
-          },
-        ],
-      },
-    ];
-  },
+  
   // Enable experimental features for better performance
   experimental: {
     optimizePackageImports: ['lucide-react'],
