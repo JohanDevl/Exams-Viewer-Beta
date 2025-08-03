@@ -4,23 +4,27 @@
 
 ### For Web Viewing Only
 
-**No installation needed!** Just visit the GitHub Pages URL:
+**No installation needed!** The Next.js application is deployed and ready to use:
 
-- **Live Demo**: [https://JohanDevl.github.io/Exams-Viewer/](https://JohanDevl.github.io/Exams-Viewer/)
-- The interface automatically detects your system theme preference
-- Includes full statistics tracking and all features
-- Works on all modern browsers and mobile devices
+- **Live Demo**: [https://yourdomain.com](https://yourdomain.com) (update with actual deployment URL)
+- Modern Next.js application with server-side rendering
+- Automatic theme detection and system integration
+- Full statistics tracking with persistent sessions
+- Optimized for all modern browsers and mobile devices
 
-### For Development/Scraping
+### For Development
 
-If you want to run the scraper or contribute to development:
+To run the Next.js application locally or contribute to development:
 
 ```bash
 # Clone the repository
-git clone https://github.com/JohanDevl/Exams-Viewer.git
-cd Exams-Viewer
+git clone https://github.com/JohanDevl/Exams-Viewer-Beta.git
+cd Exams-Viewer-Beta
 
-# Install Python dependencies
+# Install Node.js dependencies
+npm install
+
+# Install Python dependencies (for data scripts)
 pip install -r requirements.txt
 ```
 
@@ -28,60 +32,86 @@ pip install -r requirements.txt
 
 ### Prerequisites
 
-- **Python 3.11+** - For running scraper scripts
+- **Node.js 18+** - For Next.js development
+- **npm or yarn** - Package manager for Node.js dependencies 
+- **Python 3.11+** - For running data management scripts
 - **Git** - For version control and cloning
 - **GitHub account** - For automation and contributions
-- **Modern web browser** - Chrome, Firefox, Safari, Edge
-- **Code editor** - VS Code, Sublime Text, or any preferred editor
+- **Modern web browser** - Chrome, Firefox, Safari, Edge with dev tools
+- **Code editor** - VS Code recommended with TypeScript support
 
 ### Local Development Environment
 
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/JohanDevl/Exams-Viewer.git
-   cd Exams-Viewer
+   git clone https://github.com/JohanDevl/Exams-Viewer-Beta.git
+   cd Exams-Viewer-Beta
    ```
 
-2. **Install Python dependencies**
+2. **Install Node.js dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Install Python dependencies (for data scripts)**
 
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Verify installation**
+4. **Verify installation**
 
    ```bash
-   python -c "import requests, bs4; print('Dependencies installed successfully')"
+   # Check Node.js setup
+   npm run lint
+   
+   # Check Python setup
+   python -c "import requests, bs4; print('Python dependencies OK')"
    ```
 
-4. **Test scraper (optional)**
+5. **Start development server**
 
    ```bash
-   python scripts/update_all_exams.py --exam CAD
-   ```
-
-5. **Serve web interface locally**
-
-   ```bash
-   # Use Python built-in server
-   python -m http.server 8000
-
-   # Or use Node.js if available
-   npx http-server -p 8000
-
-   # Or use any other static file server
+   # Start Next.js development server with Turbopack
+   npm run dev
    ```
 
 6. **Open in browser**
-   - Navigate to `http://localhost:8000`
-   - The interface should load with all features available
+   - Navigate to `http://localhost:3000`
+   - The Next.js application will load with hot reload enabled
+   - All features available including SSR and optimizations
 
 ## 🔧 Dependencies
 
-### Python Dependencies
+### Node.js Dependencies
 
-The project uses minimal Python dependencies for scraping:
+The Next.js application uses modern React ecosystem dependencies:
+
+```json
+{
+  "next": "15.4.5",
+  "react": "19.1.0",
+  "react-dom": "19.1.0",
+  "typescript": "^5",
+  "tailwindcss": "^4",
+  "zustand": "^5.0.7",
+  "@radix-ui/react-*": "various",
+  "framer-motion": "^12.23.12",
+  "lucide-react": "^0.534.0"
+}
+```
+
+Install via:
+
+```bash
+npm install
+```
+
+### Python Dependencies (Data Management)
+
+For data scraping and management scripts:
 
 ```txt
 requests>=2.31.0
@@ -94,63 +124,85 @@ Install via:
 pip install -r requirements.txt
 ```
 
-### Frontend Dependencies
+### Key Technologies
 
-The web interface uses **no build process** and minimal external dependencies:
+- **Next.js 15** - React framework with App Router
+- **React 19** - Latest React with concurrent features
+- **TypeScript** - Type safety and developer experience
+- **Tailwind CSS** - Utility-first styling framework
+- **Radix UI** - Accessible component primitives
+- **Zustand** - Lightweight state management
+- **Framer Motion** - Animation library
 
-- **Font Awesome 6.0.0** - Icons (loaded via CDN)
-- **Vanilla JavaScript** - No frameworks required
-- **Modern CSS** - CSS Grid, Flexbox, Custom Properties
-- **HTML5** - Semantic markup
+## 🌐 Next.js Development Server
 
-All frontend dependencies are loaded via CDN, so no local installation is required.
+### Development Features
 
-## 🌐 Local Development Server
+The Next.js development server provides:
 
-### Why Use a Local Server?
+- **Hot Module Replacement** - Instant updates without page refresh
+- **Turbopack** - Ultra-fast bundling and compilation
+- **TypeScript Integration** - Real-time type checking
+- **Error Overlay** - Detailed error reporting with source maps
+- **Automatic Optimization** - Built-in performance optimizations
 
-While you can open `index.html` directly in a browser, using a local server is recommended to:
+### Development Commands
 
-- Avoid CORS issues when loading JSON data
-- Test the application in a production-like environment
-- Enable proper caching and performance testing
-- Support all export features correctly
-
-### Server Options
-
-#### Option 1: Python (Recommended)
-
-```bash
-python -m http.server 8000
-```
-
-#### Option 2: Node.js
+#### Start Development Server
 
 ```bash
-npx http-server -p 8000
+# Start with Turbopack (faster)
+npm run dev
+
+# Equivalent to: next dev --turbopack
 ```
 
-#### Option 3: PHP
+#### Build and Test Production
 
 ```bash
-php -S localhost:8000
+# Build for production
+npm run build
+
+# Start production server
+npm run start
+
+# Test production build locally on http://localhost:3000
 ```
 
-#### Option 4: VS Code Live Server Extension
+#### Linting and Type Checking
 
-- Install the "Live Server" extension
-- Right-click on `index.html`
-- Select "Open with Live Server"
+```bash
+# Run ESLint
+npm run lint
+
+# TypeScript is checked automatically during development
+```
+
+#### Data Management (Python Scripts)
+
+```bash
+# Update exam data
+python3 scripts/update_all_exams.py
+
+# Update manifest
+python3 scripts/update_manifest.py
+
+# Scrape specific exam
+python3 scripts/scraper.py [EXAM_CODE]
+```
 
 ### Testing the Installation
 
-1. **Open the web interface** at `http://localhost:8000`
-2. **Select an exam** from the dropdown
-3. **Navigate through questions** using the controls
-4. **Test statistics** by attempting some questions
-5. **Try dark mode** toggle
-6. **Test highlight mode** on questions
-7. **Export functionality** (PDF and statistics)
+1. **Open the Next.js application** at `http://localhost:3000`
+2. **Verify SSR** - Check page source shows pre-rendered content
+3. **Select an exam** from the dropdown selector
+4. **Navigate through questions** using keyboard shortcuts and controls
+5. **Test state persistence** - Refresh page to verify session restoration
+6. **Try theme switching** - System, light, and dark modes
+7. **Test statistics tracking** - Answer questions and check analytics
+8. **Verify export functionality** - JSON, CSV, TXT, PDF formats
+9. **Check mobile responsiveness** - Test on different screen sizes
+10. **Validate TypeScript** - No type errors in development console
 
 ## 📊 Data Setup
 
@@ -198,38 +250,66 @@ python scripts/update_all_exams.py --exam CAD
 
 ## 🚀 Deployment Options
 
-### GitHub Pages (Recommended)
+### Vercel (Recommended for Next.js)
 
-The easiest deployment method:
+The optimal deployment platform for Next.js:
 
-1. **Fork the repository** on GitHub
-2. **Enable GitHub Pages** in repository settings
-3. **Select source** as "Deploy from a branch"
-4. **Choose branch** `main` and folder `/` (root)
-5. **Access your site** at `https://yourusername.github.io/Exams-Viewer/`
+1. **Connect to Vercel** - Import repository from GitHub
+2. **Automatic deployment** - Vercel detects Next.js configuration
+3. **Environment variables** - Configure any required environment variables
+4. **Custom domain** - Optional: Configure custom domain
+5. **Access your site** at the provided Vercel URL
 
-### Manual Static Hosting
+### Alternative Deployment Options
 
-For other hosting providers:
+#### Netlify
+```bash
+# Build command
+npm run build
 
-1. **Upload files** to your web server:
+# Publish directory
+out/
 
+# Environment variables
+NEXT_EXPORT=true
+```
+
+#### Traditional Hosting (Static Export)
+```bash
+# Configure next.config.ts for static export
+npm run build
+
+# Deploy the 'out' directory to your hosting provider
+```
+
+### Self-Hosted Deployment
+
+For custom hosting environments:
+
+1. **Build the application**:
+
+   ```bash
+   npm run build
+   npm run start
    ```
-   index.html
-   styles.css
-   script.js
-   data/
-   favicon.ico
-   favicon.svg
+
+2. **Configure server requirements**:
+
+   - Node.js 18+ runtime
+   - Process manager (PM2, systemd, etc.)
+   - Reverse proxy (nginx, Apache) for production
+   - SSL certificate for HTTPS
+
+3. **Environment setup**:
+
+   ```bash
+   # Production environment
+   NODE_ENV=production
+   PORT=3000
+   
+   # Start with PM2
+   pm2 start npm --name "exams-viewer" -- start
    ```
-
-2. **Ensure MIME types** are configured correctly:
-
-   - `.json` files should serve as `application/json`
-   - `.css` files should serve as `text/css`
-   - `.js` files should serve as `application/javascript`
-
-3. **Test the deployment** by visiting your URL
 
 ### Docker Deployment (Advanced)
 
@@ -296,16 +376,21 @@ Create a `config.json` file for custom settings:
 ### Installation Verification Checklist
 
 - [ ] Repository cloned successfully
-- [ ] Python dependencies installed
-- [ ] Local server running on port 8000
-- [ ] Web interface loads at `http://localhost:8000`
+- [ ] Node.js dependencies installed (`npm install`)
+- [ ] Python dependencies installed (for data scripts)
+- [ ] Development server running on port 3000 (`npm run dev`)
+- [ ] Next.js application loads at `http://localhost:3000`
+- [ ] SSR working (view page source shows pre-rendered content)
+- [ ] TypeScript compilation successful
 - [ ] Exam dropdown populated with available exams
-- [ ] Questions load and display correctly
-- [ ] Statistics panel opens and functions
-- [ ] Dark mode toggle works
-- [ ] Highlight mode functions on questions
-- [ ] Export features work (PDF and JSON)
-- [ ] No console errors in browser developer tools
+- [ ] Questions load and display correctly with animations
+- [ ] State management working (session persistence)
+- [ ] Statistics panel opens and functions correctly
+- [ ] Theme switching works (system/light/dark)
+- [ ] Export features work (JSON, CSV, TXT, PDF)
+- [ ] Mobile responsiveness verified
+- [ ] No TypeScript errors in development console
+- [ ] Hot reload working during development
 
 ### Troubleshooting Installation
 

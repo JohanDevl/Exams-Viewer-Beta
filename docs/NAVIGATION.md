@@ -1,406 +1,824 @@
-# Enhanced Navigation Features
+# Navigation System - Next.js Exams Viewer
 
-This document provides comprehensive documentation for the enhanced navigation system in Exams Viewer, including keyboard shortcuts, visual progress tracking, and navigation history.
+> **Comprehensive navigation system for the modern Next.js architecture**
 
-## Table of Contents
+This document covers the advanced navigation features in the Next.js Exams Viewer, including keyboard shortcuts, interactive components, mobile navigation, and state-aware navigation patterns.
 
-1. [Overview](#overview)
-2. [Keyboard Shortcuts](#keyboard-shortcuts)
-3. [Progress Sidebar](#progress-sidebar)
-4. [Navigation History](#navigation-history)
-5. [User Interface](#user-interface)
-6. [Settings & Persistence](#settings--persistence)
-7. [Technical Implementation](#technical-implementation)
-8. [Troubleshooting](#troubleshooting)
+## 🏗️ Architecture Overview
 
-## Overview
+The navigation system is built with:
+- **React 19 Components** - Server and client components with hooks
+- **Zustand State Management** - Centralized navigation state
+- **TypeScript Interfaces** - Type-safe navigation contracts
+- **Tailwind CSS** - Responsive styling system
+- **Framer Motion** - Smooth animations and transitions
+- **Custom Hooks** - Reusable navigation logic
 
-The enhanced navigation system provides multiple ways to move through exam questions efficiently:
+## 🧭 Navigation Components
 
-- **Comprehensive keyboard shortcuts** for all navigation actions
-- **Visual progress sidebar** showing question overview and status
-- **Navigation history** with back/forward functionality
-- **Responsive design** optimized for both desktop and mobile
-- **Seamless integration** with existing features like search and favorites
+### Core Navigation Architecture
 
-## Keyboard Shortcuts
+```typescript
+// Navigation component structure
+src/components/navigation/
+├── NavigationControls.tsx      # Main navigation buttons and controls
+├── MobileNavigationBar.tsx     # Bottom navigation for mobile
+├── Sidebar.tsx                 # Question overview sidebar
+└── KeyboardShortcuts.tsx       # Keyboard navigation handler
+```
 
-### Navigation Shortcuts
+## ⌨️ Keyboard Shortcuts System
 
-#### Basic Movement
-| Shortcut | Action | Description |
-|----------|--------|-------------|
-| `←` / `h` | Previous question | Move to the previous question (vim-style) |
-| `→` / `l` | Next question | Move to the next question (vim-style) |
-| `↑` / `k` | Previous 5 questions | Jump backward by 5 questions |
-| `↓` / `j` | Next 5 questions | Jump forward by 5 questions |
+### React Hook Implementation
 
-#### Quick Navigation
-| Shortcut | Action | Description |
-|----------|--------|-------------|
-| `Home` | First question | Jump to the first question |
-| `End` | Last question | Jump to the last question |
-| `Page Up` | Previous 10 questions | Jump backward by 10 questions |
-| `Page Down` | Next 10 questions | Jump forward by 10 questions |
-| `Ctrl + ↑` | First question | Alternative to Home key |
-| `Ctrl + ↓` | Last question | Alternative to End key |
+The keyboard system uses a custom React hook with TypeScript:
 
-#### Direct Navigation
-| Shortcut | Action | Description |
-|----------|--------|-------------|
-| `1` - `9` | Jump to question | Direct navigation to questions 1-9 |
-| `r` | Random question | Navigate to a random question |
+```typescript
+// hooks/useKeyboardShortcuts.ts
+interface KeyboardShortcut {
+  key: string;
+  ctrlKey?: boolean;
+  altKey?: boolean;
+  shiftKey?: boolean;
+  description: string;
+  action: () => void;
+}
 
-#### Flow Navigation
-| Shortcut | Action | Description |
-|----------|--------|-------------|
-| `Space` | Next question | Advance to next question |
-| `Shift + Space` | Previous question | Go back to previous question |
-| `Enter` | Next question | Alternative to Space |
-| `Shift + Enter` | Validate answers | Validate current answers |
-
-### Action Shortcuts
-
-#### Answer Management
-| Shortcut | Action | Description |
-|----------|--------|-------------|
-| `v` | Validate answers | Check your selected answers |
-| `t` | Toggle highlight | Preview correct answers |
-| `Ctrl + r` | Reset question | Clear selected answers |
-
-#### Content Management
-| Shortcut | Action | Description |
-|----------|--------|-------------|
-| `f` | Toggle favorite | Add/remove question from favorites |
-| `n` | Toggle note | Open/close note editor |
-| `1` | Rate as Easy | Mark question as Easy difficulty |
-| `2` | Rate as Medium | Mark question as Medium difficulty |
-| `3` | Rate as Hard | Mark question as Hard difficulty |
-| `0` | Clear difficulty | Remove difficulty rating |
-
-#### Interface Control
-| Shortcut | Action | Description |
-|----------|--------|-------------|
-| `Ctrl + s` | Toggle sidebar | Show/hide progress sidebar |
-| `s` | Focus search | Move cursor to search input |
-| `Esc` | Close/Cancel | Close modals, sidebar, or clear search |
-| `?` | Show help | Display keyboard shortcuts modal |
-
-## Progress Sidebar
-
-### Overview
-
-The progress sidebar provides a visual overview of your exam progress with an interactive question list and comprehensive status tracking.
-
-### Features
-
-#### Progress Tracking
-- **Overall completion percentage** with animated progress bar
-- **Question count display** (answered/total)
-- **Real-time updates** as you answer questions
-
-#### Question List
-- **Clickable question items** for direct navigation
-- **Question previews** showing first 60 characters
-- **Status indicators** with color coding
-- **Automatic scrolling** to keep current question visible
-
-#### Status Indicators
-
-| Indicator | Meaning | Visual |
-|-----------|---------|--------|
-| Current Question | Currently viewing | 🔴 Orange highlight with arrow |
-| Answered Question | Question completed | ✅ Green left border with check |
-| Unanswered Question | Not yet attempted | ⭕ Gray left border with circle |
-| Favorite Question | Marked as favorite | ⭐ Yellow star icon |
-
-### Controls
-
-#### Opening/Closing
-- **Hamburger menu button** in navigation bar
-- **Keyboard shortcut**: `Ctrl + S`
-- **Close button** in sidebar header
-- **Overlay click** to close (mobile)
-
-#### Navigation
-- **Click any question** to navigate directly
-- **Scroll support** for long question lists
-- **Touch-friendly** interface on mobile devices
-
-### Responsive Design
-
-#### Desktop (768px+)
-- Sidebar slides in from the right
-- 380px fixed width
-- Overlay darkens background
-- Smooth animations and transitions
-
-#### Mobile (<768px)
-- Full-screen width sidebar
-- Optimized touch targets
-- Gesture-friendly closing
-- Adapted typography and spacing
-
-## Navigation History
-
-### Overview
-
-The navigation history system tracks your movement through questions and provides back/forward functionality similar to web browsers.
-
-### Features
-
-#### History Tracking
-- **Automatic recording** of navigation actions
-- **Intelligent duplicate prevention** (no consecutive identical entries)
-- **Limited to 50 entries** for optimal performance
-- **Integration with all navigation methods**
-
-#### Back/Forward Buttons
-- **Visual indicators** showing available steps
-- **Tooltip information** with step counts
-- **Disabled state** when no history available
-- **Keyboard shortcuts** for quick access
-
-#### Supported Actions
-All navigation methods add to history:
-- Arrow key navigation
-- Direct question clicks
-- Random question jumps
-- Keyboard shortcuts
-- Search result navigation
-
-### Usage
-
-#### Button Controls
-- **Back button**: Return to previously visited question
-- **Forward button**: Move forward in history (after going back)
-- **Button states**: Automatically enabled/disabled based on history
-
-#### History Management
-- **Automatic cleanup**: Old entries removed when limit reached
-- **Reset on exam change**: History cleared when loading new exam
-- **Smart branching**: Forward history cleared when navigating from middle
-
-## User Interface
-
-### Visual Design
-
-#### Color Scheme
-- **Consistent theming** with existing interface
-- **Dark mode support** for all components
-- **Accessible color contrasts** meeting WCAG guidelines
-- **Status-based colors** for immediate recognition
-
-#### Animations
-- **Smooth transitions** (300ms duration)
-- **Progressive disclosure** for collapsible elements
-- **Loading states** for better user feedback
-- **Hover effects** for interactive elements
-
-### Responsive Breakpoints
-
-#### Large Screens (1200px+)
-- Full sidebar width (380px)
-- All keyboard shortcuts active
-- Complete progress visualization
-
-#### Medium Screens (768px - 1199px)
-- Responsive sidebar adjustments
-- Optimized button sizes
-- Maintained functionality
-
-#### Small Screens (<768px)
-- Mobile-first approach
-- Touch-optimized controls
-- Simplified layouts
-
-## Settings & Persistence
-
-### Saved Preferences
-
-#### Automatic Persistence
-- **Sidebar state**: Open/closed preference saved
-- **Navigation preferences**: Maintained across sessions
-- **Integration with existing settings** system
-
-#### Storage Location
-- **localStorage**: Browser-based persistence
-- **JSON format**: Structured data storage
-- **Backwards compatibility**: Safe upgrades
-
-### Configuration Options
-
-#### Available Settings
-```javascript
-settings = {
-  sidebarOpen: false,          // Sidebar visibility state
-  showAdvancedSearch: false,   // Search section visibility
-  // ... other existing settings
+export function useKeyboardShortcuts(
+  shortcuts: KeyboardShortcut[], 
+  enabled = true
+): void {
+  // Implementation with modern event handling
 }
 ```
 
-#### Restoration Process
-1. Settings loaded on page initialization
-2. Sidebar state applied automatically
-3. User preferences respected
-4. Fallback to defaults if needed
+### Navigation Shortcuts
 
-## Technical Implementation
+#### Core Navigation
+| Shortcut | Action | Component | Store Action |
+|----------|--------|-----------|---------------|
+| `←` / `ArrowLeft` | Previous question | NavigationControls | `goToPreviousQuestion()` |
+| `→` / `ArrowRight` | Next question | NavigationControls | `goToNextQuestion()` |
+| `Home` | First question | NavigationControls | `setCurrentQuestion(0)` |
+| `End` | Last question | NavigationControls | `setCurrentQuestion(total-1)` |
+| `r` | Random question | NavigationControls | `goToRandomQuestion()` |
 
-### Architecture
+#### Answer Management
+| Shortcut | Action | Component | Store Action |
+|----------|--------|-----------|---------------|
+| `Space` | Submit answer | QuestionDisplay | `submitAnswer()` |
+| `Enter` | Submit answer | QuestionDisplay | `submitAnswer()` |
+| `h` | Toggle preview | QuestionDisplay | `markQuestionAsPreview()` |
+| `Ctrl + r` | Reset question | QuestionDisplay | `resetQuestion()` |
 
-#### Modular Design
-- **Separate concerns**: Navigation, UI, persistence
-- **Event-driven updates**: Real-time synchronization
-- **Performance optimized**: Minimal DOM manipulation
-- **Memory efficient**: Smart caching and cleanup
+#### Interface Control
+| Shortcut | Action | Component | Store Action |
+|----------|--------|-----------|---------------|
+| `f` | Toggle favorite | QuestionDisplay | `toggleFavorite()` |
+| `Ctrl + s` | Toggle sidebar | Sidebar | `setSidebarPosition()` |
+| `Esc` | Close modals | ModalsProvider | Various close actions |
+| `?` | Show help | App | Open shortcuts modal |
 
-#### Key Components
+#### Difficulty Rating
+| Shortcut | Action | Component | Store Action |
+|----------|--------|-----------|---------------|
+| `1` | Easy difficulty | QuestionDisplay | `setQuestionDifficulty('easy')` |
+| `2` | Medium difficulty | QuestionDisplay | `setQuestionDifficulty('medium')` |
+| `3` | Hard difficulty | QuestionDisplay | `setQuestionDifficulty('hard')` |
+| `0` | Clear difficulty | QuestionDisplay | `setQuestionDifficulty(null)` |
 
-##### JavaScript Functions
-```javascript
-// Core navigation
-navigateToQuestionIndex(index, addToHistory)
-navigateQuestion(direction)
-navigateToRandomQuestion()
+## 🧩 Sidebar Component
 
-// History management
-addToNavigationHistory(questionIndex)
-navigateHistoryBack()
-navigateHistoryForward()
+### Component Architecture
 
-// Sidebar control
-toggleSidebar()
-updateProgressSidebar()
-updateProgressBar()
+```typescript
+// components/navigation/Sidebar.tsx
+interface SidebarProps {
+  position: SidebarPosition;
+  onPositionChange: (position: SidebarPosition) => void;
+  questions: Question[];
+  questionStates: Record<number, QuestionState>;
+  currentIndex: number;
+  onQuestionSelect: (index: number) => void;
+  className?: string;
+}
 
-// Utility functions
-isQuestionAnswered(questionNumber)
-isQuestionFavorite(questionNumber)
-truncateText(text, maxLength)
+type SidebarPosition = "hidden" | "collapsed" | "expanded";
 ```
 
-##### CSS Classes
-```css
-/* Sidebar components */
-.progress-sidebar
-.progress-sidebar.open
-.sidebar-overlay.active
+### State Management Integration
 
-/* Question status */
-.question-item.current
-.question-item.answered
-.question-item.unanswered
+```typescript
+// Zustand store integration
+const { 
+  currentExam, 
+  currentQuestionIndex, 
+  questionStates, 
+  setCurrentQuestion 
+} = useExamStore();
 
-/* Navigation controls */
-.nav-controls-enhanced
-.nav-btn.history
+const { 
+  sidebarPosition, 
+  setSidebarPosition 
+} = useSettingsStore();
 ```
 
-### Performance Considerations
+### Interactive Features
 
-#### Optimization Strategies
-- **Efficient DOM updates**: Batch modifications
-- **Event delegation**: Minimize event listeners
-- **Debounced operations**: Smooth interactions
-- **Memory management**: Proper cleanup
+#### Progress Visualization
+- **Animated progress bar** using Framer Motion
+- **Real-time completion percentage** calculated from store state
+- **Color-coded status indicators** based on question states
+- **Smooth transitions** between different states
 
-#### Browser Compatibility
-- **Modern browsers**: Full feature support
-- **Progressive enhancement**: Graceful degradation
-- **Mobile optimized**: Touch event handling
-- **Accessibility compliant**: Screen reader support
+#### Question Overview
+```typescript
+// Question status calculation
+const getQuestionStatus = (index: number): QuestionStatus => {
+  const state = questionStates[index];
+  if (!state) return "unanswered";
+  return state.status;
+};
 
-## Troubleshooting
-
-### Common Issues
-
-#### Navigation Not Working
-**Symptoms**: Keyboard shortcuts not responding
-**Solutions**:
-1. Ensure focus is not in input fields
-2. Check if modals are open (press `Esc`)
-3. Reload page to reset state
-4. Clear browser cache if persistent
-
-#### Sidebar Not Opening
-**Symptoms**: Sidebar toggle not responding
-**Solutions**:
-1. Check console for JavaScript errors
-2. Verify `Ctrl + S` shortcut
-3. Try clicking hamburger menu button
-4. Clear localStorage if corrupted
-
-#### History Not Recording
-**Symptoms**: Back/Forward buttons always disabled
-**Solutions**:
-1. Navigate to different questions
-2. Check if exam is properly loaded
-3. Verify question data integrity
-4. Reset navigation history
-
-#### Mobile Issues
-**Symptoms**: Touch controls not working
-**Solutions**:
-1. Ensure touch events are enabled
-2. Check viewport meta tag
-3. Test on different mobile browsers
-4. Clear mobile browser cache
-
-### Debug Information
-
-#### Console Commands
-```javascript
-// Check navigation state
-console.log('Current question:', currentQuestionIndex);
-console.log('Total questions:', currentQuestions.length);
-console.log('Navigation history:', navigationHistory);
-
-// Test sidebar functions
-toggleSidebar();
-updateProgressSidebar();
-
-// Check settings
-console.log('Settings:', settings);
+// Visual indicators
+const statusStyles = {
+  unanswered: "border-l-4 border-gray-300",
+  answered: "border-l-4 border-blue-500",
+  correct: "border-l-4 border-green-500",
+  incorrect: "border-l-4 border-red-500",
+  preview: "border-l-4 border-yellow-500"
+};
 ```
 
-#### Browser Developer Tools
-1. **Console tab**: Check for JavaScript errors
-2. **Network tab**: Verify resource loading
-3. **Application tab**: Inspect localStorage
-4. **Elements tab**: Examine DOM structure
+#### Navigation Interface
+- **Direct question navigation** via click handlers
+- **Keyboard navigation** within sidebar
+- **Search integration** with filtered questions
+- **Favorites highlighting** with star indicators
 
-### Getting Help
+### Responsive Design
 
-If issues persist:
+#### Tailwind CSS Implementation
+```typescript
+// Responsive sidebar classes
+const sidebarClasses = cn(
+  "fixed top-0 right-0 h-full bg-background border-l",
+  "transition-transform duration-300 ease-in-out z-50",
+  {
+    "translate-x-0": position === "expanded",
+    "translate-x-full": position === "hidden",
+    "w-80": true, // Desktop width
+    "w-full sm:w-80": true, // Mobile full width, desktop 320px
+  }
+);
+```
 
-1. **Check existing issues** in the GitHub repository
-2. **Create a detailed bug report** with:
-   - Browser version and OS
-   - Steps to reproduce
-   - Console error messages
-   - Expected vs actual behavior
-3. **Include debug information** from console commands
-4. **Test in incognito mode** to rule out extension conflicts
+#### Mobile Adaptations
+- **Full-screen overlay** on mobile devices
+- **Touch-optimized controls** with proper sizing
+- **Gesture support** for closing sidebar
+- **Bottom sheet alternative** for better mobile UX
 
-## Future Enhancements
+## 🧭 Navigation Controls Component
 
-### Planned Features
-- **Customizable keyboard shortcuts**
-- **Advanced progress analytics**
-- **Question bookmarking system**
-- **Export progress reports**
-- **Collaborative study features**
-- **Performance metrics tracking**
+### Component Interface
 
-### Community Contributions
-The navigation system is designed to be extensible. Contributions are welcome for:
-- Additional keyboard shortcuts
-- Enhanced visual indicators
-- Performance improvements
-- Accessibility enhancements
-- Mobile-specific features
+```typescript
+// components/navigation/NavigationControls.tsx
+interface NavigationControlsProps {
+  onPrevious: () => void;
+  onNext: () => void;
+  onRandom: () => void;
+  onJumpTo: (index: number) => void;
+  currentIndex: number;
+  totalQuestions: number;
+  className?: string;
+}
+```
+
+### Modern Navigation Features
+
+#### Smart Navigation Logic
+```typescript
+// Advanced navigation with bounds checking
+const handlePrevious = () => {
+  if (currentQuestionIndex > 0) {
+    setCurrentQuestion(currentQuestionIndex - 1);
+  }
+};
+
+const handleNext = () => {
+  if (currentQuestionIndex < totalQuestions - 1) {
+    setCurrentQuestion(currentQuestionIndex + 1);
+  }
+};
+
+const handleRandom = () => {
+  const randomIndex = Math.floor(Math.random() * totalQuestions);
+  if (randomIndex !== currentQuestionIndex) {
+    setCurrentQuestion(randomIndex);
+  }
+};
+```
+
+#### Progress Indicators
+```typescript
+// Progress calculation
+const progress = useMemo(() => {
+  const answered = Object.values(questionStates)
+    .filter(state => state.status !== "unanswered").length;
+  return {
+    answered,
+    total: totalQuestions,
+    percentage: Math.round((answered / totalQuestions) * 100)
+  };
+}, [questionStates, totalQuestions]);
+```
+
+#### Direct Navigation Input
+```typescript
+// Jump to specific question with validation
+const [jumpToValue, setJumpToValue] = useState("");
+
+const handleJumpTo = (e: React.FormEvent) => {
+  e.preventDefault();
+  const questionNumber = parseInt(jumpToValue);
+  if (questionNumber >= 1 && questionNumber <= totalQuestions) {
+    setCurrentQuestion(questionNumber - 1); // Convert to 0-based index
+    setJumpToValue("");
+  }
+};
+```
+
+### Button Components
+
+#### Modern Button Design
+```typescript
+// Using shadcn/ui Button component
+import { Button } from "@/components/ui/button";
+
+<Button
+  variant="outline"
+  size="sm"
+  onClick={handlePrevious}
+  disabled={currentQuestionIndex === 0}
+  className="flex items-center gap-2"
+>
+  <ChevronLeft className="h-4 w-4" />
+  Previous
+</Button>
+```
+
+## 📱 Mobile Navigation
+
+### Mobile Navigation Bar Component
+
+```typescript
+// components/navigation/MobileNavigationBar.tsx
+interface MobileNavigationBarProps {
+  onPrevious: () => void;
+  onNext: () => void;
+  onRandom: () => void;
+  onToggleSidebar: () => void;
+  currentIndex: number;
+  totalQuestions: number;
+  canNavigatePrevious: boolean;
+  canNavigateNext: boolean;
+}
+```
+
+### Touch-Optimized Design
+
+#### Bottom Navigation Bar
+```typescript
+// Mobile-first bottom navigation
+<div className="fixed bottom-0 left-0 right-0 bg-background border-t">
+  <div className="flex items-center justify-between px-4 py-3">
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={onPrevious}
+      disabled={!canNavigatePrevious}
+      className="min-h-[44px] min-w-[44px]"
+    >
+      <ChevronLeft className="h-5 w-5" />
+    </Button>
+    
+    <div className="text-sm text-muted-foreground">
+      {currentIndex + 1} / {totalQuestions}
+    </div>
+    
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={onNext}
+      disabled={!canNavigateNext}
+      className="min-h-[44px] min-w-[44px]"
+    >
+      <ChevronRight className="h-5 w-5" />
+    </Button>
+  </div>
+</div>
+```
+
+#### Swipe Gestures Support
+```typescript
+// Custom hook for swipe gestures
+const useSwipeNavigation = () => {
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  
+  const minSwipeDistance = 50;
+  
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+  
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+  
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe) handleNext();
+    if (isRightSwipe) handlePrevious();
+  };
+  
+  return { onTouchStart, onTouchMove, onTouchEnd };
+};
+```
+
+### Responsive Breakpoints
+
+#### Tailwind CSS Media Queries
+```typescript
+// Responsive navigation visibility
+const navigationClasses = cn(
+  // Desktop navigation
+  "hidden md:flex items-center gap-4",
+  // Mobile navigation (separate component)
+  "md:hidden"
+);
+
+// Mobile bottom bar
+const mobileBarClasses = cn(
+  "fixed bottom-0 left-0 right-0 z-40",
+  "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+  "border-t border-border",
+  "md:hidden" // Hide on desktop
+);
+```
+
+## ⚙️ Navigation State Management
+
+### Zustand Store Integration
+
+#### Settings Store
+```typescript
+// stores/settingsStore.ts
+interface SettingsStore {
+  settings: UserSettings;
+  sidebarPosition: SidebarPosition;
+  
+  updateSettings: (newSettings: Partial<UserSettings>) => void;
+  setSidebarPosition: (position: SidebarPosition) => void;
+  resetSettings: () => void;
+}
+
+interface UserSettings {
+  theme: "light" | "dark" | "system";
+  keyboardShortcuts: boolean;
+  soundEffects: boolean;
+  animationsEnabled: boolean;
+  sidebarDefaultState: SidebarPosition;
+}
+```
+
+#### Exam Store Navigation Actions
+```typescript
+// stores/examStore.ts - Navigation methods
+interface ExamStore {
+  // Navigation state
+  currentQuestionIndex: number;
+  filteredQuestionIndices: number[];
+  
+  // Navigation actions
+  setCurrentQuestion: (index: number) => void;
+  goToNextQuestion: () => void;
+  goToPreviousQuestion: () => void;
+  goToRandomQuestion: () => void;
+  getProgress: () => {
+    answered: number;
+    correct: number;
+    total: number;
+  };
+}
+```
+
+### Persistence with Zustand
+
+#### Automatic Persistence
+```typescript
+// Persistent settings with middleware
+export const useSettingsStore = create<SettingsStore>()(
+  persist(
+    (set, get) => ({
+      settings: defaultSettings,
+      sidebarPosition: "collapsed",
+      
+      setSidebarPosition: (position) => {
+        set({ sidebarPosition: position });
+      },
+      
+      updateSettings: (newSettings) => {
+        set(state => ({
+          settings: { ...state.settings, ...newSettings }
+        }));
+      },
+    }),
+    {
+      name: 'settings-store',
+      partialize: (state) => ({
+        settings: state.settings,
+        sidebarPosition: state.sidebarPosition,
+      }),
+    }
+  )
+);
+```
+
+### Session Restoration
+
+#### Navigation State Recovery
+```typescript
+// hooks/useSessionPersistence.ts
+interface NavigationSession {
+  examCode: string;
+  questionIndex: number;
+  sidebarPosition: SidebarPosition;
+  timestamp: number;
+}
+
+export function useSessionPersistence() {
+  const saveNavigationState = (session: NavigationSession) => {
+    localStorage.setItem('navigation-session', JSON.stringify(session));
+  };
+  
+  const restoreNavigationState = (): NavigationSession | null => {
+    const saved = localStorage.getItem('navigation-session');
+    return saved ? JSON.parse(saved) : null;
+  };
+  
+  return { saveNavigationState, restoreNavigationState };
+}
+```
+
+## 🔧 Technical Implementation
+
+### Component Architecture
+
+#### React Component Hierarchy
+```typescript
+// Navigation component tree
+App
+├── ExamViewer
+│   ├── NavigationControls
+│   │   ├── PreviousButton
+│   │   ├── NextButton
+│   │   ├── RandomButton
+│   │   └── ProgressIndicator
+│   ├── MobileNavigationBar
+│   │   ├── MobileNavButton
+│   │   └── QuestionCounter
+│   └── Sidebar
+│       ├── SidebarHeader
+│       ├── ProgressBar
+│       ├── QuestionList
+│       │   └── QuestionItem
+│       └── SidebarControls
+└── KeyboardShortcutsProvider
+```
+
+#### Modern React Patterns
+
+##### Custom Navigation Hook
+```typescript
+// hooks/useNavigation.ts
+export function useNavigation() {
+  const { 
+    currentQuestionIndex, 
+    filteredQuestionIndices,
+    setCurrentQuestion,
+    goToNextQuestion,
+    goToPreviousQuestion,
+    goToRandomQuestion,
+  } = useExamStore();
+  
+  const canNavigatePrevious = currentQuestionIndex > 0;
+  const canNavigateNext = currentQuestionIndex < filteredQuestionIndices.length - 1;
+  
+  return {
+    currentIndex: currentQuestionIndex,
+    totalQuestions: filteredQuestionIndices.length,
+    canNavigatePrevious,
+    canNavigateNext,
+    goToPrevious: goToPreviousQuestion,
+    goToNext: goToNextQuestion,
+    goToRandom: goToRandomQuestion,
+    goToQuestion: setCurrentQuestion,
+  };
+}
+```
+
+##### Keyboard Shortcuts Provider
+```typescript
+// providers/KeyboardShortcutsProvider.tsx
+export function KeyboardShortcutsProvider({ children }: PropsWithChildren) {
+  const navigation = useNavigation();
+  const { submitAnswer, resetQuestion, toggleFavorite } = useExamStore();
+  
+  const shortcuts = useMemo((): KeyboardShortcut[] => [
+    {
+      key: 'ArrowLeft',
+      description: 'Previous question',
+      action: navigation.goToPrevious,
+    },
+    {
+      key: 'ArrowRight', 
+      description: 'Next question',
+      action: navigation.goToNext,
+    },
+    {
+      key: ' ', // Space
+      description: 'Submit answer',
+      action: () => submitAnswer(navigation.currentIndex, selectedAnswers),
+    },
+    // ... additional shortcuts
+  ], [navigation, submitAnswer, resetQuestion, toggleFavorite]);
+  
+  useKeyboardShortcuts(shortcuts, true);
+  
+  return <>{children}</>;
+}
+```
+
+### Performance Optimizations
+
+#### React Optimization Techniques
+```typescript
+// Memoized navigation components
+const MemoizedNavigationControls = memo(NavigationControls);
+
+// Optimized question list rendering
+const QuestionList = memo(({ questions, onQuestionSelect }) => {
+  return (
+    <div className="space-y-1">
+      {questions.map((question, index) => (
+        <QuestionItem
+          key={index}
+          question={question}
+          index={index}
+          onClick={() => onQuestionSelect(index)}
+        />
+      ))}
+    </div>
+  );
+});
+
+// Efficient state selectors
+const currentQuestionIndex = useExamStore(state => state.currentQuestionIndex);
+const totalQuestions = useExamStore(state => 
+  state.currentExam?.questions.length ?? 0
+);
+```
+
+#### Animation Performance
+```typescript
+// Framer Motion optimizations
+const sidebarVariants = {
+  hidden: { 
+    x: "100%",
+    transition: { type: "tween", duration: 0.3 }
+  },
+  visible: { 
+    x: 0,
+    transition: { type: "tween", duration: 0.3 }
+  }
+};
+
+<motion.div
+  variants={sidebarVariants}
+  initial="hidden"
+  animate={isOpen ? "visible" : "hidden"}
+  className="fixed inset-y-0 right-0 w-80 bg-background"
+>
+  {/* Sidebar content */}
+</motion.div>
+```
+
+### TypeScript Integration
+
+#### Strict Type Safety
+```typescript
+// Type-safe navigation interfaces
+interface NavigationState {
+  currentIndex: number;
+  totalQuestions: number;
+  canNavigatePrevious: boolean;
+  canNavigateNext: boolean;
+}
+
+interface NavigationActions {
+  goToPrevious: () => void;
+  goToNext: () => void;
+  goToRandom: () => void;
+  goToQuestion: (index: number) => void;
+}
+
+type NavigationHook = NavigationState & NavigationActions;
+```
+
+## 🐛 Troubleshooting
+
+### Common Navigation Issues
+
+#### Keyboard Shortcuts Not Working
+**Symptoms**: Key presses not triggering navigation
+**Solutions**:
+```typescript
+// Check if keyboard shortcuts are enabled
+const { settings } = useSettingsStore();
+console.log('Keyboard shortcuts enabled:', settings.keyboardShortcuts);
+
+// Verify event listeners are attached
+console.log('Active shortcuts:', useKeyboardShortcuts.getShortcuts());
+
+// Check for focus conflicts
+document.activeElement?.tagName; // Should not be INPUT/TEXTAREA
+```
+
+#### Sidebar State Issues
+**Symptoms**: Sidebar not opening/closing properly
+**Solutions**:
+```typescript
+// Debug sidebar state
+const { sidebarPosition, setSidebarPosition } = useSettingsStore();
+console.log('Current sidebar position:', sidebarPosition);
+
+// Reset sidebar state
+setSidebarPosition('collapsed');
+
+// Check for CSS conflicts
+const sidebarElement = document.querySelector('[data-sidebar]');
+console.log('Sidebar classes:', sidebarElement?.className);
+```
+
+#### Store State Synchronization
+**Symptoms**: Navigation state out of sync
+**Solutions**:
+```typescript
+// Debug store state
+const examStore = useExamStore.getState();
+console.log('Exam store state:', {
+  currentQuestionIndex: examStore.currentQuestionIndex,
+  totalQuestions: examStore.currentExam?.questions.length,
+  questionStates: Object.keys(examStore.questionStates).length,
+});
+
+// Reset store if corrupted
+examStore.resetExam();
+```
+
+### Mobile-Specific Issues
+
+#### Touch Navigation Problems
+**Symptoms**: Swipe gestures not working
+**Solutions**:
+```typescript
+// Check touch event support
+console.log('Touch support:', 'ontouchstart' in window);
+
+// Verify gesture thresholds
+const minSwipeDistance = 50; // Adjust if needed
+
+// Check for conflicting event listeners
+document.addEventListener('touchmove', (e) => {
+  console.log('Touch move detected:', e.touches[0].clientX);
+}, { passive: true });
+```
+
+### Development Debugging
+
+#### React DevTools Integration
+```typescript
+// Add debugging data to components
+function NavigationControls(props) {
+  // Debug props in React DevTools
+  useDebugValue({
+    currentIndex: props.currentIndex,
+    canNavigate: {
+      previous: props.currentIndex > 0,
+      next: props.currentIndex < props.totalQuestions - 1,
+    }
+  });
+  
+  return /* component JSX */;
+}
+```
+
+#### Performance Monitoring
+```typescript
+// Monitor navigation performance
+const useNavigationPerformance = () => {
+  const startTime = useRef<number>();
+  
+  const measureNavigation = (action: string) => {
+    if (process.env.NODE_ENV === 'development') {
+      performance.mark(`navigation-${action}-start`);
+      startTime.current = performance.now();
+    }
+  };
+  
+  const endMeasurement = (action: string) => {
+    if (process.env.NODE_ENV === 'development' && startTime.current) {
+      const duration = performance.now() - startTime.current;
+      console.log(`Navigation ${action} took ${duration.toFixed(2)}ms`);
+    }
+  };
+  
+  return { measureNavigation, endMeasurement };
+};
+```
+
+## 🚀 Future Enhancements
+
+### Planned Navigation Features
+
+#### Advanced Navigation Patterns
+- **Breadcrumb navigation** for complex question paths
+- **Question grouping** by topics or difficulty
+- **Smart navigation** based on performance patterns
+- **Voice navigation** for accessibility
+
+#### Enhanced Mobile Experience
+- **Gesture customization** for different navigation styles
+- **Haptic feedback** integration for touch interactions
+- **Picture-in-picture mode** for multitasking
+- **Offline navigation** with cached content
+
+#### Analytics Integration
+- **Navigation heatmaps** to understand user patterns
+- **Performance metrics** for navigation efficiency
+- **A/B testing** for navigation improvements
+- **Usage analytics** for feature optimization
+
+### Contributing to Navigation
+
+#### Component Development
+```typescript
+// Example: Adding a new navigation component
+interface CustomNavigationProps {
+  // Define your component props
+}
+
+export function CustomNavigation(props: CustomNavigationProps) {
+  // Use existing navigation hooks
+  const navigation = useNavigation();
+  const { settings } = useSettingsStore();
+  
+  // Implement your navigation logic
+  return (
+    <div className="custom-navigation">
+      {/* Your navigation UI */}
+    </div>
+  );
+}
+```
+
+#### Hook Extensions
+```typescript
+// Example: Extending navigation hooks
+export function useAdvancedNavigation() {
+  const baseNavigation = useNavigation();
+  
+  // Add your advanced navigation logic
+  const navigateToSimilarQuestions = () => {
+    // Implementation
+  };
+  
+  return {
+    ...baseNavigation,
+    navigateToSimilarQuestions,
+  };
+}
+```
 
 ---
 
-*This documentation is maintained alongside the codebase. For the latest updates, refer to the project's GitHub repository.*
+**The navigation system is built for extensibility and performance. All components follow React 19 patterns with TypeScript safety and modern state management through Zustand.**

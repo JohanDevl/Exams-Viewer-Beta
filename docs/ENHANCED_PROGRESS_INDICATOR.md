@@ -1,316 +1,734 @@
-# Enhanced Progress Indicator
+# Enhanced Progress Indicator - Next.js Exams Viewer
 
-## Overview
+> **Modern progress visualization built with React components, Framer Motion animations, and Zustand state management**
 
-The Enhanced Progress Indicator is an animated visual component that provides comprehensive feedback on exam progress. It displays real-time statistics, animated progress bars, and milestone celebrations to enhance user engagement and provide clear progress tracking.
+This document covers the comprehensive progress indicator system in the Next.js Exams Viewer, providing real-time progress tracking, animated visualizations, and milestone celebrations with modern React patterns.
 
-## Features
+## 🏗️ Architecture Overview
 
-### 🎯 **Core Functionality**
-- **Animated Progress Bar**: Smooth width transitions with GPU-accelerated animations
-- **Real-time Statistics**: Live counters for answered, favorite, and remaining questions
-- **Progress Percentage**: Dynamic percentage display with pulsing animations
-- **Milestone Celebrations**: Visual effects when reaching 25%, 50%, 75%, and 100% completion
-- **Session Isolation**: Each exam load starts a fresh progress tracking session
+The progress indicator system is built with:
+- **React Components** - Modular progress components with TypeScript interfaces
+- **Framer Motion** - Smooth animations and transitions with hardware acceleration
+- **Zustand Integration** - Real-time state updates and progress calculations
+- **Tailwind CSS** - Responsive styling with theme adaptation
+- **Custom Hooks** - Reusable progress logic and animation management
+- **Accessibility Features** - ARIA attributes and screen reader support
 
-### 🎨 **Visual Elements**
-- **Gradient Progress Bar**: Multi-colored progress bar with smooth color transitions
-- **Animated Counters**: Numbers animate smoothly when values change
-- **Glow Effects**: Subtle lighting effects that enhance the visual experience
-- **Responsive Design**: Adapts perfectly to mobile and desktop layouts
-- **Dark Mode Support**: Optimized animations and colors for both light and dark themes
+## 📊 Progress Components
 
-### ⚙️ **Settings Integration**
-- **Optional Display**: Can be enabled/disabled via Settings > Display Preferences
-- **Enabled by Default**: New users see the enhanced progress indicator automatically
-- **Persistent Settings**: User choice is saved and restored between sessions
-- **Real-time Toggle**: Changes apply immediately without page reload
+### Core Progress Interface
 
-## Implementation Details
+```typescript
+// types/progress.ts
+interface ProgressData {
+  currentQuestion: number;
+  totalQuestions: number;
+  answered: number;
+  correct: number;
+  incorrect: number;
+  favorites: number;
+  percentage: number;
+  accuracy: number;
+  timeSpent: number;
+}
 
-### File Structure
+interface ProgressIndicatorProps {
+  className?: string;
+  variant?: 'compact' | 'detailed' | 'minimal';
+  showMilestones?: boolean;
+  animationDuration?: number;
+}
 ```
-src/
-├── index.html          # Progress indicator HTML structure
-├── styles.css          # Enhanced animations and responsive styling
-└── script.js           # Progress calculation and animation logic
-```
 
-### Key Components
+### Main Progress Component
 
-#### HTML Structure (`index.html`)
-```html
-<div id="mainProgressSection" class="main-progress-section">
-  <div class="main-progress-container">
-    <div class="progress-header">
-      <div class="progress-info">
-        <span id="mainProgressText" class="progress-text">Question 1 of 0</span>
-        <span id="mainProgressPercentage" class="progress-percentage">0%</span>
+```typescript
+// components/progress/ProgressIndicator.tsx
+import { motion, AnimatePresence } from 'framer-motion';
+import { useExamStore } from '@/stores/examStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+
+export function ProgressIndicator({ 
+  variant = 'detailed',
+  showMilestones = true,
+  animationDuration = 0.8,
+  className 
+}: ProgressIndicatorProps) {
+  const { 
+    currentQuestionIndex, 
+    questionStates, 
+    currentExam,
+    getProgress 
+  } = useExamStore();
+  
+  const { settings } = useSettingsStore();
+  
+  const progressData = useMemo(() => {
+    if (!currentExam) return null;
+    
+    const progress = getProgress();
+    return {
+      currentQuestion: currentQuestionIndex + 1,
+      totalQuestions: currentExam.questions.length,
+      answered: progress.answered,
+      correct: progress.correct,
+      incorrect: progress.answered - progress.correct,
+      favorites: Object.values(questionStates)
+        .filter(state => state.isFavorite).length,
+      percentage: Math.round((progress.answered / progress.total) * 100),
+      accuracy: progress.answered > 0 
+        ? Math.round((progress.correct / progress.answered) * 100) 
+        : 0,
+      timeSpent: 0, // Would come from statistics store
+    };
+  }, [currentQuestionIndex, questionStates, currentExam, getProgress]);
+  
+  if (!progressData || !settings.showProgressIndicator) {
+    return null;
+  }
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      className={cn(
+        "progress-indicator bg-card border rounded-lg p-4 shadow-sm",
+        className
+      )}
+    >
+      <div className="space-y-4">
+        <ProgressHeader data={progressData} />
+        <ProgressBar 
+          data={progressData} 
+          showMilestones={showMilestones}
+          animationDuration={animationDuration}
+        />
+        {variant === 'detailed' && (
+          <ProgressStats data={progressData} />
+        )}
       </div>
-      <div class="progress-stats">
-        <span class="stat answered">
-          <i class="fas fa-check-circle"></i>
-          <span id="answeredCountMain">0</span>
-        </span>
-        <span class="stat favorites">
-          <i class="fas fa-star"></i>
-          <span id="favoritesCountMain">0</span>
-        </span>
-        <span class="stat remaining">
-          <i class="far fa-circle"></i>
-          <span id="remainingCountMain">0</span>
+    </motion.div>
+  );
+}
+```
+
+### Progress Header Component
+
+```typescript
+// components/progress/ProgressHeader.tsx
+function ProgressHeader({ data }: { data: ProgressData }) {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center space-x-2">
+        <h3 className="text-sm font-medium text-foreground">
+          Question {data.currentQuestion} of {data.totalQuestions}
+        </h3>
+        <motion.div
+          key={data.percentage}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full"
+        >
+          {data.percentage}%
+        </motion.div>
+      </div>
+      
+      <div className="flex items-center space-x-3 text-xs text-muted-foreground">
+        <div className="flex items-center space-x-1">
+          <CheckCircle className="h-3 w-3 text-green-500" />
+          <AnimatedCounter value={data.answered} />
+        </div>
+        <div className="flex items-center space-x-1">
+          <Star className="h-3 w-3 text-yellow-500" />
+          <AnimatedCounter value={data.favorites} />
+        </div>
+        <div className="flex items-center space-x-1">
+          <Circle className="h-3 w-3 text-muted-foreground" />
+          <AnimatedCounter value={data.totalQuestions - data.answered} />
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### Animated Progress Bar
+
+```typescript
+// components/progress/ProgressBar.tsx
+function ProgressBar({ 
+  data, 
+  showMilestones, 
+  animationDuration 
+}: {
+  data: ProgressData;
+  showMilestones: boolean;
+  animationDuration: number;
+}) {
+  const getMilestoneColor = (percentage: number) => {
+    if (percentage >= 100) return 'from-green-500 via-yellow-500 to-green-500';
+    if (percentage >= 75) return 'from-orange-500 via-red-500 to-orange-500';
+    if (percentage >= 50) return 'from-green-500 via-yellow-500 to-orange-500';
+    if (percentage >= 25) return 'from-green-400 to-green-500';
+    return 'from-blue-400 to-blue-500';
+  };
+  
+  const isAtMilestone = (percentage: number) => {
+    return percentage > 0 && (
+      percentage === 25 || 
+      percentage === 50 || 
+      percentage === 75 || 
+      percentage === 100
+    );
+  };
+  
+  return (
+    <div className="space-y-2">
+      <div className="relative h-3 bg-muted rounded-full overflow-hidden">
+        <motion.div
+          className={cn(
+            "h-full bg-gradient-to-r rounded-full",
+            getMilestoneColor(data.percentage)
+          )}
+          initial={{ width: 0 }}
+          animate={{ width: `${data.percentage}%` }}
+          transition={{ 
+            duration: animationDuration,
+            ease: [0.25, 0.46, 0.45, 0.94]
+          }}
+        />
+        
+        {/* Milestone markers */}
+        {showMilestones && (
+          <div className="absolute inset-0">
+            {[25, 50, 75].map(milestone => (
+              <div
+                key={milestone}
+                className="absolute top-0 h-full w-0.5 bg-background/50"
+                style={{ left: `${milestone}%` }}
+              />
+            ))}
+          </div>
+        )}
+        
+        {/* Glow effect for milestones */}
+        <AnimatePresence>
+          {isAtMilestone(data.percentage) && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 1, 0] }}
+              exit={{ opacity: 0 }}
+              transition={{ 
+                duration: 2,
+                repeat: 3,
+                ease: "easeInOut"
+              }}
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full"
+            />
+          )}
+        </AnimatePresence>
+      </div>
+      
+      {/* Progress line with percentages */}
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>0%</span>
+        {showMilestones && (
+          <>
+            <span className={data.percentage >= 25 ? 'text-green-500' : ''}>25%</span>
+            <span className={data.percentage >= 50 ? 'text-yellow-500' : ''}>50%</span>
+            <span className={data.percentage >= 75 ? 'text-orange-500' : ''}>75%</span>
+          </>
+        )}
+        <span className={data.percentage === 100 ? 'text-green-500 font-medium' : ''}>
+          100%
         </span>
       </div>
     </div>
-    <div class="main-progress-bar-container">
-      <div class="main-progress-bar">
-        <div id="mainProgressFill" class="progress-fill main"></div>
-      </div>
+  );
+}
+```
+
+### Animated Counter Component
+
+```typescript
+// components/progress/AnimatedCounter.tsx
+function AnimatedCounter({ 
+  value, 
+  duration = 0.5 
+}: { 
+  value: number; 
+  duration?: number; 
+}) {
+  const [displayValue, setDisplayValue] = useState(value);
+  
+  useEffect(() => {
+    let startTime: number;
+    let startValue = displayValue;
+    
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      
+      const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      const currentValue = Math.round(startValue + (value - startValue) * easeOutQuart);
+      
+      setDisplayValue(currentValue);
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+    
+    requestAnimationFrame(animate);
+  }, [value, duration, displayValue]);
+  
+  return (
+    <motion.span
+      key={value}
+      initial={{ scale: 0.8 }}
+      animate={{ scale: 1 }}
+      transition={{ duration: 0.2 }}
+      className="tabular-nums"
+    >
+      {displayValue}
+    </motion.span>
+  );
+}
+```
+
+### Progress Statistics Component
+
+```typescript
+// components/progress/ProgressStats.tsx
+function ProgressStats({ data }: { data: ProgressData }) {
+  const stats = [
+    {
+      label: 'Answered',
+      value: data.answered,
+      total: data.totalQuestions,
+      color: 'text-blue-600',
+      icon: CheckCircle,
+    },
+    {
+      label: 'Correct',
+      value: data.correct,
+      total: data.answered,
+      color: 'text-green-600',
+      icon: CheckCheck,
+    },
+    {
+      label: 'Accuracy',
+      value: `${data.accuracy}%`,
+      color: data.accuracy >= 70 ? 'text-green-600' : 'text-yellow-600',
+      icon: Target,
+    },
+    {
+      label: 'Favorites',
+      value: data.favorites,
+      color: 'text-yellow-600',
+      icon: Star,
+    },
+  ];
+  
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {stats.map((stat, index) => (
+        <motion.div
+          key={stat.label}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+          className="flex items-center space-x-2 p-2 rounded-md bg-muted/50"
+        >
+          <stat.icon className={cn("h-4 w-4", stat.color)} />
+          <div className="flex-1 min-w-0">
+            <div className="text-xs text-muted-foreground truncate">
+              {stat.label}
+            </div>
+            <div className={cn("text-sm font-medium", stat.color)}>
+              {typeof stat.value === 'number' ? (
+                <AnimatedCounter value={stat.value} />
+              ) : (
+                stat.value
+              )}
+              {stat.total && (
+                <span className="text-muted-foreground">
+                  /{stat.total}
+                </span>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      ))}
     </div>
-  </div>
-</div>
-```
-
-#### JavaScript Functions (`script.js`)
-
-##### Core Functions
-- **`updateMainProgressBar()`**: Main function that updates all progress elements
-- **`updateMainProgressBarVisibility()`**: Controls visibility based on settings
-- **`animateNumberChange(element, newValue)`**: Smooth number transitions
-- **`addProgressMilestoneEffects(percentage)`**: Milestone celebration logic
-
-##### Integration Points
-- Called from `updateProgressSidebar()` for automatic updates
-- Integrated with `validateAnswers()` for answer tracking
-- Connected to `navigateToQuestionIndex()` for navigation updates
-- Linked to favorites system for real-time statistics
-
-#### CSS Animations (`styles.css`)
-
-##### Key Animation Classes
-```css
-.main-progress-section {
-  animation: slideInFromTop 0.6s ease-out forwards;
-}
-
-.progress-fill.main {
-  transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  animation: progressGlow 3s ease-in-out infinite;
-}
-
-.progress-percentage {
-  animation: percentagePulse 2s ease-in-out infinite;
+  );
 }
 ```
 
-##### Milestone Effects
-- **25% Milestone**: Green gradient progress bar
-- **50% Milestone**: Green to orange gradient
-- **75% Milestone**: Multi-color gradient with warning colors
-- **100% Milestone**: Full spectrum with gold accents and celebration animation
+## 🎯 Milestone Celebrations
 
-### Performance Optimizations
+### Milestone Detection Hook
 
-#### GPU Acceleration
-- Uses `transform: scaleX()` for smooth bar animations
-- CSS3 transitions for hardware acceleration
-- `requestAnimationFrame` for smooth number counting
-
-#### Memory Management
-- Efficient DOM updates with minimal reflows
-- Debounced animation callbacks
-- Cleanup of animation classes after completion
-
-#### Responsive Behavior
-- Adaptive layout for different screen sizes
-- Optimized animations for mobile devices
-- Reduced motion support for accessibility
-
-## Usage Examples
-
-### Basic Integration
-```javascript
-// Update progress when answer is validated
-function validateAnswers() {
-  // ... validation logic
-  updateProgressSidebar(); // Automatically calls updateMainProgressBar()
-}
-
-// Update progress when navigating
-async function navigateToQuestionIndex(index) {
-  // ... navigation logic
-  updateProgressSidebar(); // Progress updates automatically
-}
-```
-
-### Settings Control
-```javascript
-// Enable/disable via settings
-settings.showMainProgressBar = true; // Enable
-updateMainProgressBarVisibility(); // Apply immediately
-
-// Settings are automatically saved to localStorage
-```
-
-### Manual Progress Update
-```javascript
-// Force update progress display
-updateMainProgressBar();
-
-// Hide progress bar temporarily
-hideMainProgressBar();
-```
-
-## Customization
-
-### Color Themes
-The progress indicator automatically adapts to the current theme:
-
-#### Light Mode
-- Background: Light gray containers
-- Progress: Green to orange gradient
-- Text: Dark colors for contrast
-
-#### Dark Mode
-- Background: Dark containers with subtle shadows
-- Progress: Enhanced gradients with better visibility
-- Text: Light colors optimized for dark backgrounds
-
-### Animation Timing
-Default animation durations can be customized in CSS:
-```css
-.progress-fill.main {
-  transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.progress-percentage {
-  animation: percentagePulse 2s ease-in-out infinite;
-}
-```
-
-### Milestone Celebrations
-Milestone effects can be customized by modifying the milestone classes:
-```css
-.progress-fill.main.milestone-100 {
-  animation: progressGlow 1.5s ease-in-out infinite, completionPulse 0.8s ease-in-out;
-}
-```
-
-## Accessibility
-
-### Screen Reader Support
-- Proper ARIA attributes on progress elements
-- `role="progressbar"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax`
-- Descriptive text alternatives for visual indicators
-
-### Keyboard Navigation
-- Progress bar updates automatically with keyboard navigation
-- No keyboard traps or focus issues
-- Maintains focus flow during animations
-
-### Reduced Motion
-- Respects user's motion preferences
-- Essential animations maintained for functionality
-- Subtle alternatives for users with motion sensitivity
-
-## Troubleshooting
-
-### Common Issues
-
-#### Progress Not Updating
-**Symptoms**: Progress bar doesn't reflect answered questions
-**Solution**: Check if `updateMainProgressBar()` is called in navigation functions
-
-#### Animation Performance
-**Symptoms**: Choppy animations on slower devices
-**Solution**: Verify CSS uses hardware acceleration (`transform` vs `width`)
-
-#### Settings Not Persisting
-**Symptoms**: Progress bar setting resets after page reload
-**Solution**: Ensure `saveSettings()` includes `showMainProgressBar` setting
-
-#### Mobile Layout Issues
-**Symptoms**: Progress bar overlaps or looks cramped on mobile
-**Solution**: Check responsive CSS media queries are properly applied
-
-### Debugging
-
-#### Console Debugging
-```javascript
-// Check current settings
-console.log('Progress bar enabled:', settings.showMainProgressBar);
-
-// Force progress update
-updateMainProgressBar();
-
-// Check element visibility
-const section = document.getElementById('mainProgressSection');
-console.log('Progress section display:', section.style.display);
-```
-
-#### Performance Monitoring
-```javascript
-// Monitor animation performance
-const observer = new PerformanceObserver((list) => {
-  list.getEntries().forEach((entry) => {
-    if (entry.name.includes('animation')) {
-      console.log('Animation duration:', entry.duration);
+```typescript
+// hooks/useProgressMilestones.ts
+export function useProgressMilestones() {
+  const [celebratedMilestones, setCelebratedMilestones] = useState<Set<number>>(new Set());
+  
+  const checkMilestone = useCallback((percentage: number) => {
+    const milestones = [25, 50, 75, 100];
+    const currentMilestone = milestones.find(m => 
+      percentage >= m && !celebratedMilestones.has(m)
+    );
+    
+    if (currentMilestone) {
+      setCelebratedMilestones(prev => new Set(prev).add(currentMilestone));
+      return currentMilestone;
     }
+    
+    return null;
+  }, [celebratedMilestones]);
+  
+  const resetMilestones = useCallback(() => {
+    setCelebratedMilestones(new Set());
+  }, []);
+  
+  return { checkMilestone, resetMilestones };
+}
+```
+
+### Celebration Effects Component
+
+```typescript
+// components/progress/MilestoneCelebration.tsx
+function MilestoneCelebration({ 
+  milestone, 
+  onComplete 
+}: { 
+  milestone: number | null;
+  onComplete: () => void;
+}) {
+  if (!milestone) return null;
+  
+  const celebrationConfig = {
+    25: { emoji: '🎯', message: 'Great start!', color: 'text-green-500' },
+    50: { emoji: '⚡', message: 'Halfway there!', color: 'text-yellow-500' },
+    75: { emoji: '🔥', message: 'Almost done!', color: 'text-orange-500' },
+    100: { emoji: '🎉', message: 'Completed!', color: 'text-green-600' },
+  };
+  
+  const config = celebrationConfig[milestone as keyof typeof celebrationConfig];
+  
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ 
+          scale: [0, 1.2, 1],
+          opacity: [0, 1, 1, 0]
+        }}
+        exit={{ scale: 0, opacity: 0 }}
+        transition={{ 
+          duration: 2,
+          times: [0, 0.3, 0.7, 1],
+          ease: "easeInOut"
+        }}
+        onAnimationComplete={onComplete}
+        className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
+      >
+        <div className="bg-background/90 backdrop-blur-sm rounded-2xl p-8 text-center shadow-2xl border">
+          <motion.div
+            animate={{ rotate: [0, -10, 10, -10, 0] }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="text-6xl mb-4"
+          >
+            {config.emoji}
+          </motion.div>
+          <h3 className={cn("text-2xl font-bold mb-2", config.color)}>
+            {milestone}% Complete
+          </h3>
+          <p className="text-muted-foreground">
+            {config.message}
+          </p>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+```
+
+## ⚙️ Settings Integration
+
+### Progress Settings Component
+
+```typescript
+// components/settings/ProgressSettings.tsx
+function ProgressSettings() {
+  const { settings, updateSettings } = useSettingsStore();
+  
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Label htmlFor="show-progress">Show Progress Indicator</Label>
+        <Switch
+          id="show-progress"
+          checked={settings.showProgressIndicator}
+          onCheckedChange={(checked) => 
+            updateSettings({ showProgressIndicator: checked })
+          }
+        />
+      </div>
+      
+      <div className="flex items-center justify-between">
+        <Label htmlFor="show-milestones">Milestone Celebrations</Label>
+        <Switch
+          id="show-milestones"
+          checked={settings.showMilestoneCelebrations}
+          onCheckedChange={(checked) => 
+            updateSettings({ showMilestoneCelebrations: checked })
+          }
+          disabled={!settings.showProgressIndicator}
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <Label>Progress Variant</Label>
+        <RadioGroup
+          value={settings.progressVariant}
+          onValueChange={(value) => 
+            updateSettings({ progressVariant: value as ProgressVariant })
+          }
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="minimal" id="minimal" />
+            <Label htmlFor="minimal">Minimal</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="compact" id="compact" />
+            <Label htmlFor="compact">Compact</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="detailed" id="detailed" />
+            <Label htmlFor="detailed">Detailed</Label>
+          </div>
+        </RadioGroup>
+      </div>
+    </div>
+  );
+}
+```
+
+## 🎨 Theme Integration
+
+### Progress Theme Variants
+
+```typescript
+// components/progress/ProgressTheme.tsx
+const progressThemes = {
+  default: {
+    background: 'bg-muted',
+    fill: 'from-blue-400 to-blue-500',
+    text: 'text-foreground',
+    accent: 'text-primary',
+  },
+  success: {
+    background: 'bg-green-100 dark:bg-green-900/20',
+    fill: 'from-green-400 to-green-500',
+    text: 'text-green-800 dark:text-green-200',
+    accent: 'text-green-600',
+  },
+  warning: {
+    background: 'bg-yellow-100 dark:bg-yellow-900/20',
+    fill: 'from-yellow-400 to-yellow-500',
+    text: 'text-yellow-800 dark:text-yellow-200',
+    accent: 'text-yellow-600',
+  },
+};
+
+function ThemedProgressBar({ 
+  percentage, 
+  theme = 'default' 
+}: {
+  percentage: number;
+  theme?: keyof typeof progressThemes;
+}) {
+  const themeClasses = progressThemes[theme];
+  
+  return (
+    <div className={cn("h-3 rounded-full overflow-hidden", themeClasses.background)}>
+      <motion.div
+        className={cn("h-full bg-gradient-to-r rounded-full", themeClasses.fill)}
+        initial={{ width: 0 }}
+        animate={{ width: `${percentage}%` }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      />
+    </div>
+  );
+}
+```
+
+## 🔧 Performance Optimizations
+
+### Optimized Progress Updates
+
+```typescript
+// hooks/useOptimizedProgress.ts
+export function useOptimizedProgress() {
+  const { questionStates, currentExam } = useExamStore();
+  
+  // Memoize expensive calculations
+  const progressData = useMemo(() => {
+    if (!currentExam) return null;
+    
+    const answered = Object.values(questionStates)
+      .filter(state => state.status !== 'unanswered').length;
+    const correct = Object.values(questionStates)
+      .filter(state => state.status === 'correct').length;
+    const favorites = Object.values(questionStates)
+      .filter(state => state.isFavorite).length;
+    
+    return {
+      answered,
+      correct,
+      favorites,
+      total: currentExam.questions.length,
+      percentage: Math.round((answered / currentExam.questions.length) * 100),
+      accuracy: answered > 0 ? Math.round((correct / answered) * 100) : 0,
+    };
+  }, [questionStates, currentExam]);
+  
+  // Debounce rapid updates
+  const debouncedProgress = useDebounce(progressData, 100);
+  
+  return debouncedProgress;
+}
+
+// Debounce hook for performance
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+  
+  return debouncedValue;
+}
+```
+
+## ♿ Accessibility Features
+
+### ARIA Integration
+
+```typescript
+// Accessible progress component
+function AccessibleProgressIndicator({ data }: { data: ProgressData }) {
+  return (
+    <div
+      role="progressbar"
+      aria-valuenow={data.percentage}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={`Progress: ${data.percentage}% complete, ${data.answered} of ${data.totalQuestions} questions answered`}
+      className="progress-indicator"
+    >
+      <div className="sr-only">
+        Question {data.currentQuestion} of {data.totalQuestions}.
+        {data.answered} questions answered.
+        {data.correct} correct answers.
+        Current accuracy: {data.accuracy}%.
+      </div>
+      
+      {/* Visual progress components */}
+      <ProgressBar data={data} />
+    </div>
+  );
+}
+```
+
+### Reduced Motion Support
+
+```typescript
+// Respect user motion preferences
+function MotionSafeProgressBar({ percentage }: { percentage: number }) {
+  const prefersReducedMotion = useReducedMotion();
+  
+  return (
+    <motion.div
+      className="h-3 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full"
+      initial={{ width: 0 }}
+      animate={{ width: `${percentage}%` }}
+      transition={{ 
+        duration: prefersReducedMotion ? 0.1 : 0.8,
+        ease: "easeOut"
+      }}
+    />
+  );
+}
+
+// Hook to detect motion preferences
+function useReducedMotion() {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const listener = (event: MediaQueryListEvent) => {
+      setPrefersReducedMotion(event.matches);
+    };
+    
+    mediaQuery.addEventListener('change', listener);
+    return () => mediaQuery.removeEventListener('change', listener);
+  }, []);
+  
+  return prefersReducedMotion;
+}
+```
+
+## 🧪 Testing Integration
+
+### Progress Component Tests
+
+```typescript
+// __tests__/ProgressIndicator.test.tsx
+import { render, screen } from '@testing-library/react';
+import { ProgressIndicator } from '@/components/progress/ProgressIndicator';
+
+describe('ProgressIndicator', () => {
+  it('displays correct progress percentage', () => {
+    const mockData = {
+      currentQuestion: 5,
+      totalQuestions: 10,
+      answered: 4,
+      correct: 3,
+      percentage: 40,
+    };
+    
+    render(<ProgressIndicator data={mockData} />);
+    
+    expect(screen.getByText('40%')).toBeInTheDocument();
+    expect(screen.getByText('Question 5 of 10')).toBeInTheDocument();
+  });
+  
+  it('has proper ARIA attributes', () => {
+    render(<ProgressIndicator data={mockData} />);
+    
+    const progressBar = screen.getByRole('progressbar');
+    expect(progressBar).toHaveAttribute('aria-valuenow', '40');
+    expect(progressBar).toHaveAttribute('aria-valuemin', '0');
+    expect(progressBar).toHaveAttribute('aria-valuemax', '100');
   });
 });
-observer.observe({entryTypes: ['measure']});
 ```
-
-## Browser Compatibility
-
-### Supported Browsers
-- ✅ Chrome 60+
-- ✅ Firefox 55+
-- ✅ Safari 12+
-- ✅ Edge 79+
-
-### CSS Features Used
-- CSS3 Animations and Transitions
-- CSS Grid and Flexbox
-- CSS Custom Properties (variables)
-- `cubic-bezier()` timing functions
-
-### JavaScript Features Used
-- ES6 Template Literals
-- `requestAnimationFrame`
-- `performance.now()`
-- Async/Await (for integration)
-
-## Future Enhancements
-
-### Planned Features
-- **Custom Color Themes**: User-configurable progress bar colors
-- **Sound Effects**: Optional audio feedback for milestones
-- **Progress History**: Visual graph of progress over time
-- **Estimated Completion**: Time estimation based on current pace
-
-### Technical Improvements
-- **WebGL Animations**: Enhanced visual effects for capable devices
-- **Service Worker Integration**: Offline progress tracking
-- **Analytics Integration**: Progress tracking for learning insights
-- **A11y Enhancements**: Enhanced screen reader support
-
-## Related Documentation
-
-- [Navigation System](./NAVIGATION.md) - Integration with navigation features
-- [Statistics System](./STATISTICS.md) - Progress data tracking
-- [Settings Management](./SETTINGS.md) - Configuration options
-- [Performance Optimizations](./PERFORMANCE_OPTIMIZATIONS.md) - Animation performance
-
-## Support
-
-For issues or questions about the Enhanced Progress Indicator:
-
-1. Check the [Troubleshooting](#troubleshooting) section
-2. Review [Common Issues](#common-issues)
-3. Search existing GitHub issues
-4. Create a new issue with detailed reproduction steps
 
 ---
 
-*This documentation covers the Enhanced Progress Indicator feature implemented in v2.5.0+*
+**The enhanced progress indicator provides modern, accessible, and performant progress visualization with full Next.js integration and React component architecture.**

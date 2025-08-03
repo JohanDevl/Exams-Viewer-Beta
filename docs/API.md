@@ -1,665 +1,697 @@
 # API Documentation - Exams Viewer
 
-This document provides comprehensive API documentation for the Exams-Viewer application, including the new statistics system, dark mode functionality, and highlight features.
+This document provides comprehensive API documentation for the modern Next.js Exams Viewer application, including TypeScript interfaces, React components, Zustand stores, and utility functions.
 
-## 🌐 Frontend JavaScript API
+## 🏗️ Next.js Architecture Overview
 
-### Statistics System
+The application is built with:
+- **Next.js 15** with App Router
+- **React 19** with TypeScript
+- **Zustand** for state management
+- **Radix UI** for accessible components
+- **Tailwind CSS** for styling
 
-The statistics system provides comprehensive tracking of user performance and study patterns with advanced storage optimization.
+## 📁 Project Structure
 
-#### Core Classes
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── layout.tsx         # Root layout with providers
+│   ├── page.tsx          # Main application page
+│   └── globals.css       # Global styles
+├── components/           # React components
+│   ├── exam/            # Exam-specific components
+│   ├── question/        # Question display components
+│   ├── navigation/      # Navigation components
+│   ├── modals/         # Modal dialogs
+│   ├── providers/      # Context providers
+│   └── ui/             # Reusable UI components
+├── stores/             # Zustand state management
+├── types/              # TypeScript definitions
+├── hooks/              # Custom React hooks
+└── utils/              # Utility functions
+```
 
-##### `ExamSession`
+## 🗃️ State Management (Zustand)
 
-Represents a single exam session with optimized storage.
+### ExamStore
 
-```javascript
-class ExamSession {
-  constructor(examCode, examName)
+Manages exam data, question states, and session tracking.
 
-  // Optimized properties (shortened for storage)
-  id: string        // Ultra-compact session ID
-  ec: string        // Exam code (examCode)
-  en: string        // Exam name (examName)
-  st: number        // Start time timestamp (startTime)
-  et: number        // End time timestamp (endTime)
-  q: Array          // Questions array (questions)
-  tq: number        // Total questions (totalQuestions)
-  ca: number        // Correct answers (correctAnswers)
-  ia: number        // Incorrect answers (incorrectAnswers)
-  pa: number        // Preview answers (previewAnswers)
-  tt: number        // Total time in seconds (totalTime)
-  c: boolean        // Completed flag (completed)
+#### Interface
 
-  // Backward compatibility getters/setters
-  get examCode(): string
-  get examName(): string
-  get startTime(): number
-  get endTime(): number
-  get questions(): Array
-  get totalQuestions(): number
-  get correctAnswers(): number
-  get incorrectAnswers(): number
-  get previewAnswers(): number
-  get totalTime(): number
-  get completed(): boolean
+```typescript
+interface ExamStore {
+  // Current state
+  currentExam: ExamData | null;
+  currentExamInfo: ExamInfo | null;
+  currentQuestionIndex: number;
+  isLoading: boolean;
+  error: string | null;
+  sessionId: string | null;
+
+  // Question states
+  questionStates: Record<number, QuestionState>;
+  examData: Record<string, Record<number, Partial<QuestionState>>>;
+  
+  // Search and filtering
+  searchFilters: SearchFilters;
+  filteredQuestionIndices: number[];
+
+  // Actions
+  loadExam: (examCode: string) => Promise<void>;
+  setCurrentQuestion: (index: number) => void;
+  submitAnswer: (questionIndex: number, selectedAnswers: string[]) => void;
+  markQuestionAsPreview: (questionIndex: number) => void;
+  resetQuestion: (questionIndex: number) => void;
+  toggleFavorite: (questionIndex: number) => void;
+  setQuestionDifficulty: (questionIndex: number, difficulty: DifficultyLevel) => void;
+  setQuestionNotes: (questionIndex: number, notes: string) => void;
+  setQuestionCategory: (questionIndex: number, category: string) => void;
+  setSearchFilters: (filters: Partial<SearchFilters>) => void;
+  updateFilteredQuestions: () => void;
+  resetExam: () => void;
+  getQuestionStatus: (questionIndex: number) => QuestionStatus;
+  getFirstAnswerStatus: (questionIndex: number) => QuestionStatus;
+  getProgress: () => { answered: number; correct: number; total: number };
+  goToNextQuestion: () => void;
+  goToPreviousQuestion: () => void;
+  goToRandomQuestion: () => void;
 }
 ```
 
-##### `QuestionAttempt`
+#### Usage Examples
 
-Tracks all interactions with a single question with heavily optimized storage.
+```typescript
+import { useExamStore } from '@/stores/examStore';
 
-```javascript
-class QuestionAttempt {
-  constructor(questionNumber, correctAnswers)
+// Load exam
+const { loadExam, currentExam, isLoading } = useExamStore();
+await loadExam('CAD');
 
-  // Optimized properties (shortened for storage)
-  qn: number        // Question number (questionNumber)
-  ca: Array         // Correct answers (correctAnswers)
-  ua: Array         // User answers (userAnswers)
-  att: Array        // Attempts array (attempts)
-  st: number        // Start timestamp (startTime)
-  et: number        // End timestamp (endTime)
-  ts: number        // Time spent (timeSpent)
-  ic: boolean       // Is correct (isCorrect)
-  fs: number        // Final score (finalScore)
-  rc: number        // Reset count (resetCount)
-  hbc: number       // Highlight button clicks (highlightButtonClicks)
-  hvc: number       // Highlight view count (highlightViewCount)
-  fat: string       // First action type: 'c'/'i'/'p' (firstActionType)
-  far: boolean      // First action recorded (firstActionRecorded)
+// Submit answer
+const { submitAnswer } = useExamStore();
+submitAnswer(0, ['A', 'C']);
 
-  // Methods
-  addAttempt(selectedAnswers, isCorrect, timeSpent, wasHighlightEnabled): void
-  addHighlightButtonClick(): void
-  addReset(): void
-  addHighlightView(): void
-  getTotalHighlightInteractions(): number
+// Navigate questions
+const { goToNextQuestion, goToPreviousQuestion } = useExamStore();
+goToNextQuestion();
 
-  // Backward compatibility getters
-  get questionNumber(): number
-  get correctAnswers(): Array
-  get userAnswers(): Array
-  get attempts(): Array
-  get startTime(): number
-  get endTime(): number
-  get timeSpent(): number
-  get isCorrect(): boolean
-  get finalScore(): number
-  get resetCount(): number
-  get highlightButtonClicks(): number
-  get highlightViewCount(): number
-  get firstActionType(): string
-  get firstActionRecorded(): boolean
-  get highlightAnswers(): Array // Computed from attempts
+// Set filters
+const { setSearchFilters } = useExamStore();
+setSearchFilters({ status: 'correct', difficulty: 'hard' });
+```
+
+### SettingsStore
+
+Manages user preferences and application settings.
+
+#### Interface
+
+```typescript
+interface SettingsStore {
+  settings: UserSettings;
+  sidebarPosition: SidebarPosition;
+  
+  updateSettings: (newSettings: Partial<UserSettings>) => void;
+  setSidebarPosition: (position: SidebarPosition) => void;
+  resetSettings: () => void;
 }
 ```
 
-#### Statistics Management Functions
+#### Usage Examples
 
-##### `startExamSession(examCode: string, examName: string): void`
+```typescript
+import { useSettingsStore } from '@/stores/settingsStore';
 
-Starts a new exam session for statistics tracking.
+// Update theme
+const { updateSettings } = useSettingsStore();
+updateSettings({ theme: 'dark' });
 
-```javascript
-startExamSession("CAD", "Certified Application Developer");
+// Toggle sidebar
+const { setSidebarPosition } = useSettingsStore();
+setSidebarPosition('expanded');
 ```
 
-##### `endCurrentSession(): void`
+### StatisticsStore
 
-Ends the current exam session and saves statistics.
+Manages session tracking and performance analytics.
 
-```javascript
-endCurrentSession();
+#### Interface
+
+```typescript
+interface StatisticsStore {
+  statistics: Statistics;
+  
+  startSession: (examCode: string, examName: string) => string;
+  updateCurrentSession: (sessionId: string, update: Partial<ExamSession>) => void;
+  endSession: (sessionId: string, finalStats: Partial<ExamSession>) => void;
+  getCurrentSession: (examCode: string) => ExamSession | null;
+  finalizePendingSessions: () => void;
+  exportStatistics: () => void;
+  clearStatistics: () => void;
+}
 ```
 
-##### `trackQuestionAttempt(questionNumber, correctAnswers, selectedAnswers, isCorrect, timeSpent, wasHighlightEnabled): void`
+#### Usage Examples
 
-Tracks a question attempt with comprehensive metrics.
+```typescript
+import { useStatisticsStore } from '@/stores/statisticsStore';
 
-```javascript
-trackQuestionAttempt(
-  1, // questionNumber
-  ["A", "C"], // correctAnswers
-  new Set(["A", "C"]), // selectedAnswers
-  true, // isCorrect
-  45, // timeSpent (seconds)
-  false // wasHighlightEnabled
-);
+// Start session
+const { startSession } = useStatisticsStore();
+const sessionId = startSession('CAD', 'Certified Application Developer');
+
+// Update session
+const { updateCurrentSession } = useStatisticsStore();
+updateCurrentSession(sessionId, { questionsAnswered: 5, correctAnswers: 4 });
+
+// End session
+const { endSession } = useStatisticsStore();
+endSession(sessionId, { completionPercentage: 100 });
 ```
 
-##### `updateSessionStats(): void`
+## 🧩 TypeScript Interfaces
 
-Updates session statistics based on current questions.
+### Core Data Types
 
-```javascript
-updateSessionStats();
+```typescript
+interface ExamData {
+  status: "complete" | "partial" | "error";
+  error?: string;
+  questions: Question[];
+}
+
+interface Question {
+  question: string;
+  answers: string[];
+  comments: Comment[];
+  correct_answers?: string[];
+  explanation?: string;
+  most_voted?: string;
+  correct_answer?: string;
+  images?: Record<string, { webp: string; jpeg: string }>;
+  question_number?: string;
+}
+
+interface Comment {
+  content: string;
+  selected_answer: string;
+  replies: Comment[];
+}
+
+interface ExamInfo {
+  code: string;
+  name: string;
+  description: string;
+  questionCount: number;
+  lastUpdated: string;
+}
 ```
 
-##### `saveStatistics(): void`
+### Application State Types
 
-Saves statistics to localStorage with compression.
+```typescript
+type QuestionStatus = "unanswered" | "answered" | "correct" | "incorrect" | "preview";
+type DifficultyLevel = "easy" | "medium" | "hard" | null;
+type SidebarPosition = "hidden" | "collapsed" | "expanded";
 
-```javascript
-saveStatistics();
+interface QuestionState {
+  status: QuestionStatus;
+  userAnswer?: UserAnswer;
+  firstAnswer?: UserAnswer;
+  isFavorite: boolean;
+  difficulty?: DifficultyLevel;
+  notes?: string;
+  category?: string;
+}
+
+interface UserAnswer {
+  selectedAnswers: string[];
+  timestamp: Date;
+  isCorrect?: boolean;
+}
+
+interface SearchFilters {
+  query: string;
+  status: QuestionStatus | "all";
+  difficulty: DifficultyLevel | "all";
+  favorites: boolean;
+  category: string | "all";
+}
 ```
 
-##### `loadStatistics(): void`
+### Statistics Types
 
-Loads statistics from localStorage with decompression and migration.
+```typescript
+interface ExamSession {
+  id: string;
+  examCode: string;
+  examName: string;
+  startTime: Date;
+  endTime?: Date;
+  questionsAnswered: number;
+  correctAnswers: number;
+  accuracy: number;
+  timeSpent: number;
+  completionPercentage: number;
+  difficultyBreakdown: Record<string, {
+    answered: number;
+    correct: number;
+    total: number;
+  }>;
+}
 
-```javascript
-loadStatistics();
+interface Statistics {
+  totalQuestionsAnswered: number;
+  correctAnswers: number;
+  incorrectAnswers: number;
+  accuracy: number;
+  timeSpent: number;
+  favoriteQuestions: number;
+  examProgress: Record<string, {
+    answered: number;
+    correct: number;
+    total: number;
+    lastAccessed: Date;
+  }>;
+  dailyProgress: Record<string, {
+    questionsAnswered: number;
+    timeSpent: number;
+    accuracy: number;
+  }>;
+  sessions: ExamSession[];
+}
 ```
 
-#### Storage Optimization
+### UI Component Types
 
-The statistics system uses advanced compression techniques achieving 60-80% storage reduction:
+```typescript
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+}
 
-##### `compressData(data: any): string`
+interface ToastMessage {
+  id: string;
+  type: "success" | "error" | "warning" | "info";
+  title: string;
+  description?: string;
+  duration?: number;
+}
 
-Compresses statistics data for efficient storage.
+interface NavigationItem {
+  id: string;
+  label: string;
+  icon?: string;
+  shortcut?: string;
+  action: () => void;
+}
 
-```javascript
-const compressed = compressData(statistics);
-// Achieves 60-80% storage reduction
+interface KeyboardShortcut {
+  key: string;
+  ctrlKey?: boolean;
+  altKey?: boolean;
+  shiftKey?: boolean;
+  description: string;
+  action: () => void;
+}
 ```
 
-##### `decompressData(compressedData: string): any`
+## ⚛️ React Components API
 
-Decompresses statistics data from localStorage.
+### Core Components
 
-```javascript
-const decompressed = decompressData(savedData);
+#### ExamViewer
+Main component for displaying exam questions.
+
+```typescript
+interface ExamViewerProps {
+  className?: string;
+}
+
+export function ExamViewer({ className }: ExamViewerProps): JSX.Element;
 ```
 
-**Compression Features:**
+#### QuestionDisplay
+Displays individual question with answers and interactions.
 
-- Property name compression (e.g., `examCode` → `ec`)
-- Timestamp optimization (ISO strings → numeric timestamps)
-- Boolean compression (`true` → `1`, `false` → `0`)
-- Ultra-compact session IDs (60% reduction)
-- Advanced string compression (20-40% additional reduction)
+```typescript
+interface QuestionDisplayProps {
+  question: Question;
+  questionIndex: number;
+  questionState: QuestionState;
+  onAnswerSelect: (answers: string[]) => void;
+  onPreview: () => void;
+  onReset: () => void;
+  className?: string;
+}
 
-#### Statistics Display Functions
-
-##### `displayStatistics(): void`
-
-Opens the statistics modal and displays current data.
-
-```javascript
-displayStatistics();
+export function QuestionDisplay(props: QuestionDisplayProps): JSX.Element;
 ```
 
-##### `showStatsTab(tabName: string): void`
+#### ExamSelector
+Dropdown component for selecting exams.
 
-Switches to a specific statistics tab.
+```typescript
+interface ExamSelectorProps {
+  onExamSelect: (examCode: string) => void;
+  selectedExam?: string;
+  className?: string;
+}
 
-```javascript
-showStatsTab("overview"); // Overview tab
-showStatsTab("exams"); // Per-exam statistics
-showStatsTab("sessions"); // Session history
-showStatsTab("progress"); // Progress charts
+export function ExamSelector(props: ExamSelectorProps): JSX.Element;
 ```
 
-##### `updateOverviewTab(): void`
+### Navigation Components
 
-Updates the overview statistics tab with current data.
+#### NavigationControls
+Previous/Next navigation with keyboard shortcuts.
 
-```javascript
-updateOverviewTab();
+```typescript
+interface NavigationControlsProps {
+  onPrevious: () => void;
+  onNext: () => void;
+  onRandom: () => void;
+  onJumpTo: (index: number) => void;
+  currentIndex: number;
+  totalQuestions: number;
+  className?: string;
+}
+
+export function NavigationControls(props: NavigationControlsProps): JSX.Element;
 ```
 
-##### `updateExamsTab(): void`
+#### Sidebar
+Collapsible sidebar with question overview.
 
-Updates the per-exam statistics tab.
+```typescript
+interface SidebarProps {
+  position: SidebarPosition;
+  onPositionChange: (position: SidebarPosition) => void;
+  questions: Question[];
+  questionStates: Record<number, QuestionState>;
+  currentIndex: number;
+  onQuestionSelect: (index: number) => void;
+  className?: string;
+}
 
-```javascript
-updateExamsTab();
+export function Sidebar(props: SidebarProps): JSX.Element;
 ```
 
-##### `updateSessionsTab(): void`
+### Modal Components
 
-Updates the session history tab.
+#### StatisticsModal
+Displays comprehensive statistics and analytics.
 
-```javascript
-updateSessionsTab();
+```typescript
+interface StatisticsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  statistics: Statistics;
+  onExport: () => void;
+  onClear: () => void;
+}
+
+export function StatisticsModal(props: StatisticsModalProps): JSX.Element;
 ```
 
-##### `updateProgressTab(): void`
+#### SettingsModal
+User preferences and configuration.
 
-Updates the progress charts tab.
+```typescript
+interface SettingsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  settings: UserSettings;
+  onSettingsChange: (settings: Partial<UserSettings>) => void;
+}
 
-```javascript
-updateProgressTab();
+export function SettingsModal(props: SettingsModalProps): JSX.Element;
 ```
 
-#### Utility Functions
+#### ExportModal
+Export functionality with format options.
 
-##### `exportStatistics(): void`
+```typescript
+interface ExportModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  examData: ExamData | null;
+  onExport: (options: ExportOptions) => void;
+}
 
-Exports statistics to JSON file.
-
-```javascript
-exportStatistics();
+export function ExportModal(props: ExportModalProps): JSX.Element;
 ```
 
-##### `resetAllStatistics(): void`
+## 🪝 Custom Hooks
 
-Resets all statistics after user confirmation.
+### useKeyboardShortcuts
+Manages keyboard shortcuts throughout the application.
 
-```javascript
-resetAllStatistics();
+```typescript
+interface UseKeyboardShortcutsProps {
+  shortcuts: KeyboardShortcut[];
+  enabled?: boolean;
+}
+
+export function useKeyboardShortcuts({ 
+  shortcuts, 
+  enabled = true 
+}: UseKeyboardShortcutsProps): void;
 ```
 
-##### `cleanCorruptedStatistics(): void`
+### useSessionPersistence
+Handles session persistence and restoration.
 
-Cleans corrupted statistics data and recalculates totals.
+```typescript
+interface SessionData {
+  examCode: string;
+  questionIndex: number;
+  timestamp: number;
+}
 
-```javascript
-cleanCorruptedStatistics();
+export function useSessionPersistence(): {
+  saveSession: (data: SessionData) => void;
+  restoreSession: () => SessionData | null;
+  clearSession: () => void;
+};
 ```
 
-##### `formatTime(seconds: number): string`
+### useScrollLock
+Manages body scroll lock for modals.
 
-Formats time in seconds to readable format.
-
-```javascript
-formatTime(3665); // Returns "1h 1m 5s"
-formatTime(125); // Returns "2m 5s"
-formatTime(45); // Returns "45s"
+```typescript
+export function useScrollLock(isLocked: boolean): void;
 ```
 
-##### `createOverviewChart(): void`
+### useSoundEffects
+Manages sound effects for user interactions.
 
-Creates the overview pie chart on canvas.
+```typescript
+interface SoundEffectsConfig {
+  enabled: boolean;
+  volume: number;
+}
 
-```javascript
-createOverviewChart();
+export function useSoundEffects(config: SoundEffectsConfig): {
+  playSuccess: () => void;
+  playError: () => void;
+  playClick: () => void;
+  playNotification: () => void;
+};
 ```
 
-##### `createProgressChart(): void`
+### useToastWithSound
+Combines toast notifications with sound effects.
 
-Creates the progress line chart on canvas.
-
-```javascript
-createProgressChart();
+```typescript
+export function useToastWithSound(): {
+  showToast: (message: ToastMessage) => void;
+  dismissToast: (id: string) => void;
+  dismissAll: () => void;
+};
 ```
 
-#### Storage Optimization
+## 🔧 Utility Functions
 
-##### `compressData(data: any): string`
+### Export Utilities
 
-Compresses data for localStorage storage.
+```typescript
+// Export to different formats
+export function exportToJSON(data: any, filename: string): void;
+export function exportToCSV(data: any[], filename: string): void;
+export function exportToTXT(content: string, filename: string): void;
+export function exportToPDF(content: string, filename: string): Promise<void>;
 
-```javascript
-const compressed = compressData(statistics);
+// Export options
+interface ExportOptions {
+  format: ExportFormat;
+  includeAnswers: boolean;
+  includeExplanations: boolean;
+  includeStatistics: boolean;
+  filterByStatus?: QuestionStatus;
+  filterByDifficulty?: DifficultyLevel;
+}
 ```
 
-##### `decompressData(compressedData: string): any`
+### Link Utilities
 
-Decompresses data from localStorage.
-
-```javascript
-const decompressed = decompressData(savedData);
+```typescript
+// Process and validate external links
+export function processLinks(content: string): JSX.Element;
+export function validateUrl(url: string): boolean;
+export function openExternalLink(url: string): void;
 ```
 
-### Theme System
+### Data Processing
 
-#### Theme Management
+```typescript
+// Question processing
+export function processQuestion(question: Question): ProcessedQuestion;
+export function calculateQuestionDifficulty(
+  question: Question, 
+  attempts: UserAnswer[]
+): DifficultyLevel;
 
-##### `loadSettings(): void`
+// Progress calculations
+export function calculateProgress(
+  questionStates: Record<number, QuestionState>
+): ProgressStats;
 
-Loads settings from localStorage including theme preference.
-
-```javascript
-loadSettings();
+export function calculateSessionStats(
+  session: ExamSession
+): SessionAnalytics;
 ```
 
-##### `saveSettings(): void`
+## 🎨 Styling and Theming
 
-Saves settings to localStorage and applies theme.
+### CSS Custom Properties
 
-```javascript
-saveSettings();
-```
-
-##### `applyTheme(isDark: boolean): void`
-
-Applies light or dark theme to the interface.
-
-```javascript
-applyTheme(true); // Apply dark theme
-applyTheme(false); // Apply light theme
-```
-
-#### CSS Custom Properties
-
-The theme system uses CSS custom properties for efficient theme switching:
+The application uses CSS custom properties for theming:
 
 ```css
 :root {
-  /* Light mode variables */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fa;
-  --bg-tertiary: #e9ecef;
-  --text-primary: #262730;
-  --text-secondary: #495057;
-  --text-muted: #6c757d;
-  --border-color: #d1d5db;
-  --border-light: #e9ecef;
-  --accent-color: #ff4b4b;
-  --accent-hover: #e03e3e;
-  --success-color: #28a745;
-  --warning-color: #ffc107;
-  --error-color: #dc3545;
-  --spinner-bg: #f3f3f3;
+  /* Light theme colors */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 84% 4.9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  --radius: 0.5rem;
 }
 
-[data-theme="dark"] {
-  /* Dark mode variables */
-  --bg-primary: #1a1a1a;
-  --bg-secondary: #2d2d2d;
-  --bg-tertiary: #3a3a3a;
-  --text-primary: #ffffff;
-  --text-secondary: #e0e0e0;
-  --text-muted: #a0a0a0;
-  --border-color: #404040;
-  --border-light: #505050;
-  --accent-color: #ff6b6b;
-  --accent-hover: #ff5252;
-  --success-color: #4caf50;
-  --warning-color: #ff9800;
-  --error-color: #f44336;
-  --spinner-bg: #404040;
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  /* ... dark theme variables */
 }
 ```
 
-### Highlight System
+### Tailwind Configuration
 
-#### Highlight Management
-
-##### `toggleHighlight(): void`
-
-Toggles highlight mode and updates statistics.
-
-```javascript
-toggleHighlight();
-```
-
-##### `updateHighlightButton(): void`
-
-Updates highlight button appearance based on current state.
-
-```javascript
-updateHighlightButton();
-```
-
-#### Highlight Tracking
-
-Highlight usage is automatically tracked in the statistics system:
-
-- Button clicks are tracked when highlight is activated
-- View counts are tracked when questions are viewed with highlight active
-- First action tracking includes highlight usage as "preview" action
-
-### State Management
-
-The application maintains enhanced global state including:
-
-```javascript
-// Core state
-let currentExam = null;
-let currentQuestions = [];
-let currentQuestionIndex = 0;
-let selectedAnswers = new Set();
-let isValidated = false;
-
-// Highlight state
-let isHighlightEnabled = false;
-let isHighlightTemporaryOverride = false;
-let questionStartTime = null;
-
-// Settings state
-let settings = {
-  showDiscussionDefault: false,
-  highlightDefault: false,
-  darkMode: false,
-};
-
-// Statistics state
-let statistics = {
-  sessions: [],
-  currentSession: null,
-  totalStats: {
-    totalQuestions: 0,
-    totalCorrect: 0,
-    totalIncorrect: 0,
-    totalPreview: 0,
-    totalTime: 0,
-    totalResets: 0,
-    totalHighlightAttempts: 0,
-    examStats: {},
-  },
-};
-
-// Available exams
-let availableExams = {};
-```
-
-### Event Handlers
-
-Enhanced event handling system:
-
-```javascript
-// Statistics events
-document
-  .getElementById("statisticsBtn")
-  .addEventListener("click", displayStatistics);
-document
-  .getElementById("closeStatsModal")
-  .addEventListener("click", closeStatistics);
-document
-  .getElementById("exportStatsBtn")
-  .addEventListener("click", exportStatistics);
-document
-  .getElementById("resetStatsBtn")
-  .addEventListener("click", resetAllStatistics);
-
-// Theme events
-document
-  .getElementById("darkModeToggle")
-  .addEventListener("change", saveSettings);
-document
-  .getElementById("darkModeBtn")
-  .addEventListener("click", toggleDarkMode);
-
-// Highlight events
-document
-  .getElementById("highlightBtn")
-  .addEventListener("click", toggleHighlight);
-
-// Statistics tabs
-document.querySelectorAll(".stats-tab").forEach((tab) => {
-  tab.addEventListener("click", () => showStatsTab(tab.dataset.tab));
-});
-```
-
-### Data Structures
-
-#### Statistics Data Format
-
-```javascript
-// Optimized session format
-{
-  "id": "k7x9m8n2abc",           // Ultra-compact session ID
-  "ec": "CAD",                   // Exam code (compressed)
-  "en": "Certified App Dev",     // Exam name (compressed)
-  "st": 1641234567890,          // Start timestamp (compressed)
-  "et": 1641234567890,          // End timestamp (compressed)
-  "q": [                        // Questions array (compressed)
-    {
-      "qn": 1,                  // Question number (compressed)
-      "ca": ["A", "C"],         // Correct answers (compressed)
-      "ua": ["A", "C"],         // User answers (compressed)
-      "att": [                  // Attempts array (compressed)
-        {
-          "a": ["A", "C"],      // Answers (compressed)
-          "c": 1,               // Is correct (compressed boolean)
-          "h": 0                // Highlight enabled (compressed boolean)
-        }
-      ],
-      "st": 1641234567890,      // Start timestamp (compressed)
-      "et": 1641234567890,      // End timestamp (compressed)
-      "ts": 45,                 // Time spent (compressed)
-      "ic": 1,                  // Is correct (compressed boolean)
-      "fs": 100,                // Final score (compressed)
-      "rc": 0,                  // Reset count (compressed)
-      "hbc": 2,                 // Highlight button clicks (compressed)
-      "hvc": 1,                 // Highlight view count (compressed)
-      "fat": "c",               // First action type (compressed)
-      "far": 1                  // First action recorded (compressed boolean)
-    }
+```typescript
+// tailwind.config.ts
+export default {
+  content: [
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  "tq": 150,                    // Total questions (compressed)
-  "ca": 120,                    // Correct answers (compressed)
-  "ia": 25,                     // Incorrect answers (compressed)
-  "pa": 5,                      // Preview answers (compressed)
-  "tt": 3600,                   // Total time (compressed)
-  "c": 1                        // Completed (compressed boolean)
-}
-```
-
-#### Theme Configuration
-
-```javascript
-// Theme settings
-const THEME_STORAGE_KEY = "examViewerSettings";
-const AUTO_THEME_DETECTION = true;
-const THEME_TRANSITION_DURATION = 300; // milliseconds
-```
-
-### Feature Flags
-
-```javascript
-// Feature configuration
-const FEATURES = {
-  STATISTICS_ENABLED: true,
-  DARK_MODE_ENABLED: true,
-  HIGHLIGHT_MODE_ENABLED: true,
-  COMPRESSION_ENABLED: true,
-  MIGRATION_ENABLED: true,
-  DEBUG_MODE: isDevelopmentMode(),
-};
+  theme: {
+    extend: {
+      colors: {
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        // ... additional color definitions
+      },
+    },
+  },
+  plugins: [],
+} satisfies Config;
 ```
 
 ## 🐍 Python Scripts API
 
-### scraper.py
+### Data Management Scripts
 
-Main scraping module for ExamTopics data extraction.
-
-#### Functions
-
-##### `update_exam_data(exam_code, progress_callback=None, rapid_scraping=False)`
-
-Updates exam data for a specific exam code.
-
-**Parameters:**
-
-- `exam_code` (str): The exam code (e.g., 'CAD', 'CIS-ITSM')
-- `progress_callback` (callable, optional): Progress tracking callback
-- `rapid_scraping` (bool, optional): Enable rapid scraping mode (no delays)
-
-**Returns:**
-
-- `dict`: Exam data with questions and metadata
-
-**Example:**
+#### scraper.py
 
 ```python
-from scripts.scraper import update_exam_data
+def update_exam_data(
+    exam_code: str, 
+    progress_callback: Optional[Callable] = None,
+    rapid_scraping: bool = False
+) -> Dict[str, Any]:
+    """
+    Updates exam data for a specific exam code.
+    
+    Args:
+        exam_code: The exam code (e.g., 'CAD', 'CIS-ITSM')
+        progress_callback: Optional progress tracking callback
+        rapid_scraping: Enable rapid scraping mode (no delays)
+    
+    Returns:
+        Dict containing exam data with questions and metadata
+    """
 
-# Update CAD exam
-result = update_exam_data('CAD', rapid_scraping=True)
-print(f"Status: {result['status']}")
-print(f"Questions: {len(result['questions'])}")
+def load_json(filename: str) -> Dict[str, Any]:
+    """Loads JSON data from file with error handling."""
+
+def save_json(data: Dict[str, Any], filename: str) -> bool:
+    """Saves data to JSON file with proper formatting."""
 ```
 
-##### `load_json(filename)`
+#### update_all_exams.py
 
-Loads JSON data from file with error handling.
+```python
+def get_available_exam_codes() -> List[str]:
+    """Scans data directory for available exam codes."""
 
-**Parameters:**
+def update_single_exam(
+    exam_code: str, 
+    progress_tracker: 'ProgressTracker'
+) -> Dict[str, Any]:
+    """Updates a single exam with error handling."""
 
-- `filename` (str): Path to JSON file
-
-**Returns:**
-
-- `dict`: Parsed JSON data or empty dict if error
-
-##### `save_json(data, filename)`
-
-Saves data to JSON file with proper formatting.
-
-**Parameters:**
-
-- `data` (dict): Data to save
-- `filename` (str): Output file path
-
-**Returns:**
-
-- `bool`: Success status
-
-### update_all_exams.py
-
-Automation script for updating all exam data.
-
-#### Functions
-
-##### `get_available_exam_codes()`
-
-Scans data directory for available exam codes.
-
-**Returns:**
-
-- `list`: Sorted list of exam codes
-
-##### `update_single_exam(exam_code, progress_tracker)`
-
-Updates a single exam with error handling.
-
-**Parameters:**
-
-- `exam_code` (str): Exam code to update
-- `progress_tracker` (ProgressTracker): Progress tracking instance
-
-**Returns:**
-
-- `dict`: Update result with status and metadata
-
-##### `main()`
-
-Main automation function that processes all exams.
-
-**Usage:**
-
-```bash
-python scripts/update_all_exams.py
+class ProgressTracker:
+    """Simple progress tracking utility."""
+    
+    def __init__(self, description: str = ""):
+        self.description = description
+    
+    def progress(self, value: float, text: str = "") -> None:
+        """Log progress message."""
 ```
 
-#### Classes
+#### update_manifest.py
 
-##### `ProgressTracker`
+```python
+def generate_manifest() -> Dict[str, Any]:
+    """Generates optimized manifest.json for Next.js application."""
 
-Simple progress tracking utility.
-
-**Methods:**
-
-- `__init__(description="")`: Initialize tracker
-- `progress(value, text="")`: Log progress message
+def calculate_exam_stats(exam_data: Dict[str, Any]) -> Dict[str, int]:
+    """Calculates statistics for exam data."""
+```
 
 ## 📊 Data Structures
 
@@ -680,1057 +712,245 @@ Simple progress tracking utility.
       ],
       "comments": [
         {
-          "user": "username",
-          "text": "Comment text",
-          "selected_answer": "A"
+          "content": "Comment text",
+          "selected_answer": "A",
+          "replies": []
         }
       ],
       "most_voted": "A",
       "question_number": "1",
-      "link": "https://www.examtopics.com/...",
-      "error": null
+      "explanation": "Optional explanation text",
+      "images": {
+        "image1": {
+          "webp": "/images/exam/question1.webp",
+          "jpeg": "/images/exam/question1.jpg"
+        }
+      }
     }
   ]
 }
 ```
 
-### Update Log Format
+### Manifest Format
 
 ```json
 {
-  "timestamp": "2024-01-04T10:30:00.000Z",
-  "total_exams": 12,
-  "successful_updates": 11,
-  "failed_updates": 1,
-  "total_questions": 1850,
-  "results": [
+  "version": "4.0.0",
+  "generated": "2024-01-04T10:30:00.000Z",
+  "totalExams": 20,
+  "totalQuestions": 3000,
+  "exams": [
     {
-      "exam_code": "CAD",
-      "status": "success",
-      "question_count": 150,
-      "error": null
+      "code": "CAD",
+      "name": "Certified Application Developer",
+      "description": "ServiceNow Certified Application Developer",
+      "questionCount": 150,
+      "lastUpdated": "2024-01-04T09:15:00.000Z"
+    }
+  ]
+}
+```
+
+### Statistics Storage Format
+
+```json
+{
+  "totalQuestionsAnswered": 150,
+  "correctAnswers": 120,
+  "incorrectAnswers": 25,
+  "accuracy": 80.0,
+  "timeSpent": 3600,
+  "favoriteQuestions": 15,
+  "sessions": [
+    {
+      "id": "session_2024_01_04_12345",
+      "examCode": "CAD",
+      "examName": "Certified Application Developer",
+      "startTime": "2024-01-04T10:00:00.000Z",
+      "endTime": "2024-01-04T11:30:00.000Z",
+      "questionsAnswered": 50,
+      "correctAnswers": 40,
+      "accuracy": 80.0,
+      "timeSpent": 5400,
+      "completionPercentage": 33.3,
+      "difficultyBreakdown": {
+        "easy": { "answered": 20, "correct": 18, "total": 25 },
+        "medium": { "answered": 20, "correct": 15, "total": 30 },
+        "hard": { "answered": 10, "correct": 7, "total": 20 }
+      }
     }
   ]
 }
 ```
 
 ## 🔧 Configuration
+
+### Next.js Configuration
+
+```typescript
+// next.config.ts
+const nextConfig: NextConfig = {
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  eslint: {
+    ignoreDuringBuilds: false,
+  },
+  async headers() {
+    return [
+      {
+        source: '/data/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, stale-while-revalidate=86400',
+          },
+        ],
+      },
+    ];
+  },
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
+};
+```
 
 ### Environment Variables
 
-- `RAPID_SCRAPING`: Enable rapid mode (default: false)
-- `MAX_RETRIES`: Maximum retry attempts (default: 3)
-- `DELAY_SECONDS`: Delay between requests (default: 5)
+```bash
+# Development
+NODE_ENV=development
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-### Rate Limiting
+# Production
+NODE_ENV=production
+NEXT_PUBLIC_APP_URL=https://your-domain.com
 
-Default delays:
-
-- Between exams: 10 seconds
-- Between questions: 5 seconds
-- Rapid mode: No delays
+# Python Scripts
+RAPID_SCRAPING=false
+MAX_RETRIES=3
+DELAY_SECONDS=5
+```
 
 ## 🚨 Error Handling
 
-### Common Errors
+### React Error Boundaries
 
-1. **Rate Limiting**: HTTP 429 responses
+```typescript
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
 
-   - Automatic retry with exponential backoff
-   - Logs warning and continues
+class ErrorBoundary extends React.Component<
+  React.PropsWithChildren<{}>,
+  ErrorBoundaryState
+> {
+  constructor(props: React.PropsWithChildren<{}>) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
-2. **Network Errors**: Connection timeouts
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
 
-   - Retry logic with increasing delays
-   - Graceful degradation
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo);
+  }
 
-3. **Parsing Errors**: Invalid HTML/JSON
+  render() {
+    if (this.state.hasError) {
+      return <ErrorFallback error={this.state.error} />;
+    }
 
-   - Skip problematic questions
-   - Log detailed error information
-
-4. **File System Errors**: Permission/disk space
-   - Fail fast with clear error messages
-   - Preserve existing data
-
-## 🌐 Frontend JavaScript API
-
-### Statistics System
-
-The frontend includes a comprehensive statistics system with optimized storage and backward compatibility.
-
-#### Classes
-
-##### `ExamSession`
-
-Represents a single exam session with optimized storage.
-
-```javascript
-class ExamSession {
-  constructor(examCode, examName);
-
-  // Optimized properties (internal storage)
-  id: string;           // Ultra-compact session ID
-  ec: string;           // Exam code (shortened)
-  en: string;           // Exam name (shortened)
-  st: number;           // Start time as timestamp (shortened)
-  et: number | null;    // End time (shortened)
-  q: QuestionAttempt[]; // Array of question attempts (shortened)
-  tq: number;           // Total questions (shortened)
-  ca: number;           // Correct answers (shortened)
-  ia: number;           // Incorrect answers (shortened)
-  pa: number;           // Preview answers (shortened)
-  tt: number;           // Total time in seconds (shortened)
-  c: boolean;           // Completed flag (shortened)
-
-  // Backward compatibility getters/setters
-  get examCode(): string;
-  get examName(): string;
-  get startTime(): number;
-  get endTime(): number | null;
-  get questions(): QuestionAttempt[];
-  get totalQuestions(): number;
-  get correctAnswers(): number;
-  get incorrectAnswers(): number;
-  get previewAnswers(): number;
-  get totalTime(): number;
-  get completed(): boolean;
-
-  generateCompactId(): string;
+    return this.props.children;
+  }
 }
 ```
 
-##### `QuestionAttempt`
-
-Tracks all interactions with a single question with optimized storage.
-
-```javascript
-class QuestionAttempt {
-  constructor(questionNumber: string, correctAnswers: string[]);
-
-  // Optimized properties (internal storage)
-  qn: string;           // Question number (shortened)
-  ca: string[];         // Correct answers array (shortened)
-  ua: string[];         // User answers (shortened)
-  att: AttemptObject[]; // Attempts array (shortened)
-  st: number;           // Start timestamp (shortened)
-  et: number | null;    // End timestamp (shortened)
-  ts: number;           // Time spent (shortened)
-  ic: boolean;          // Is correct (shortened)
-  fs: number;           // Final score (shortened)
-  rc: number;           // Reset count (shortened)
-  hbc: number;          // Highlight button clicks (shortened)
-  hvc: number;          // Highlight view count (shortened)
-  fat: string | null;   // First action type: 'c'/'i'/'p' (shortened)
-  far: boolean;         // First action recorded (shortened)
-
-  // Methods
-  addAttempt(selectedAnswers: Set<string>, isCorrect: boolean, timeSpent: number, wasHighlightEnabled: boolean): void;
-  addHighlightButtonClick(): void;
-  addReset(): void;
-  addHighlightView(): void;
-  getTotalHighlightInteractions(): number;
-
-  // Backward compatibility getters
-  get questionNumber(): string;
-  get correctAnswers(): string[];
-  get userAnswers(): string[];
-  get attempts(): AttemptObject[];
-  get startTime(): number;
-  get endTime(): number | null;
-  get timeSpent(): number;
-  get isCorrect(): boolean;
-  get finalScore(): number;
-  get resetCount(): number;
-  get highlightButtonClicks(): number;
-  get highlightViewCount(): number;
-  get firstActionType(): string | null;
-  get firstActionRecorded(): boolean;
-  get highlightAnswers(): Array<{answers: string[], timestamp: number}>;
-}
-```
-
-##### `AttemptObject`
-
-Ultra-compact attempt tracking object.
-
-```javascript
-interface AttemptObject {
-  a: string[]; // answers (shortened)
-  c: boolean; // is correct (shortened)
-  h: boolean; // highlight enabled (shortened)
-}
-```
-
-#### Statistics Management Functions
-
-##### `startExamSession(examCode: string, examName: string): void`
-
-Starts a new exam session for statistics tracking.
-
-```javascript
-startExamSession("CAD", "Certified Application Developer");
-```
-
-##### `endCurrentSession(): void`
-
-Ends the current exam session and saves statistics.
-
-```javascript
-endCurrentSession();
-```
-
-##### `trackQuestionAttempt(questionNumber: string, correctAnswers: string[], selectedAnswers: Set<string>, isCorrect: boolean, timeSpent: number, wasHighlightEnabled: boolean): void`
-
-Tracks a question attempt with comprehensive metrics.
-
-```javascript
-trackQuestionAttempt("1", ["A", "C"], new Set(["A", "C"]), true, 45, false);
-```
-
-##### `updateSessionStats(): void`
-
-Updates session statistics based on current question attempts.
-
-```javascript
-updateSessionStats();
-```
-
-##### `recalculateTotalStats(): void`
-
-Recalculates total statistics from all sessions.
-
-```javascript
-recalculateTotalStats();
-```
-
-#### Data Persistence
-
-##### `saveStatistics(): void`
-
-Saves statistics to localStorage with compression.
-
-```javascript
-saveStatistics();
-```
-
-##### `loadStatistics(): void`
-
-Loads statistics from localStorage with decompression and migration.
-
-```javascript
-loadStatistics();
-```
-
-#### Statistics Display
-
-##### `displayStatistics(): void`
-
-Opens the statistics modal and updates all tabs.
-
-```javascript
-displayStatistics();
-```
-
-##### `showStatsTab(tabName: string): void`
-
-Switches to a specific statistics tab.
-
-```javascript
-showStatsTab("overview"); // 'overview', 'exams', 'sessions', 'progress'
-```
-
-##### `updateOverviewTab(): void`
-
-Updates the overview statistics tab with current data.
-
-```javascript
-updateOverviewTab();
-```
-
-##### `updateExamsTab(): void`
-
-Updates the per-exam statistics tab.
-
-```javascript
-updateExamsTab();
-```
-
-##### `updateSessionsTab(): void`
-
-Updates the sessions history tab.
-
-```javascript
-updateSessionsTab();
-```
-
-##### `updateProgressTab(): void`
-
-Updates the progress charts tab.
-
-```javascript
-updateProgressTab();
-```
-
-#### Utility Functions
-
-##### `exportStatistics(): void`
-
-Exports statistics to JSON file.
-
-```javascript
-exportStatistics();
-```
-
-##### `resetAllStatistics(): void`
-
-Resets all statistics after user confirmation.
-
-```javascript
-resetAllStatistics();
-```
-
-##### `cleanCorruptedStatistics(): void`
-
-Cleans corrupted statistics data and recalculates totals.
-
-```javascript
-cleanCorruptedStatistics();
-```
-
-##### `formatTime(seconds: number): string`
-
-Formats time in seconds to readable format.
-
-```javascript
-formatTime(3665); // Returns "1h 1m 5s"
-formatTime(125); // Returns "2m 5s"
-formatTime(45); // Returns "45s"
-```
-
-##### `createOverviewChart(): void`
-
-Creates the overview pie chart on canvas.
-
-```javascript
-createOverviewChart();
-```
-
-##### `createProgressChart(): void`
-
-Creates the progress line chart on canvas.
-
-```javascript
-createProgressChart();
-```
-
-#### Storage Optimization
-
-##### `compressData(data: any): string`
-
-Compresses data for localStorage storage.
-
-```javascript
-const compressed = compressData(statistics);
-```
-
-##### `decompressData(compressedData: string): any`
-
-Decompresses data from localStorage.
-
-```javascript
-const decompressed = decompressData(savedData);
-```
-
-### Theme System
-
-#### Theme Management
-
-##### `loadSettings(): void`
-
-Loads settings from localStorage including theme preference.
-
-```javascript
-loadSettings();
-```
-
-##### `saveSettings(): void`
-
-Saves settings to localStorage and applies theme.
-
-```javascript
-saveSettings();
-```
-
-##### `applyTheme(isDark: boolean): void`
-
-Applies light or dark theme to the interface.
-
-```javascript
-applyTheme(true); // Apply dark theme
-applyTheme(false); // Apply light theme
-```
-
-#### CSS Custom Properties
-
-The theme system uses CSS custom properties for efficient theme switching:
-
-```css
-:root {
-  /* Light mode variables */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fa;
-  --bg-tertiary: #e9ecef;
-  --text-primary: #262730;
-  --text-secondary: #495057;
-  --text-muted: #6c757d;
-  --border-color: #d1d5db;
-  --border-light: #e9ecef;
-  --accent-color: #ff4b4b;
-  --accent-hover: #e03e3e;
-  --success-color: #28a745;
-  --warning-color: #ffc107;
-  --error-color: #dc3545;
-  --spinner-bg: #f3f3f3;
-}
-
-[data-theme="dark"] {
-  /* Dark mode variables */
-  --bg-primary: #1a1a1a;
-  --bg-secondary: #2d2d2d;
-  --bg-tertiary: #3a3a3a;
-  --text-primary: #ffffff;
-  --text-secondary: #e0e0e0;
-  --text-muted: #a0a0a0;
-  --border-color: #404040;
-  --border-light: #505050;
-  --accent-color: #ff6b6b;
-  --accent-hover: #ff5252;
-  --success-color: #4caf50;
-  --warning-color: #ff9800;
-  --error-color: #f44336;
-  --spinner-bg: #404040;
-}
-```
-
-### Highlight System
-
-#### Highlight Management
-
-##### `toggleHighlight(): void`
-
-Toggles highlight mode and updates statistics.
-
-```javascript
-toggleHighlight();
-```
-
-##### `updateHighlightButton(): void`
-
-Updates highlight button appearance based on current state.
-
-```javascript
-updateHighlightButton();
-```
-
-#### Highlight Tracking
-
-Highlight usage is automatically tracked in the statistics system:
-
-- Button clicks are tracked when highlight is activated
-- View counts are tracked when questions are viewed with highlight active
-- First action tracking includes highlight usage as "preview" action
-
-### State Management
-
-The application maintains enhanced global state including:
-
-```javascript
-// Core state
-let currentExam = null;
-let currentQuestions = [];
-let currentQuestionIndex = 0;
-let selectedAnswers = new Set();
-let isValidated = false;
-
-// Highlight state
-let isHighlightEnabled = false;
-let isHighlightTemporaryOverride = false;
-let questionStartTime = null;
-
-// Settings state
-let settings = {
-  showDiscussionDefault: false,
-  highlightDefault: false,
-  darkMode: false,
-};
-
-// Statistics state
-let statistics = {
-  sessions: [],
-  currentSession: null,
-  totalStats: {
-    totalQuestions: 0,
-    totalCorrect: 0,
-    totalIncorrect: 0,
-    totalPreview: 0,
-    totalTime: 0,
-    totalResets: 0,
-    totalHighlightAttempts: 0,
-    examStats: {},
+### Zustand Error Handling
+
+```typescript
+// Error handling in stores
+const useExamStore = create<ExamStore>()((set, get) => ({
+  loadExam: async (examCode: string) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const examData = await fetchExamData(examCode);
+      set({ currentExam: examData, isLoading: false });
+    } catch (error) {
+      set({ 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        isLoading: false 
+      });
+    }
   },
-};
-
-// Available exams
-let availableExams = {};
+}));
 ```
 
-### Event Handlers
+## 🔍 Development Utilities
 
-Enhanced event handling system:
+### Debug Functions
 
-```javascript
-// Statistics events
-document
-  .getElementById("statisticsBtn")
-  .addEventListener("click", displayStatistics);
-document
-  .getElementById("closeStatsModal")
-  .addEventListener("click", closeStatistics);
-document
-  .getElementById("exportStatsBtn")
-  .addEventListener("click", exportStatistics);
-document
-  .getElementById("resetStatsBtn")
-  .addEventListener("click", resetAllStatistics);
-
-// Theme events
-document
-  .getElementById("darkModeToggle")
-  .addEventListener("change", saveSettings);
-document
-  .getElementById("darkModeBtn")
-  .addEventListener("click", toggleDarkMode);
-
-// Highlight events
-document
-  .getElementById("highlightBtn")
-  .addEventListener("click", toggleHighlight);
-
-// Statistics tabs
-document.querySelectorAll(".stats-tab").forEach((tab) => {
-  tab.addEventListener("click", () => showStatsTab(tab.dataset.tab));
-});
-```
-
-### Data Structures
-
-#### Statistics Data Format
-
-```json
-{
-  "sessions": [
-    {
-      "id": "k4x2mp8abc",
-      "ec": "CAD",
-      "en": "Certified Application Developer",
-      "st": 1641123456789,
-      "et": 1641127056789,
-      "q": [
-        {
-          "qn": "1",
-          "ca": ["A", "C"],
-          "ua": ["A", "C"],
-          "att": [
-            {
-              "a": ["A", "C"],
-              "c": true,
-              "h": false
-            }
-          ],
-          "st": 1641123456789,
-          "et": 1641123501789,
-          "ts": 45,
-          "ic": true,
-          "fs": 100,
-          "rc": 0,
-          "hbc": 1,
-          "hvc": 2,
-          "fat": "c",
-          "far": true
-        }
-      ],
-      "tq": 150,
-      "ca": 120,
-      "ia": 25,
-      "pa": 5,
-      "tt": 3600,
-      "c": true
-    }
-  ],
-  "currentSession": null,
-  "totalStats": {
-    "totalQuestions": 150,
-    "totalCorrect": 120,
-    "totalIncorrect": 25,
-    "totalPreview": 5,
-    "totalTime": 3600,
-    "totalResets": 8,
-    "totalHighlightAttempts": 45,
-    "examStats": {
-      "CAD": {
-        "examName": "Certified Application Developer",
-        "totalQuestions": 150,
-        "totalCorrect": 120,
-        "totalIncorrect": 25,
-        "totalPreview": 5,
-        "totalTime": 3600,
-        "totalResets": 8,
-        "totalHighlightAttempts": 45,
-        "sessions": 1,
-        "averageScore": 80,
-        "bestScore": 80,
-        "lastAttempt": 1641127056789
-      }
-    }
-  }
-}
-```
-
-#### Settings Data Format
-
-```json
-{
-  "showDiscussionDefault": false,
-  "highlightDefault": false,
-  "darkMode": false
-}
-```
-
-### Performance Optimization
-
-#### Storage Compression
-
-The statistics system uses advanced compression techniques:
-
-```javascript
-// Property name compression mapping
-const compressionMap = {
-  '"examCode"': '"ec"',
-  '"examName"': '"en"',
-  '"startTime"': '"st"',
-  '"endTime"': '"et"',
-  '"questions"': '"q"',
-  '"totalQuestions"': '"tq"',
-  '"correctAnswers"': '"ca"',
-  '"incorrectAnswers"': '"ia"',
-  '"previewAnswers"': '"pa"',
-  '"totalTime"': '"tt"',
-  '"completed"': '"c"',
-  // ... additional mappings
-  ":true": ":1",
-  ":false": ":0",
-  ":null": ":n",
-};
-```
-
-#### Performance Metrics
-
-- **Storage Reduction**: 60-80% reduction in localStorage usage
-- **Load Time**: 40-60% faster load/save operations
-- **Memory Usage**: 40-60% reduction in memory footprint
-- **Compression Ratios**:
-  - Session IDs: 60% reduction
-  - Timestamps: 46% reduction
-  - Property names: 83% reduction
-  - Full sessions: 62% reduction
-
-### Error Handling
-
-#### Statistics Error Handling
-
-```javascript
-function saveStatistics() {
-  try {
-    const compressedData = compressData(statistics);
-    localStorage.setItem("examViewerStatistics", compressedData);
-  } catch (error) {
-    devError("Error saving statistics:", error);
-  }
-}
-
-function loadStatistics() {
-  try {
-    const savedStats = localStorage.getItem("examViewerStatistics");
-    if (savedStats) {
-      statistics = decompressData(savedStats);
-    }
-  } catch (error) {
-    devError("Error loading statistics:", error);
-    // Reset to default if corrupted
-    statistics = getDefaultStatistics();
-  }
-}
-```
-
-#### Migration System
-
-The system includes automatic migration for backward compatibility:
-
-```javascript
-// Migrate existing sessions to new optimized format
-statistics.sessions.forEach((session) => {
-  if (session.examCode !== undefined && session.ec === undefined) {
-    // Convert old format to new format
-    session.ec = session.examCode;
-    session.en = session.examName;
-    session.st =
-      typeof session.startTime === "string"
-        ? new Date(session.startTime).getTime()
-        : session.startTime;
-    // ... additional migrations
-
-    // Clean up old properties
-    delete session.examCode;
-    delete session.examName;
-    delete session.startTime;
-    // ... cleanup
-  }
-});
-```
-
-### Development Utilities
-
-#### Debug Functions
-
-```javascript
-function isDevelopmentMode() {
-  return (
-    location.hostname === "localhost" ||
-    location.hostname === "127.0.0.1" ||
-    location.search.includes("debug=true")
-  );
-}
-
-function devLog(...args) {
-  if (isDevelopmentMode()) {
-    console.log(...args);
-  }
-}
-
-function devError(...args) {
-  if (isDevelopmentMode()) {
-    console.error(...args);
-  }
-}
-```
-
-#### Performance Monitoring
-
-```javascript
-// Log compression ratios in development
-if (isDevelopmentMode()) {
-  const originalSize = JSON.stringify(statistics).length;
-  const compressedSize = compressedData.length;
-  const ratio = (
-    ((originalSize - compressedSize) / originalSize) *
-    100
-  ).toFixed(1);
-  devLog(
-    `Statistics saved - Original: ${originalSize} bytes, Compressed: ${compressedSize} bytes, Saved: ${ratio}%`
-  );
-}
-```
-
-## 🔧 Configuration
-
-### Enhanced Environment Variables
-
-- `RAPID_SCRAPING`: Enable rapid mode (default: false)
-- `MAX_RETRIES`: Maximum retry attempts (default: 3)
-- `DELAY_SECONDS`: Delay between requests (default: 5)
-- `DEBUG_MODE`: Enable debug logging (default: false)
-
-### Frontend Configuration
-
-#### Statistics Configuration
-
-```javascript
-// Statistics settings
-const STATISTICS_STORAGE_KEY = "examViewerStatistics";
-const SETTINGS_STORAGE_KEY = "examViewerSettings";
-const COMPRESSION_ENABLED = true;
-const MIGRATION_ENABLED = true;
-const DEBUG_COMPRESSION = isDevelopmentMode();
-```
-
-#### Theme Configuration
-
-```javascript
-// Theme settings
-const THEME_STORAGE_KEY = "examViewerSettings";
-const AUTO_THEME_DETECTION = true;
-const THEME_TRANSITION_DURATION = 300; // milliseconds
-```
-
-### Feature Flags
-
-```javascript
-// Feature configuration
-const FEATURES = {
-  STATISTICS_ENABLED: true,
-  DARK_MODE_ENABLED: true,
-  HIGHLIGHT_MODE_ENABLED: true,
-  COMPRESSION_ENABLED: true,
-  MIGRATION_ENABLED: true,
-  DEBUG_MODE: isDevelopmentMode(),
-};
-```
-
-## 🚨 Enhanced Error Handling
-
-### Frontend Error Types
-
-1. **Statistics Errors**
-
-   - Storage quota exceeded
-   - Data corruption during compression/decompression
-   - Migration failures
-
-2. **Theme Errors**
-
-   - CSS custom property support issues
-   - System theme detection failures
-
-3. **Highlight Errors**
-   - State synchronization issues
-   - Statistics tracking failures
-
-### Error Recovery
-
-```javascript
-// Graceful error recovery for statistics
-function recoverFromStatisticsError() {
-  try {
-    // Attempt to recover from backup
-    const backup = localStorage.getItem("examViewerStatistics_backup");
-    if (backup) {
-      statistics = JSON.parse(backup);
-      return true;
-    }
-  } catch (error) {
-    devError("Backup recovery failed:", error);
-  }
-
-  // Reset to default state
-  statistics = getDefaultStatistics();
-  return false;
-}
-```
-
-### Performance Optimization
-
-#### Statistics Performance
-
-The statistics system includes several performance optimizations:
-
-- **Compression**: 60-80% reduction in storage size
-- **Lazy Loading**: Statistics loaded only when needed
-- **Efficient Updates**: Incremental updates instead of full recalculation
-- **Memory Management**: Automatic cleanup of old sessions
-
-#### Theme Performance
-
-- **CSS Variables**: Efficient theme switching with no JavaScript overhead
-- **Prefers-Color-Scheme**: Automatic system theme detection
-- **Smooth Transitions**: Optimized CSS transitions for theme changes
-- **Mobile Optimization**: Reduced reflow and repaint operations
-
-#### Highlight Performance
-
-- **Event Delegation**: Efficient event handling for highlight interactions
-- **State Caching**: Cached highlight states to reduce computations
-- **DOM Optimization**: Minimal DOM manipulation during highlight changes
-
-### Data Migration
-
-The application includes robust data migration for backward compatibility:
-
-```javascript
-// Migration example
-function migrateStatistics(oldData) {
-  // Migrate session format
-  if (oldData.sessions) {
-    oldData.sessions.forEach((session) => {
-      if (session.examCode && !session.ec) {
-        session.ec = session.examCode;
-        delete session.examCode;
-      }
-    });
-  }
-
-  // Migrate question format
-  if (oldData.questions) {
-    oldData.questions.forEach((question) => {
-      if (question.questionNumber && !question.qn) {
-        question.qn = question.questionNumber;
-        delete question.questionNumber;
-      }
-    });
-  }
-
-  return oldData;
-}
-```
-
-### Development Utilities
-
-#### Debug Functions
-
-```javascript
+```typescript
 // Development mode detection
-function isDevelopmentMode() {
-  return (
-    location.hostname === "localhost" ||
-    location.hostname === "127.0.0.1" ||
-    location.hostname === ""
-  );
+export function isDevelopmentMode(): boolean {
+  return process.env.NODE_ENV === 'development';
 }
 
 // Debug logging
-function devLog(message, data) {
+export function devLog(message: string, data?: any): void {
   if (isDevelopmentMode()) {
     console.log(`[DEBUG] ${message}`, data);
   }
 }
 
 // Error logging
-function devError(message, error) {
+export function devError(message: string, error: Error): void {
   if (isDevelopmentMode()) {
     console.error(`[ERROR] ${message}`, error);
   }
 }
 ```
 
-#### Performance Monitoring
+### Performance Monitoring
 
-```javascript
-// Performance monitoring for statistics
-function monitorStatisticsPerformance() {
-  const startTime = performance.now();
+```typescript
+// Performance measurement
+export function measurePerformance<T>(
+  name: string,
+  fn: () => T
+): T {
+  if (isDevelopmentMode()) {
+    performance.mark(`${name}-start`);
+    const result = fn();
+    performance.mark(`${name}-end`);
+    performance.measure(name, `${name}-start`, `${name}-end`);
+    return result;
+  }
+  return fn();
+}
 
-  // Perform statistics operation
-  saveStatistics();
+// Component performance monitoring
+export function withPerformanceMonitoring<P extends object>(
+  WrappedComponent: React.ComponentType<P>,
+  displayName: string
+): React.ComponentType<P> {
+  const MonitoredComponent = (props: P) => {
+    React.useEffect(() => {
+      if (isDevelopmentMode()) {
+        console.log(`${displayName} rendered`);
+      }
+    });
 
-  const endTime = performance.now();
-  const duration = endTime - startTime;
+    return <WrappedComponent {...props} />;
+  };
 
-  devLog(`Statistics save took ${duration.toFixed(2)}ms`);
+  MonitoredComponent.displayName = `withPerformanceMonitoring(${displayName})`;
+  return MonitoredComponent;
 }
 ```
 
-### Configuration
-
-#### Statistics Configuration
-
-```javascript
-// Statistics settings
-const STATISTICS_CONFIG = {
-  MAX_SESSIONS: 100, // Maximum sessions to keep
-  COMPRESSION_ENABLED: true, // Enable data compression
-  AUTO_CLEANUP: true, // Auto-cleanup old sessions
-  BACKUP_ENABLED: true, // Enable backup creation
-  MIGRATION_ENABLED: true, // Enable automatic migration
-};
-```
-
-#### Theme Configuration
-
-```javascript
-// Theme settings
-const THEME_CONFIG = {
-  STORAGE_KEY: "examViewerSettings",
-  AUTO_DETECTION: true,
-  TRANSITION_DURATION: 300,
-  PREFERS_COLOR_SCHEME: true,
-  SMOOTH_TRANSITIONS: true,
-};
-```
-
-#### Highlight Configuration
-
-```javascript
-// Highlight settings
-const HIGHLIGHT_CONFIG = {
-  TRACK_USAGE: true, // Track highlight usage
-  VISUAL_FEEDBACK: true, // Show visual feedback
-  STATISTICS_INTEGRATION: true, // Integrate with statistics
-  RESET_ON_NAVIGATION: true, // Reset on question navigation
-};
-```
-
-### API Examples
-
-#### Complete Statistics Workflow
-
-```javascript
-// Initialize statistics system
-loadStatistics();
-
-// Start exam session
-startExamSession("CAD", "Certified Application Developer");
-
-// Track question attempt
-trackQuestionAttempt(1, ["A", "C"], new Set(["A", "C"]), true, 45, false);
-
-// Update session stats
-updateSessionStats();
-
-// Display statistics
-displayStatistics();
-
-// Export statistics
-exportStatistics();
-
-// End session
-endCurrentSession();
-```
-
-#### Complete Theme Workflow
-
-```javascript
-// Load theme settings
-loadSettings();
-
-// Apply theme based on system preference
-const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-applyTheme(prefersDark);
-
-// Listen for system theme changes
-window
-  .matchMedia("(prefers-color-scheme: dark)")
-  .addEventListener("change", (e) => {
-    applyTheme(e.matches);
-  });
-
-// Save theme settings
-saveSettings();
-```
-
-#### Complete Highlight Workflow
-
-```javascript
-// Initialize highlight system
-isHighlightEnabled = settings.highlightDefault;
-
-// Toggle highlight mode
-toggleHighlight();
-
-// Update highlight button
-updateHighlightButton();
-
-// Track highlight usage (automatic)
-// Highlight interactions are automatically tracked in statistics
-```
-
-This enhanced API documentation covers all the new features including the advanced statistics system, dark mode support, highlight functionality, and performance optimizations while maintaining backward compatibility with existing implementations.
+This comprehensive API documentation covers the modern Next.js architecture with TypeScript, React components, Zustand state management, and all the utilities and hooks used in the application.
