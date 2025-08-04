@@ -1,6 +1,29 @@
 {
-  "name": "nextjs-app",
-  "version": "0.1.0",
+  "name": "exams-viewer",
+  "version": "5.0.0",
+  "description": "Modern exam practice platform for ServiceNow certification study materials",
+  "homepage": "https://JohanDevl.github.io/Exams-Viewer/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JohanDevl/Exams-Viewer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JohanDevl/Exams-Viewer/issues"
+  },
+  "author": {
+    "name": "Johan",
+    "url": "https://github.com/JohanDevl"
+  },
+  "license": "Educational-Use",
+  "keywords": [
+    "servicenow",
+    "certification",
+    "exam",
+    "practice",
+    "nextjs",
+    "react",
+    "typescript"
+  ],
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",

@@ -7,7 +7,7 @@ import { ModalsProvider } from "@/components/providers/ModalsProvider";
 import { KeyboardShortcutsProvider } from "@/components/providers/KeyboardShortcutsProvider";
 
 // Base path for GitHub Pages deployment
-const BASE_PATH = process.env.NODE_ENV === 'production' ? '/Exams-Viewer-Beta' : '';
+const BASE_PATH = process.env.NODE_ENV === 'production' ? '/Exams-Viewer' : '';
 
 const inter = Inter({
   subsets: ["latin"],

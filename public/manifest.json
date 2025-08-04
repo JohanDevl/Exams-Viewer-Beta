@@ -2,7 +2,7 @@
   "name": "Exams Viewer - ServiceNow Certification Training",
   "short_name": "Exams Viewer",
   "description": "Modern platform for ServiceNow certification exam preparation with practice questions, statistics, and progress tracking.",
-  "start_url": "/Exams-Viewer-Beta/",
+  "start_url": "/Exams-Viewer/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0f172a",
@@ -12,15 +12,15 @@
     "productivity"
   ],
   "lang": "fr",
-  "scope": "/Exams-Viewer-Beta/",
+  "scope": "/Exams-Viewer/",
   "icons": [
     {
-      "src": "/Exams-Viewer-Beta/favicon.ico",
+      "src": "/Exams-Viewer/favicon.ico",
       "sizes": "any",
       "type": "image/x-icon"
     },
     {
-      "src": "/Exams-Viewer-Beta/favicon.svg",
+      "src": "/Exams-Viewer/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }
@@ -31,10 +31,10 @@
       "name": "Statistics",
       "short_name": "Stats",
       "description": "View your exam statistics",
-      "url": "/Exams-Viewer-Beta/?action=stats",
+      "url": "/Exams-Viewer/?action=stats",
       "icons": [
         {
-          "src": "/Exams-Viewer-Beta/favicon.ico",
+          "src": "/Exams-Viewer/favicon.ico",
           "sizes": "any"
         }
       ]
@@ -43,10 +43,10 @@
       "name": "Favorites",
       "short_name": "Favorites",
       "description": "Access your favorite questions",
-      "url": "/Exams-Viewer-Beta/?action=favorites",
+      "url": "/Exams-Viewer/?action=favorites",
       "icons": [
         {
-          "src": "/Exams-Viewer-Beta/favicon.ico",
+          "src": "/Exams-Viewer/favicon.ico",
           "sizes": "any"
         }
       ]

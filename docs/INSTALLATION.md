@@ -18,8 +18,8 @@ To run the Next.js application locally or contribute to development:
 
 ```bash
 # Clone the repository
-git clone https://github.com/JohanDevl/Exams-Viewer-Beta.git
-cd Exams-Viewer-Beta
+git clone https://github.com/JohanDevl/Exams-Viewer.git
+cd Exams-Viewer
 
 # Install Node.js dependencies
 npm install

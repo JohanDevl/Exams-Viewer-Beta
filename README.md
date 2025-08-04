@@ -89,8 +89,8 @@ Currently supporting **20+ exams** across ServiceNow certification tracks:
 
 ```bash
 # Clone the repository
-git clone https://github.com/JohanDevl/Exams-Viewer-Beta.git
-cd Exams-Viewer-Beta
+git clone https://github.com/JohanDevl/Exams-Viewer.git
+cd Exams-Viewer
 
 # Install Node.js dependencies
 npm install
@@ -109,7 +109,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the application.
 ### Modern Next.js Structure
 
 ```
-Exams-Viewer-Beta/
+Exams-Viewer/
 ├── 🏠 src/                          # Application source code
 │   ├── 📄 app/                      # Next.js App Router
 │   │   ├── globals.css               # Global styles
@@ -256,8 +256,8 @@ We welcome contributions! Here's how to get started:
 
 ```bash
 # Clone your fork
-git clone https://github.com/yourusername/Exams-Viewer-Beta.git
-cd Exams-Viewer-Beta
+git clone https://github.com/yourusername/Exams-Viewer.git
+cd Exams-Viewer
 
 # Install dependencies
 npm install

@@ -9,7 +9,7 @@ This guide covers the development setup, architecture patterns, and contribution
 ### Modern Next.js Structure
 
 ```
-Exams-Viewer-Beta/
+Exams-Viewer/
 ├── 📁 src/                        # Application source code
 │   ├── 📄 app/                    # Next.js App Router
 │   │   ├── globals.css            # Global styles and CSS variables
