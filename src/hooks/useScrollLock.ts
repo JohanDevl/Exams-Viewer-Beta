@@ -6,7 +6,7 @@ export const useScrollLock = () => {
   const isLocked = useRef<boolean>(false);
   const lockQueue = useRef<number>(0);
 
-  // ULTRA-AGGRESSIVE scroll lock for mobile - NO COMPROMISES
+  // INVISIBLE SCROLL LOCK for mobile - effective but seamless  
   const withUltraScrollLock = useCallback(<T extends unknown[]>(callback: (...args: T) => void) => {
     return (...args: T) => {
       // Detect mobile
@@ -18,8 +18,8 @@ export const useScrollLock = () => {
         return;
       }
 
-      // Mobile: ULTRA-AGGRESSIVE lock
-      const scrollY = window.scrollY;
+      // Mobile: SMART INVISIBLE lock
+      const startScrollY = window.scrollY;
       const body = document.body;
       const html = document.documentElement;
       
@@ -27,94 +27,66 @@ export const useScrollLock = () => {
       lockQueue.current++;
       const currentLockId = lockQueue.current;
       
-      // Store ALL original styles and properties
-      const originalBodyStyle = body.style.cssText;
-      const originalHtmlStyle = html.style.cssText;
-      const originalBodyClass = body.className;
-      const originalHtmlClass = html.className;
+      // Store original overflow only
+      const originalBodyOverflow = body.style.overflow;
+      const originalHtmlOverflow = html.style.overflow;
+      const originalBodyTouchAction = body.style.touchAction;
+      const originalHtmlTouchAction = html.style.touchAction;
       
-      // NUCLEAR OPTION: Complete page freeze
-      body.style.cssText = `
-        position: fixed !important;
-        top: -${scrollY}px !important;
-        left: 0 !important;
-        right: 0 !important;
-        width: 100% !important;
-        height: 100vh !important;
-        overflow: hidden !important;
-        overscroll-behavior: none !important;
-        touch-action: none !important;
-        user-select: none !important;
-        -webkit-user-select: none !important;
-        -webkit-touch-callout: none !important;
-        -webkit-tap-highlight-color: transparent !important;
-      `;
+      // MINIMAL but effective lock - preserve visual appearance
+      body.style.overflow = 'hidden';
+      body.style.touchAction = 'none';
+      html.style.overflow = 'hidden';
+      html.style.touchAction = 'none';
       
-      html.style.cssText = `
-        overflow: hidden !important;
-        height: 100% !important;
-        overscroll-behavior: none !important;
-        touch-action: none !important;
-        position: fixed !important;
-        width: 100% !important;
-      `;
-      
-      // Add lock classes for additional CSS control
-      body.classList.add('scroll-locked', 'ultra-locked');
-      html.classList.add('scroll-locked', 'ultra-locked');
-      
-      // Disable ALL scroll-related events during lock
-      const preventAllScrollEvents = (e: Event) => {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        return false;
+      // Smart scroll prevention that maintains position
+      const smartScrollPrevent = (e: Event) => {
+        // Only prevent scroll events, not touch events for buttons
+        if (e.type === 'scroll' || e.type === 'touchmove') {
+          e.preventDefault();
+          e.stopPropagation();
+          // Instantly restore scroll position if it changed
+          if (window.scrollY !== startScrollY) {
+            window.scrollTo(0, startScrollY);
+          }
+        }
       };
       
-      const scrollEvents = ['scroll', 'touchmove', 'touchstart', 'touchend', 'wheel', 'mousewheel'];
-      scrollEvents.forEach(event => {
-        document.addEventListener(event, preventAllScrollEvents, { passive: false, capture: true });
-        window.addEventListener(event, preventAllScrollEvents, { passive: false, capture: true });
+      const criticalScrollEvents = ['scroll', 'touchmove'];
+      criticalScrollEvents.forEach(event => {
+        document.addEventListener(event, smartScrollPrevent, { passive: false, capture: true });
+        window.addEventListener(event, smartScrollPrevent, { passive: false, capture: true });
       });
       
       isLocked.current = true;
       
       try {
-        // Execute callback immediately while completely locked
+        // Execute callback immediately
         callback(...args);
       } finally {
-        // EXTENDED delay for mobile - NO RUSH
-        const restoreDelay = 300; // 300ms pour être sûr
+        // MINIMAL delay for mobile - just enough
+        const restoreDelay = 100; // 100ms minimum
         
         setTimeout(() => {
           // Only restore if we're still the current lock
           if (lockQueue.current === currentLockId) {
             // Remove event listeners
-            scrollEvents.forEach(event => {
-              document.removeEventListener(event, preventAllScrollEvents, { capture: true });
-              window.removeEventListener(event, preventAllScrollEvents, { capture: true });
+            criticalScrollEvents.forEach(event => {
+              document.removeEventListener(event, smartScrollPrevent, { capture: true });
+              window.removeEventListener(event, smartScrollPrevent, { capture: true });
             });
             
-            // Restore classes
-            body.className = originalBodyClass;
-            html.className = originalHtmlClass;
+            // Restore original overflow styles only
+            body.style.overflow = originalBodyOverflow;
+            body.style.touchAction = originalBodyTouchAction;
+            html.style.overflow = originalHtmlOverflow;  
+            html.style.touchAction = originalHtmlTouchAction;
             
-            // Restore styles
-            body.style.cssText = originalBodyStyle;
-            html.style.cssText = originalHtmlStyle;
+            // Final position check
+            if (window.scrollY !== startScrollY) {
+              window.scrollTo({ top: startScrollY, left: 0, behavior: 'instant' });
+            }
             
-            // Restore scroll position with multiple attempts
-            const restoreScroll = () => {
-              window.scrollTo({ top: scrollY, left: 0, behavior: 'instant' });
-              // Double-check after a tick
-              requestAnimationFrame(() => {
-                if (window.scrollY !== scrollY) {
-                  window.scrollTo({ top: scrollY, left: 0, behavior: 'instant' });
-                }
-              });
-            };
-            
-            restoreScroll();
             isLocked.current = false;
           }
         }, restoreDelay);
