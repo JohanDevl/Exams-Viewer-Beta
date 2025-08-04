@@ -6,11 +6,93 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Summary
 
+- [5.0.0] - 2025-08-04: Complete Architecture Overhaul - GitHub Pages & Mobile Experience Revolution
 - [4.3.0] - 2025-07-29: User-Perceived Difficulty Rating System
 - [4.2.0] - 2025-07-28: Enhanced Keyboard Shortcuts with Visual Feedback
 - [4.1.2] - 2025-07-28: Mobile Navigation & Performance Fixes
 - [4.1.1] - 2025-07-28: Performance Optimization - Removed Obsolete Exam Preloading
 - [4.1.0] - 2025-07-28: Smart Cache Strategy & Deployment Optimization
+
+## [5.0.0] - 2025-08-04
+
+### 🚨 Breaking Changes
+- **🏗️ Complete Architecture Migration**: Revolutionary platform transformation
+  - **BREAKING**: Migrated from vanilla JavaScript/HTML to modern Next.js 15 with React 19
+  - **BREAKING**: Replaced manual DOM manipulation with React component architecture
+  - **BREAKING**: Converted to TypeScript for enhanced type safety and developer experience
+  - **BREAKING**: Implemented Zustand state management replacing localStorage-based state handling
+  - **BREAKING**: Adopted Tailwind CSS and Radix UI replacing custom CSS styling system
+  - **BREAKING**: New App Router architecture with server-side rendering capabilities
+  - **BREAKING**: Changed from static site to modern React application with PWA capabilities
+
+### ✨ New Features
+- **🔗 Dynamic Project Links System**: Intelligent creator attribution and project navigation
+  - Auto-detection of GitHub repository name for basePath-aware links
+  - Dynamic project links with context-aware URL generation
+  - Enhanced creator attribution section with GitHub and Raycast profile links
+  - Responsive design with mobile-optimized touch targets for external links
+  - Professional developer information display with hover effects and tooltips
+
+- **🎯 GitHub Pages Deployment Optimization**: Comprehensive deployment infrastructure improvements
+  - Automatic basePath detection from GitHub repository configuration
+  - Dynamic basePath-aware manifest generation for PWA compatibility
+  - Intelligent asset path resolution for GitHub Pages hosting environment
+  - Enhanced build process with integrated manifest generation workflow
+
+### 🎨 User Experience Enhancements
+- **📱 Ultra-Aggressive Mobile Scroll Lock System**: Revolutionary mobile interaction stability
+  - Complete scroll prevention during button interactions to eliminate position loss
+  - Extended 300ms lock duration on mobile devices for bulletproof stability
+  - Intelligent mobile detection with user agent and screen width analysis
+  - Multiple CSS reinforcement layers for scroll prevention (position: fixed, overflow: hidden)
+  - Automatic scroll position restoration with multiple fallback attempts
+  - Sound interference prevention on mobile to avoid setTimeout conflicts
+  - Event prevention system blocking all scroll-related events during interactions
+
+- **🎨 Enhanced Visual Identity**: Professional branding and visual consistency
+  - Official Raycast logo implementation with proper design specifications
+  - Improved logo component with accurate color schemes and proportions
+  - Consistent visual hierarchy across all branding elements
+  - Enhanced creator attribution with professional social media integration
+
+### 🔧 Technical Improvements
+- **🏗️ Modern Next.js Architecture**: Optimized development and deployment workflow
+  - Turbopack integration for faster development builds and hot reload
+  - Enhanced next.config.ts with basePath auto-detection capabilities
+  - Streamlined build process with automated manifest generation
+  - Improved development experience with optimized configuration management
+
+- **⚡ Performance Optimizations**: Enhanced loading and interaction performance
+  - Invisible mobile scroll lock implementation with zero visual impact
+  - Optimized asset loading with basePath-aware resource resolution
+  - Efficient link generation with intelligent path calculation
+  - Memory-efficient event handling for mobile scroll prevention system
+
+- **♿ Accessibility & Mobile Experience**: Enhanced usability across all devices
+  - Touch-friendly creator link layout with proper spacing and sizing
+  - Mobile-first responsive design for external navigation elements
+  - Improved focus management for keyboard navigation
+  - High contrast support maintained across all visual enhancements
+
+### 🐛 Bug Fixes
+- **📱 Mobile Scroll Clipping**: Resolved position loss during user interactions
+  - Fixed scroll clipping issues that occurred during button validation on mobile devices
+  - Eliminated unwanted page movement when users interact with question controls
+  - Improved timing mechanisms for scroll lock activation and deactivation
+  - Enhanced reliability of scroll position restoration after interactions
+
+- **🔗 PWA Manifest Issues**: Resolved all manifest 404 errors for GitHub Pages
+  - Fixed PWA manifest loading errors that prevented proper app installation
+  - Corrected icon path resolution for GitHub Pages deployment environment
+  - Enhanced favicon loading with proper basePath integration
+  - Improved service worker compatibility with dynamic path resolution
+
+### 🚀 Deployment & Infrastructure
+- **📦 GitHub Pages Optimization**: Production-ready deployment enhancements
+  - Automated basePath configuration based on repository structure
+  - Dynamic manifest generation integrated into build pipeline
+  - Enhanced asset caching with proper GitHub Pages compatibility
+  - Improved SEO and PWA compliance for GitHub Pages hosting
 
 ## [4.3.0] - 2025-07-29
 
@@ -1009,6 +1091,7 @@ When adding entries to this changelog:
 
 ## Version History Summary
 
+- [5.0.0] - 2025-08-04: Complete Architecture Overhaul - GitHub Pages & Mobile Experience Revolution
 - [4.3.0] - 2025-07-29: User-Perceived Difficulty Rating System
 - [4.2.0] - 2025-07-28: Enhanced Keyboard Shortcuts with Visual Feedback
 - [4.1.2] - 2025-07-28: Mobile Navigation & Performance Fixes
