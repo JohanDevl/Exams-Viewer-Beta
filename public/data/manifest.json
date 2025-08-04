@@ -7,7 +7,7 @@
     {
       "code": "CAD",
       "name": "CAD",
-      "description": "ServiceNow Certified Application Developer certification exam questions",
+      "description": "Certified Application Developer certification exam questions",
       "questionCount": 158,
       "lastUpdated": "2025-08-03T16:36:17.137278"
     },
@@ -140,7 +140,7 @@
     {
       "code": "CSA",
       "name": "CSA",
-      "description": "ServiceNow Certified System Administrator certification exam questions",
+      "description": "Certified System Administrator certification exam questions",
       "questionCount": 369,
       "lastUpdated": "2025-08-03T16:36:17.130018"
     }
