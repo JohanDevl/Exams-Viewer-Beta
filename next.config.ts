@@ -1,19 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Enable static export for GitHub Pages
-  output: 'export',
+  // Enable static export only for production build
+  ...(process.env.NODE_ENV === 'production' && { output: 'export' }),
   
-  // Configure basePath for GitHub Pages (repository name)
-  basePath: '/Exams-Viewer-Beta',
+  // Configure basePath for GitHub Pages only in production
+  ...(process.env.NODE_ENV === 'production' && { basePath: '/Exams-Viewer-Beta' }),
   
   // Disable server-side image optimization for static export
   images: {
     unoptimized: true,
   },
   
-  // Add trailing slash for better GitHub Pages compatibility
-  trailingSlash: true,
+  // Add trailing slash for better GitHub Pages compatibility in production
+  ...(process.env.NODE_ENV === 'production' && { trailingSlash: true }),
   
   typescript: {
     // Allow build to complete even with TypeScript warnings (not errors)
