@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Moon, Sun, Settings, BarChart3, Heart, Menu, Github, ExternalLink, Download } from 'lucide-react';
+import { Moon, Sun, Settings, BarChart3, Heart, Menu, Github, ExternalLink, Download, Code, Bug } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ClientOnly } from '@/components/ui/ClientOnly';
 import { RaycastLogo } from '@/components/ui/RaycastLogo';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useExamStore } from '@/stores/examStore';
+import { getProjectLinks } from '@/lib/assets';
 import { cn } from '@/lib/utils';
 
 export function AppHeader() {
@@ -22,6 +23,7 @@ export function AppHeader() {
   const { currentExam, questionStates } = useExamStore();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const projectLinks = getProjectLinks();
   
   // Check if we have data to enable/disable certain buttons
   const hasExamData = !!currentExam;
@@ -143,7 +145,7 @@ export function AppHeader() {
               title="GitHub Profile"
             >
               <a
-                href="https://github.com/JohanDevl"
+                href={projectLinks.creatorGitHub}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1"
@@ -160,12 +162,31 @@ export function AppHeader() {
               title="Raycast Profile"
             >
               <a
-                href="https://www.raycast.com/xjo_nd?via=johan"
+                href={projectLinks.creatorRaycast}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1"
               >
                 <RaycastLogo className="h-4 w-4" />
+              </a>
+            </Button>
+
+            <div className="w-px h-6 bg-border mx-1" />
+
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="text-muted-foreground hover:text-foreground"
+              title="Project Repository"
+            >
+              <a
+                href={projectLinks.repository}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1"
+              >
+                <Code className="h-4 w-4" />
               </a>
             </Button>
           </div>
@@ -260,7 +281,7 @@ export function AppHeader() {
                     className="text-muted-foreground hover:text-foreground flex-1"
                   >
                     <a
-                      href="https://github.com/JohanDevl"
+                      href={projectLinks.creatorGitHub}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2"
@@ -277,7 +298,7 @@ export function AppHeader() {
                     className="text-muted-foreground hover:text-foreground flex-1"
                   >
                     <a
-                      href="https://www.raycast.com/xjo_nd?via=johan"
+                      href={projectLinks.creatorRaycast}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2"
@@ -285,6 +306,43 @@ export function AppHeader() {
                     >
                       <RaycastLogo className="h-4 w-4" />
                       <span>Raycast</span>
+                    </a>
+                  </Button>
+                </div>
+                
+                <div className="flex gap-2 justify-center mt-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    asChild
+                    className="text-muted-foreground hover:text-foreground flex-1"
+                  >
+                    <a
+                      href={projectLinks.repository}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Code className="h-4 w-4" />
+                      <span>Source Code</span>
+                    </a>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    asChild
+                    className="text-muted-foreground hover:text-foreground flex-1"
+                  >
+                    <a
+                      href={projectLinks.issues}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Bug className="h-4 w-4" />
+                      <span>Report Bug</span>
                     </a>
                   </Button>
                 </div>

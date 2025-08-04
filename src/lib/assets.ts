@@ -56,3 +56,59 @@ export const getAssetPath = (path: string): string => {
 export const getDataPath = (dataPath: string): string => {
   return getAssetPath(`data/${dataPath}`);
 };
+
+/**
+ * Get GitHub repository information from environment or basePath
+ * @returns Object with owner and repo name
+ */
+const getGitHubRepoInfo = () => {
+  // Try to get from environment variables first
+  if (process.env.GITHUB_REPOSITORY) {
+    const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+    return { owner, repo };
+  }
+  
+  // Fallback to basePath detection
+  const basePath = getBasePath();
+  if (basePath) {
+    const repoName = basePath.replace('/', '');
+    return { owner: 'JohanDevl', repo: repoName };
+  }
+  
+  // Default fallback
+  return { owner: 'JohanDevl', repo: 'Exams-Viewer' };
+};
+
+/**
+ * Get the GitHub repository URL
+ * @returns The full GitHub repository URL
+ */
+export const getGitHubRepoUrl = (): string => {
+  const { owner, repo } = getGitHubRepoInfo();
+  return `https://github.com/${owner}/${repo}`;
+};
+
+/**
+ * Get the GitHub issues URL
+ * @returns The full GitHub issues URL
+ */
+export const getGitHubIssuesUrl = (): string => {
+  const { owner, repo } = getGitHubRepoInfo();
+  return `https://github.com/${owner}/${repo}/issues`;
+};
+
+/**
+ * Get project links configuration
+ * @returns Object with all project-related URLs
+ */
+export const getProjectLinks = () => {
+  return {
+    // Project links
+    repository: getGitHubRepoUrl(),
+    issues: getGitHubIssuesUrl(),
+    
+    // Creator links (fixed)
+    creatorGitHub: 'https://github.com/JohanDevl',
+    creatorRaycast: 'https://www.raycast.com/xjo_nd?via=johan'
+  };
+};

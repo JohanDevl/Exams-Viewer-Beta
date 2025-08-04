@@ -1,6 +1,6 @@
 'use client';
 
-import { Settings, Palette, Eye, Navigation, Keyboard, Volume2, Star, Grid, List, RotateCcw, Sidebar, MessageCircle, User, Github, ExternalLink } from 'lucide-react';
+import { Settings, Palette, Eye, Navigation, Keyboard, Volume2, Star, Grid, List, RotateCcw, Sidebar, MessageCircle, User, Github, ExternalLink, Bug, Code } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent, 
@@ -26,6 +26,7 @@ import { ClientOnly } from '@/components/ui/ClientOnly';
 import { RaycastLogo } from '@/components/ui/RaycastLogo';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { getProjectLinks } from '@/lib/assets';
 import type { SidebarPosition } from '@/types';
 
 export function SettingsModal() {
@@ -38,6 +39,7 @@ export function SettingsModal() {
   } = useSettingsStore();
   
   const { shortcuts } = useKeyboardShortcuts();
+  const projectLinks = getProjectLinks();
 
   const handleSettingChange = (key: keyof typeof settings, value: string | boolean) => {
     updateSettings({ [key]: value });
@@ -361,41 +363,80 @@ export function SettingsModal() {
                     <p className="font-medium text-foreground mb-2">Created by Johan</p>
                   </div>
                   
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
-                      className="flex-1"
-                    >
-                      <a
-                        href="https://github.com/JohanDevl"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2"
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                        className="flex-1"
                       >
-                        <Github className="h-4 w-4" />
-                        GitHub Profile
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
-                      className="flex-1"
-                    >
-                      <a
-                        href="https://www.raycast.com/xjo_nd?via=johan"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2"
+                        <a
+                          href={projectLinks.creatorGitHub}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2"
+                        >
+                          <Github className="h-4 w-4" />
+                          GitHub Profile
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                        className="flex-1"
                       >
-                        <RaycastLogo className="h-4 w-4" />
-                        Raycast Profile
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    </Button>
+                        <a
+                          href={projectLinks.creatorRaycast}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2"
+                        >
+                          <RaycastLogo className="h-4 w-4" />
+                          Raycast Profile
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </Button>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                        className="flex-1"
+                      >
+                        <a
+                          href={projectLinks.repository}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2"
+                        >
+                          <Code className="h-4 w-4" />
+                          Source Code
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                        className="flex-1"
+                      >
+                        <a
+                          href={projectLinks.issues}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2"
+                        >
+                          <Bug className="h-4 w-4" />
+                          Report Bug
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </Button>
+                    </div>
                   </div>
                   
                   <Separator />
