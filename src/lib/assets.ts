@@ -2,20 +2,33 @@
  * Utility functions for handling asset paths with Next.js basePath
  */
 
-// Get the basePath from Next.js config
+// Get the basePath dynamically based on environment
 const getBasePath = () => {
-  // In production (GitHub Pages), the basePath is '/Exams-Viewer-Beta'
-  // In development, it's empty
+  // Client-side detection
   if (typeof window !== 'undefined') {
-    // Client-side: check if we're on GitHub Pages domain
-    if (window.location.hostname === 'johandevl.github.io') {
-      return '/Exams-Viewer-Beta';
+    // Check if we're on GitHub Pages domain
+    if (window.location.hostname.endsWith('.github.io')) {
+      // Extract repo name from pathname
+      const pathParts = window.location.pathname.split('/').filter(Boolean);
+      if (pathParts.length > 0) {
+        return `/${pathParts[0]}`;
+      }
     }
+    return '';
   }
   
-  // For server-side or development, check environment or use process.env.NODE_ENV
+  // Server-side detection
   if (process.env.NODE_ENV === 'production') {
-    return '/Exams-Viewer-Beta';
+    // Try to get from GitHub environment
+    const ghRepo = process.env.GITHUB_REPOSITORY?.split('/')[1];
+    if (ghRepo && process.env.GITHUB_ACTIONS) {
+      return `/${ghRepo}`;
+    }
+    
+    // Check for custom basePath environment variable
+    if (process.env.NEXT_PUBLIC_BASE_PATH) {
+      return process.env.NEXT_PUBLIC_BASE_PATH;
+    }
   }
   
   return '';

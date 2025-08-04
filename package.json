@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "node scripts/generate-manifest.js && next build",
+    "build:github": "node scripts/generate-manifest.js && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate-manifest": "node scripts/generate-manifest.js"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.2",
