@@ -10,6 +10,10 @@ A cutting-edge web application for practicing ServiceNow certification exam ques
 
 > Modern Next.js application with server-side rendering, responsive design, dark mode, and comprehensive study features.
 
+**📜 Legacy Version**: [https://JohanDevl.github.io/Exams-Viewer-Legacy/](https://JohanDevl.github.io/Exams-Viewer-Legacy/)
+
+> Original vanilla JavaScript version (archived). For legacy code reference, see the [Legacy Repository](https://github.com/JohanDevl/Exams-Viewer-Legacy).
+
 ## ✨ Key Features
 
 ### 🎯 Modern Learning Experience

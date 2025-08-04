@@ -437,6 +437,43 @@ export function SettingsModal() {
                         </a>
                       </Button>
                     </div>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                        className="flex-1"
+                      >
+                        <a
+                          href="https://github.com/JohanDevl/Exams-Viewer-Legacy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2"
+                        >
+                          <Code className="h-4 w-4" />
+                          Legacy Repository
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                        className="flex-1"
+                      >
+                        <a
+                          href="https://JohanDevl.github.io/Exams-Viewer-Legacy/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Legacy Demo
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </Button>
+                    </div>
                   </div>
                   
                   <Separator />
@@ -444,6 +481,7 @@ export function SettingsModal() {
                   <div className="text-xs text-muted-foreground">
                     <p>Data from ExamTopics.com for educational purposes only.</p>
                     <p className="mt-1">Open source project built with Next.js, React, and TypeScript.</p>
+                    <p className="mt-1">Legacy version (vanilla JavaScript) available for reference.</p>
                   </div>
                 </CardContent>
               </Card>

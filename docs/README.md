@@ -2,6 +2,15 @@
 
 Complete documentation for the modern Next.js Exams Viewer application.
 
+## 📜 Legacy Version
+
+For reference to the original vanilla JavaScript implementation:
+
+- **Legacy Repository**: [Exams-Viewer-Legacy](https://github.com/JohanDevl/Exams-Viewer-Legacy)
+- **Legacy Demo**: [https://JohanDevl.github.io/Exams-Viewer-Legacy/](https://JohanDevl.github.io/Exams-Viewer-Legacy/)
+
+> The legacy version is archived and no longer maintained. This documentation covers the modern Next.js implementation.
+
 ## 🚀 Quick Start
 - [Installation Guide](INSTALLATION.md) - Next.js setup and deployment
 - [Usage Guide](USAGE.md) - How to use the React application
