@@ -1,6 +1,6 @@
 'use client';
 
-import { Settings, Palette, Eye, Navigation, Keyboard, Volume2, Star, Grid, List, RotateCcw, Sidebar, MessageCircle } from 'lucide-react';
+import { Settings, Palette, Eye, Navigation, Keyboard, Volume2, Star, Grid, List, RotateCcw, Sidebar, MessageCircle, User, Github, ExternalLink } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent, 
@@ -23,6 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { ClientOnly } from '@/components/ui/ClientOnly';
+import { RaycastLogo } from '@/components/ui/RaycastLogo';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import type { SidebarPosition } from '@/types';
@@ -343,6 +344,68 @@ export function SettingsModal() {
                   </CardContent>
                 </Card>
               )}
+
+              {/* About */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <User className="h-4 w-4" />
+                    About
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-sm text-muted-foreground">
+                    <p className="mb-3">
+                      ServiceNow Certification Exam Viewer - A comprehensive tool for exam preparation with advanced features and analytics.
+                    </p>
+                    <p className="font-medium text-foreground mb-2">Created by Johan</p>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="flex-1"
+                    >
+                      <a
+                        href="https://github.com/JohanDevl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2"
+                      >
+                        <Github className="h-4 w-4" />
+                        GitHub Profile
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="flex-1"
+                    >
+                      <a
+                        href="https://www.raycast.com/xjo_nd?via=johan"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2"
+                      >
+                        <RaycastLogo className="h-4 w-4" />
+                        Raycast Profile
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </Button>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="text-xs text-muted-foreground">
+                    <p>Data from ExamTopics.com for educational purposes only.</p>
+                    <p className="mt-1">Open source project built with Next.js, React, and TypeScript.</p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </ScrollArea>
 
