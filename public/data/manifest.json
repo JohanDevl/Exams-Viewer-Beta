@@ -1,6 +1,6 @@
 {
   "version": "3.0",
-  "generated": "2025-08-04T18:15:19.445679",
+  "generated": "2025-08-04T18:22:33.321831",
   "totalExams": 20,
   "totalQuestions": 2593,
   "exams": [
@@ -114,7 +114,7 @@
       "name": "CIS-SM",
       "description": "CIS-SM certification exam questions",
       "questionCount": 39,
-      "lastUpdated": "2025-08-03T19:42:58.947499"
+      "lastUpdated": "2025-08-04T18:22:33.234490"
     },
     {
       "code": "CIS-SPM",
