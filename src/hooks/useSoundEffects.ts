@@ -56,6 +56,10 @@ export const useSoundEffects = () => {
   const playSound = useCallback((soundType: SoundType) => {
     if (!settings.soundEffects) return;
     
+    // COMPLETELY disable sounds on mobile to prevent setTimeout interference with scroll lock
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+    if (isMobile) return;
+    
     // Only play sounds if the user has interacted with the page (browser requirement)
     if (typeof window === 'undefined' || (!window.AudioContext && !(window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)) {
       return;

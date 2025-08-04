@@ -3,92 +3,128 @@
 import { useCallback, useRef } from 'react';
 
 export const useScrollLock = () => {
-  const originalScrollY = useRef<number>(0);
   const isLocked = useRef<boolean>(false);
+  const lockQueue = useRef<number>(0);
 
-  const gentleScrollPrevent = useCallback(() => {
-    if (isLocked.current) {
-      // Check if scroll position has changed
-      if (Math.abs(window.scrollY - originalScrollY.current) > 5) {
-        // Gently restore position without jarring effects
-        window.scrollTo({
-          top: originalScrollY.current,
-          behavior: 'instant' as ScrollBehavior
-        });
-      }
-    }
-  }, []);
-
-
-  const withScrollLock = useCallback(<T extends unknown[]>(callback: (...args: T) => void) => {
+  // ULTRA-AGGRESSIVE scroll lock for mobile - NO COMPROMISES
+  const withUltraScrollLock = useCallback(<T extends unknown[]>(callback: (...args: T) => void) => {
     return (...args: T) => {
-      // Store initial position
-      originalScrollY.current = window.scrollY;
-      isLocked.current = true;
+      // Detect mobile
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
       
-      // Set up gentle monitoring with minimal frequency
-      const monitorInterval = setInterval(gentleScrollPrevent, 16); // ~60fps
-      
-      try {
+      if (!isMobile) {
+        // Desktop: simple callback execution
         callback(...args);
-      } finally {
-        // Release lock after minimal delay (just one animation frame)
-        setTimeout(() => {
-          isLocked.current = false;
-          clearInterval(monitorInterval);
-        }, 16); // Just one frame to let React update
+        return;
       }
-    };
-  }, [gentleScrollPrevent]);
 
-  // Ultra-aggressive invisible scroll lock - complete body locking without clipping
-  const withInvisibleScrollLock = useCallback(<T extends unknown[]>(callback: (...args: T) => void) => {
-    return (...args: T) => {
-      // Store current state
+      // Mobile: ULTRA-AGGRESSIVE lock
       const scrollY = window.scrollY;
       const body = document.body;
       const html = document.documentElement;
       
-      // Store original styles
+      // Increment lock queue
+      lockQueue.current++;
+      const currentLockId = lockQueue.current;
+      
+      // Store ALL original styles and properties
       const originalBodyStyle = body.style.cssText;
       const originalHtmlStyle = html.style.cssText;
+      const originalBodyClass = body.className;
+      const originalHtmlClass = html.className;
       
-      // Apply ultra-aggressive scroll lock before any action
-      body.style.position = 'fixed';
-      body.style.top = `-${scrollY}px`;
-      body.style.left = '0';
-      body.style.right = '0';
-      body.style.width = '100%';
-      body.style.height = '100vh';
-      body.style.overflow = 'hidden';
+      // NUCLEAR OPTION: Complete page freeze
+      body.style.cssText = `
+        position: fixed !important;
+        top: -${scrollY}px !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: 100vh !important;
+        overflow: hidden !important;
+        overscroll-behavior: none !important;
+        touch-action: none !important;
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        -webkit-touch-callout: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+      `;
       
-      // Also lock html element
-      html.style.overflow = 'hidden';
-      html.style.height = '100%';
+      html.style.cssText = `
+        overflow: hidden !important;
+        height: 100% !important;
+        overscroll-behavior: none !important;
+        touch-action: none !important;
+        position: fixed !important;
+        width: 100% !important;
+      `;
       
-      // Disable touch actions on the entire document
-      body.style.touchAction = 'none';
-      html.style.touchAction = 'none';
+      // Add lock classes for additional CSS control
+      body.classList.add('scroll-locked', 'ultra-locked');
+      html.classList.add('scroll-locked', 'ultra-locked');
+      
+      // Disable ALL scroll-related events during lock
+      const preventAllScrollEvents = (e: Event) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      };
+      
+      const scrollEvents = ['scroll', 'touchmove', 'touchstart', 'touchend', 'wheel', 'mousewheel'];
+      scrollEvents.forEach(event => {
+        document.addEventListener(event, preventAllScrollEvents, { passive: false, capture: true });
+        window.addEventListener(event, preventAllScrollEvents, { passive: false, capture: true });
+      });
+      
+      isLocked.current = true;
       
       try {
-        // Execute the callback immediately while locked
+        // Execute callback immediately while completely locked
         callback(...args);
       } finally {
-        // Restore everything with proper delay for mobile to prevent clipping
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
-        const restoreDelay = isMobile ? 100 : 16; // Longer delay on mobile
+        // EXTENDED delay for mobile - NO RUSH
+        const restoreDelay = 300; // 300ms pour être sûr
         
         setTimeout(() => {
-          // Restore original styles
-          body.style.cssText = originalBodyStyle;
-          html.style.cssText = originalHtmlStyle;
-          
-          // Restore scroll position silently
-          window.scrollTo(0, scrollY);
+          // Only restore if we're still the current lock
+          if (lockQueue.current === currentLockId) {
+            // Remove event listeners
+            scrollEvents.forEach(event => {
+              document.removeEventListener(event, preventAllScrollEvents, { capture: true });
+              window.removeEventListener(event, preventAllScrollEvents, { capture: true });
+            });
+            
+            // Restore classes
+            body.className = originalBodyClass;
+            html.className = originalHtmlClass;
+            
+            // Restore styles
+            body.style.cssText = originalBodyStyle;
+            html.style.cssText = originalHtmlStyle;
+            
+            // Restore scroll position with multiple attempts
+            const restoreScroll = () => {
+              window.scrollTo({ top: scrollY, left: 0, behavior: 'instant' });
+              // Double-check after a tick
+              requestAnimationFrame(() => {
+                if (window.scrollY !== scrollY) {
+                  window.scrollTo({ top: scrollY, left: 0, behavior: 'instant' });
+                }
+              });
+            };
+            
+            restoreScroll();
+            isLocked.current = false;
+          }
         }, restoreDelay);
       }
     };
   }, []);
 
-  return { withScrollLock, withInvisibleScrollLock };
+  // Alias both methods to the ultra version for consistency
+  return { 
+    withScrollLock: withUltraScrollLock, 
+    withInvisibleScrollLock: withUltraScrollLock 
+  };
 };

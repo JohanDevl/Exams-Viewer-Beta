@@ -164,4 +164,41 @@
       transform: scale(0.98);
     }
   }
+  
+  /* ULTRA-AGGRESSIVE scroll lock styles for mobile */
+  body.scroll-locked,
+  body.ultra-locked {
+    position: fixed !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    pointer-events: auto !important; /* Keep interactions for buttons */
+  }
+  
+  html.scroll-locked,
+  html.ultra-locked {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  /* Allow interactions only on specific elements during lock */
+  body.ultra-locked * {
+    pointer-events: none !important;
+  }
+  
+  body.ultra-locked button,
+  body.ultra-locked [role="button"],
+  body.ultra-locked input,
+  body.ultra-locked label,
+  body.ultra-locked .answer-option {
+    pointer-events: auto !important;
+  }
 }

@@ -92,6 +92,21 @@ Each question maintains:
 - Advanced search and filtering capabilities
 - Data export functionality (JSON, CSV, TXT, PDF)
 
+## Mobile Optimization
+
+### Ultra-Aggressive Scroll Lock System
+The application features a sophisticated scroll lock system specifically designed for mobile devices to prevent any unwanted scrolling during user interactions:
+
+- **Complete Page Freeze**: During button interactions (validate, show answer, reset), the entire page is locked using `position: fixed` on both `body` and `html` elements
+- **Event Prevention**: All scroll-related events (`scroll`, `touchmove`, `touchstart`, `touchend`, `wheel`) are completely blocked during interactions
+- **300ms Lock Duration**: Extended lock time on mobile ensures zero scroll clipping
+- **Automatic Mobile Detection**: Intelligent detection via user agent and screen width
+- **Sound Interference Prevention**: Audio effects are disabled on mobile to prevent `setTimeout` conflicts
+- **CSS Reinforcement**: Additional CSS classes (`.scroll-locked`, `.ultra-locked`) provide bulletproof scroll prevention
+- **Position Restoration**: Multiple attempts to restore exact scroll position after interaction
+
+This system ensures users experience zero scroll movement during question interactions, maintaining perfect position stability.
+
 ## Documentation
 
 Comprehensive documentation is available in the `/docs/` directory:
