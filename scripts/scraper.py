@@ -884,12 +884,11 @@ def main():
             # Update manifest after successful scraping
             print(f"\n🔄 Updating exam manifest...")
             try:
-                from update_manifest import generate_manifest, validate_manifest, save_manifest
+                from update_manifest import update_single_exam_in_manifest
                 
-                # Generate new manifest
-                manifest = generate_manifest()
-                if manifest and validate_manifest(manifest) and save_manifest(manifest):
-                    print(f"✅ Manifest updated successfully with latest exam data")
+                # Update only this specific exam in the manifest
+                if update_single_exam_in_manifest(args.exam_code):
+                    print(f"✅ Manifest updated successfully for {args.exam_code}")
                 else:
                     print(f"⚠️  Failed to update manifest - check manually with: python3 scripts/update_manifest.py")
             except Exception as e:

@@ -115,6 +115,81 @@ def scan_exam_directory(exam_path):
         return None
 
 
+def update_single_exam_in_manifest(exam_code):
+    """
+    Update only a specific exam in the manifest, preserving existing data
+    
+    Args:
+        exam_code (str): The exam code to update
+        
+    Returns:
+        bool: Success status
+    """
+    project_root = get_project_root()
+    manifest_path = project_root / "public" / "data" / "manifest.json"
+    
+    # Check if manifest exists
+    if not manifest_path.exists():
+        print(f"❌ Manifest file not found: {manifest_path}")
+        print("📝 Creating new manifest with complete scan...")
+        # If no manifest exists, generate a complete one
+        manifest = generate_manifest()
+        return save_manifest(manifest) if manifest else False
+    
+    try:
+        # Load existing manifest
+        with open(manifest_path, 'r', encoding='utf-8') as f:
+            manifest = json.load(f)
+    except Exception as e:
+        print(f"❌ Error loading manifest: {str(e)}")
+        return False
+    
+    # Get updated exam data
+    exam_path = project_root / "public" / "data" / exam_code
+    if not exam_path.exists():
+        print(f"❌ Exam directory not found: {exam_path}")
+        return False
+    
+    updated_entry = scan_exam_directory(exam_path)
+    if not updated_entry:
+        print(f"❌ Failed to scan exam directory: {exam_code}")
+        return False
+    
+    # Find and update the exam in the manifest
+    exam_found = False
+    for i, exam in enumerate(manifest.get('exams', [])):
+        if exam.get('code') == exam_code:
+            # Preserve existing description if it exists and is different from auto-generated
+            existing_description = exam.get('description', '')
+            auto_generated_description = f"{updated_entry['name']} certification exam questions"
+            
+            # Only preserve description if it's not the auto-generated one
+            if existing_description and existing_description != auto_generated_description:
+                print(f"📝 Preserving custom description for {exam_code}")
+                updated_entry['description'] = existing_description
+            
+            # Update the exam entry
+            manifest['exams'][i] = updated_entry
+            exam_found = True
+            print(f"✅ Updated {exam_code} in manifest (questions: {updated_entry['questionCount']})")
+            break
+    
+    if not exam_found:
+        # Add new exam to manifest
+        manifest.setdefault('exams', []).append(updated_entry)
+        # Sort exams by code
+        manifest['exams'].sort(key=lambda x: x['code'])
+        print(f"✅ Added {exam_code} to manifest (questions: {updated_entry['questionCount']})")
+    
+    # Update manifest metadata (but keep other exams' lastUpdated unchanged)
+    manifest['generated'] = datetime.now().isoformat()
+    manifest['totalExams'] = len(manifest.get('exams', []))
+    manifest['totalQuestions'] = sum(exam['questionCount'] for exam in manifest.get('exams', []))
+    
+    # Save the updated manifest
+    return save_manifest(manifest)
+
+
 def generate_manifest():
     """
     Generate the complete manifest.json file
