@@ -7,140 +7,140 @@
     {
       "code": "CAD",
       "name": "CAD",
-      "description": "CAD certification exam questions",
+      "description": "Certified Application Developer",
       "questionCount": 158,
       "lastUpdated": "2025-08-03T19:42:58.930928"
     },
     {
       "code": "CAS-PA",
       "name": "CAS-PA",
-      "description": "CAS-PA certification exam questions",
+      "description": "Certified Application Specialist – Performance Analytics",
       "questionCount": 79,
       "lastUpdated": "2025-08-03T19:42:58.931895"
     },
     {
       "code": "CIS-APM",
       "name": "CIS-APM",
-      "description": "CIS-APM certification exam questions",
+      "description": "Certified Implementation Specialist - Application Portfolio Management",
       "questionCount": 24,
       "lastUpdated": "2025-08-03T19:42:58.932492"
     },
     {
       "code": "CIS-CPG",
       "name": "CIS-CPG",
-      "description": "CIS-CPG certification exam questions",
+      "description": "Certified Implementation Specialist - Cloud Provisioning and Governance",
       "questionCount": 32,
       "lastUpdated": "2025-08-03T19:42:58.932698"
     },
     {
       "code": "CIS-CSM",
       "name": "CIS-CSM",
-      "description": "CIS-CSM certification exam questions",
+      "description": "Certified Implementation Specialist - Customer Service Management",
       "questionCount": 240,
       "lastUpdated": "2025-08-03T19:42:58.934561"
     },
     {
       "code": "CIS-Discovery",
       "name": "CIS-Discovery",
-      "description": "CIS-Discovery certification exam questions",
+      "description": "Certified Implementation Specialist - Discovery",
       "questionCount": 104,
       "lastUpdated": "2025-08-03T19:42:58.936174"
     },
     {
       "code": "CIS-EM",
       "name": "CIS-EM",
-      "description": "CIS-EM certification exam questions",
+      "description": "Certified Implementation Specialist - Event Management",
       "questionCount": 109,
       "lastUpdated": "2025-08-03T19:42:58.937630"
     },
     {
       "code": "CIS-FSM",
       "name": "CIS-FSM",
-      "description": "CIS-FSM certification exam questions",
+      "description": "Certified Implementation Specialist - Field Service Management",
       "questionCount": 44,
       "lastUpdated": "2025-08-04T18:15:19.400826"
     },
     {
       "code": "CIS-HAM",
       "name": "CIS-HAM",
-      "description": "CIS-HAM certification exam questions",
+      "description": "Certified Implementation Specialist - Hardware Asset Management",
       "questionCount": 180,
       "lastUpdated": "2025-08-03T19:42:58.938381"
     },
     {
       "code": "CIS-HR",
       "name": "CIS-HR",
-      "description": "CIS-HR certification exam questions",
+      "description": "Certified Implementation Specialist - Human Resources",
       "questionCount": 169,
       "lastUpdated": "2025-08-03T19:42:58.940865"
     },
     {
       "code": "CIS-ITSM",
       "name": "CIS-ITSM",
-      "description": "CIS-ITSM certification exam questions",
+      "description": "Certified Implementation Specialist - IT Service Management",
       "questionCount": 224,
       "lastUpdated": "2025-08-03T19:42:58.941386"
     },
     {
       "code": "CIS-PPM",
       "name": "CIS-PPM",
-      "description": "CIS-PPM certification exam questions",
+      "description": "Certified Implementation Specialist - Project Portfolio Management",
       "questionCount": 166,
       "lastUpdated": "2025-08-03T19:42:58.942349"
     },
     {
       "code": "CIS-RC",
       "name": "CIS-RC",
-      "description": "CIS-RC certification exam questions",
+      "description": "Certified Implementation Specialist - Risk and Compliance",
       "questionCount": 179,
       "lastUpdated": "2025-08-03T19:42:58.943686"
     },
     {
       "code": "CIS-SAM",
       "name": "CIS-SAM",
-      "description": "CIS-SAM certification exam questions",
+      "description": "Certified Implementation Specialist - Software Asset Management",
       "questionCount": 191,
       "lastUpdated": "2025-08-03T19:42:58.945976"
     },
     {
       "code": "CIS-SIR",
       "name": "CIS-SIR",
-      "description": "CIS-SIR certification exam questions",
+      "description": "Certified Implementation Specialist - Security Incident Response",
       "questionCount": 117,
       "lastUpdated": "2025-08-03T19:42:58.946616"
     },
     {
       "code": "CIS-SM",
       "name": "CIS-SM",
-      "description": "CIS-SM certification exam questions",
+      "description": "Certified Implementation Specialist - Service Mapping",
       "questionCount": 39,
       "lastUpdated": "2025-08-04T18:22:33.234490"
     },
     {
       "code": "CIS-SPM",
       "name": "CIS-SPM",
-      "description": "CIS-SPM certification exam questions",
+      "description": "Certified Implementation Specialist - Strategic Portfolio Management",
       "questionCount": 51,
       "lastUpdated": "2025-08-03T19:42:58.947739"
     },
     {
       "code": "CIS-VR",
       "name": "CIS-VR",
-      "description": "CIS-VR certification exam questions",
+      "description": "Certified Implementation Specialist - Vulnerability Response",
       "questionCount": 59,
       "lastUpdated": "2025-08-03T19:42:58.949053"
     },
     {
       "code": "CIS-VRM",
       "name": "CIS-VRM",
-      "description": "CIS-VRM certification exam questions",
+      "description": "Certified Implementation Specialist - Vendor Risk Management",
       "questionCount": 59,
       "lastUpdated": "2025-08-03T19:42:58.949316"
     },
     {
       "code": "CSA",
       "name": "CSA",
-      "description": "CSA certification exam questions",
+      "description": "Certified System Administrator",
       "questionCount": 369,
       "lastUpdated": "2025-08-03T19:42:58.952463"
     }
