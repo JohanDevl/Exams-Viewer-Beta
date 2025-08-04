@@ -5,8 +5,6 @@ import { useCallback, useRef } from 'react';
 export const useScrollLock = () => {
   const originalScrollY = useRef<number>(0);
   const isLocked = useRef<boolean>(false);
-  const isInvisibleLocked = useRef<boolean>(false);
-  const preventScroll = useRef<((e: Event) => void) | null>(null);
 
   const gentleScrollPrevent = useCallback(() => {
     if (isLocked.current) {
@@ -21,14 +19,6 @@ export const useScrollLock = () => {
     }
   }, []);
 
-  // Invisible scroll prevention for ultra-smooth experience
-  const invisibleScrollPrevent = useCallback((e: Event) => {
-    if (isInvisibleLocked.current) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
-  }, []);
 
   const withScrollLock = useCallback(<T extends unknown[]>(callback: (...args: T) => void) => {
     return (...args: T) => {
@@ -84,15 +74,18 @@ export const useScrollLock = () => {
         // Execute the callback immediately while locked
         callback(...args);
       } finally {
-        // Restore everything with minimal delay to prevent clipping
-        requestAnimationFrame(() => {
+        // Restore everything with proper delay for mobile to prevent clipping
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+        const restoreDelay = isMobile ? 100 : 16; // Longer delay on mobile
+        
+        setTimeout(() => {
           // Restore original styles
           body.style.cssText = originalBodyStyle;
           html.style.cssText = originalHtmlStyle;
           
           // Restore scroll position silently
           window.scrollTo(0, scrollY);
-        });
+        }, restoreDelay);
       }
     };
   }, []);
