@@ -137,8 +137,8 @@ Exams-Viewer/
 │       │   └── links.json             # Resource links
 │       └── manifest.json             # Exam catalog
 ├── 🔧 scripts/                      # Python data management
-│   ├── scraper.py                    # Web scraping
-│   ├── update_all_exams.py           # Batch updates
+│   ├── scraper.py                    # Individual exam scraping
+│   ├── servicenow_batch_scraper.py   # Optimized batch scraping
 │   └── update_manifest.py            # Manifest generation
 └── 📚 docs/                         # Documentation
 ```
@@ -200,8 +200,8 @@ npm run lint
 ### Data Management Scripts
 
 ```bash
-# Update all exam data
-python3 scripts/update_all_exams.py
+# Update all exam data (optimized)
+python3 scripts/servicenow_batch_scraper.py
 
 # Update specific exam
 python3 scripts/scraper.py [EXAM_CODE]

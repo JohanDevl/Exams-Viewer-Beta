@@ -9,9 +9,9 @@ Python scripts for managing the Exams Viewer application data and operations.
 python3 scripts/update_manifest.py
 ```
 
-### Update All Exams
+### Batch Update All Exams (Optimized)
 ```bash
-python3 scripts/update_all_exams.py
+python3 scripts/servicenow_batch_scraper.py
 ```
 
 ### Scrape Individual Exam (with auto-manifest update)
@@ -30,7 +30,7 @@ python3 scripts/scraper.py --help  # See all options
 |--------|---------|-------------|---------------|
 | `update_manifest.py` | Generate optimized manifest.json | After data changes, before deployment | N/A |
 | `scraper.py` | Web scraping of exam questions | Adding new exams, updating content | ✅ Yes |
-| `update_all_exams.py` | Batch update all exams | Periodic updates, maintenance | ✅ Yes |
+| `servicenow_batch_scraper.py` | Optimized batch scraping | Periodic updates, maintenance | ✅ Yes (85% faster) |
 
 ## Performance Impact
 

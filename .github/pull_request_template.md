@@ -33,7 +33,7 @@ Related to #(issue number)
 ### Backend Changes (if applicable)
 
 - [ ] Modified scraper logic in `scraper.py`
-- [ ] Updated `update_all_exams.py`
+- [ ] Updated `servicenow_batch_scraper.py`
 - [ ] Changed data processing
 - [ ] Added new exam support
 - [ ] Updated error handling

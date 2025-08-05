@@ -38,7 +38,7 @@ For reference to the original vanilla JavaScript implementation:
 |--------|---------|-------------------|
 | `update_manifest.py` | Generate optimized manifest.json for SSG | Creates `/public/data/manifest.json` |
 | `scraper.py` | Web scraping with enhanced logic | Populates `/public/data/[EXAM]/` |
-| `update_all_exams.py` | Batch operations for deployment | Pre-build data preparation |
+| `servicenow_batch_scraper.py` | Optimized batch operations | Pre-build data preparation (85% faster) |
 
 ### Next.js Development
 - `npm run dev` - Development server with Turbopack

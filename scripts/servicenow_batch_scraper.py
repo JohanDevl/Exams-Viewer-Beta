@@ -366,13 +366,24 @@ def main():
         if not args.links_only:
             print(f"\n🔄 Updating ServiceNow manifest...")
             try:
-                from update_manifest import generate_manifest, validate_manifest, save_manifest
+                from update_manifest import update_single_exam_in_manifest
                 
-                manifest = generate_manifest()
-                if manifest and validate_manifest(manifest) and save_manifest(manifest):
-                    print(f"✅ ServiceNow manifest updated successfully")
+                # Mettre à jour seulement les examens traités pour préserver les descriptions existantes
+                updated_count = 0
+                failed_count = 0
+                
+                for exam_code in target_exam_codes:
+                    if update_single_exam_in_manifest(exam_code):
+                        updated_count += 1
+                    else:
+                        failed_count += 1
+                        print(f"⚠️  Failed to update {exam_code} in manifest")
+                
+                if failed_count == 0:
+                    print(f"✅ ServiceNow manifest updated successfully ({updated_count} exams)")
                 else:
-                    print(f"⚠️  Failed to update manifest")
+                    print(f"⚠️  Manifest partially updated ({updated_count} success, {failed_count} failed)")
+                    
             except Exception as e:
                 print(f"⚠️  Manifest error: {str(e)}")
         

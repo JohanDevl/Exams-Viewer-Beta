@@ -102,7 +102,7 @@ All future scraping operations will automatically use this improved logic, ensur
 
 ### Problem with Original Update Logic
 
-The original `update_all_exams.py` script had a significant limitation: it would **skip existing questions entirely** without checking if their content had changed. This meant:
+The legacy `update_all_exams.py` script (now replaced by `servicenow_batch_scraper.py`) had a significant limitation: it would **skip existing questions entirely** without checking if their content had changed. This meant:
 
 - Questions with `most_voted: null` would never be updated with new voting data
 - Changes to question content or answers would not be detected
@@ -134,13 +134,13 @@ The original `update_all_exams.py` script had a significant limitation: it would
 
 ```bash
 # Normal update (only new questions + changed existing questions)
-python scripts/update_all_exams.py --exam CAD
+python scripts/servicenow_batch_scraper.py
 
 # Force update all existing questions
-python scripts/update_all_exams.py --exam CAD --force-update
+python scripts/servicenow_batch_scraper.py --force-update
 
 # Force rescan links + force update questions
-python scripts/update_all_exams.py --exam CAD --force-rescan --force-update
+python scripts/servicenow_batch_scraper.py --force-rescan --force-update
 ```
 
 **Benefits:**

@@ -27,8 +27,8 @@ python3 scripts/servicenow_batch_scraper.py
 # Update specific exam (optimized)
 python3 scripts/servicenow_batch_scraper.py --exam CAD
 
-# Legacy: Full system update
-python3 scripts/update_all_exams.py
+# Optimized: Full system update  
+python3 scripts/servicenow_batch_scraper.py
 
 # Individual exam scraping (legacy)
 python3 scripts/scraper.py [EXAM_CODE]
@@ -128,20 +128,20 @@ python3 scripts/servicenow_batch_scraper.py --force-update
 - ✅ Respectful rate limiting
 - ✅ Next.js build optimization
 
-### 2. update_all_exams.py (Legacy)
+### 2. servicenow_batch_scraper.py (Recommended)
 
 **Purpose**: Traditional exam data management (use servicenow_batch_scraper.py instead)
 **Status**: Maintained for backward compatibility
 
 ```bash
 # Legacy batch update
-python3 scripts/update_all_exams.py
+python3 scripts/servicenow_batch_scraper.py
 
 # Update specific exam
-python3 scripts/update_all_exams.py --exam CAD
+python3 scripts/servicenow_batch_scraper.py --exam CAD
 
 # Force complete refresh (for deployments)
-python3 scripts/update_all_exams.py --force-rescan --force-update
+python3 scripts/servicenow_batch_scraper.py --force-rescan --force-update
 ```
 
 **Note**: Use `servicenow_batch_scraper.py` for significantly better performance.
@@ -334,10 +334,10 @@ python3 -c "import requests, json, pathlib; print('Dependencies OK')"
 #### Rate Limiting Issues
 ```bash
 # Use longer delays between requests
-python3 scripts/update_all_exams.py --delay 10
+python3 scripts/servicenow_batch_scraper.py --delay 10
 
 # Check current rate limiting status
-python3 scripts/update_all_exams.py --check-limits
+python3 scripts/servicenow_batch_scraper.py --check-limits
 ```
 
 ### Next.js Integration Issues
@@ -376,7 +376,7 @@ npm run dev
 ### Pre-deployment Checklist
 ```bash
 # 1. Update all exam data
-python3 scripts/update_all_exams.py --force-update
+python3 scripts/servicenow_batch_scraper.py --force-update
 
 # 2. Verify manifest generation
 python3 scripts/update_manifest.py --validate
@@ -425,7 +425,7 @@ print(f'CAD exam: {len(data[\"questions\"])} questions')
 ```bash
 # Update multiple specific exams
 for exam in CAD CSA CIS-ITSM; do
-  python3 scripts/update_all_exams.py --exam $exam
+  python3 scripts/servicenow_batch_scraper.py --exam $exam
 done
 
 # Update manifest after batch operations
@@ -435,7 +435,7 @@ python3 scripts/update_manifest.py
 ### Performance Monitoring
 ```bash
 # Monitor script performance
-time python3 scripts/update_all_exams.py
+time python3 scripts/servicenow_batch_scraper.py
 
 # Check data sizes
 find public/data -name "*.json" -exec du -h {} \; | sort -h
@@ -459,7 +459,7 @@ The scripts integrate seamlessly with Vercel:
 COPY scripts/ ./scripts/
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
-RUN python3 scripts/update_all_exams.py
+RUN python3 scripts/servicenow_batch_scraper.py
 
 # Nginx serving
 location /data/ {
