@@ -10516,6 +10516,11 @@
       ],
       "comments": [
         {
+          "content": "ITSM Implementation washington text book - user criteria module 4.3",
+          "selected_answer": "E",
+          "replies": []
+        },
+        {
           "content": "4.3- User Criteria - user criteria can be applied to category, catalog and catalog item",
           "selected_answer": "E",
           "replies": []
@@ -10533,7 +10538,7 @@
       ],
       "question_number": "210",
       "link": "https://www.examtopics.com/discussions/servicenow/view/305048-exam-cis-itsm-topic-1-question-210-discussion/",
-      "most_voted": "A",
+      "most_voted": "E",
       "images": {},
       "error": null
     },

@@ -1,5 +1,5 @@
 {
-  "page_num": 128,
+  "page_num": "all_servicenow_pages",
   "status": "complete",
   "links": [
     "/discussions/servicenow/view/128111-exam-cas-pa-topic-1-question-1-discussion/",
@@ -74,6 +74,7 @@
     "/discussions/servicenow/view/137453-exam-cas-pa-topic-1-question-73-discussion/",
     "/discussions/servicenow/view/137454-exam-cas-pa-topic-1-question-74-discussion/",
     "/discussions/servicenow/view/137455-exam-cas-pa-topic-1-question-75-discussion/",
+    "/discussions/servicenow/view/305492-exam-cas-pa-topic-1-question-76-discussion/",
     "/discussions/servicenow/view/168983-exam-cas-pa-topic-1-question-77-discussion/",
     "/discussions/servicenow/view/137456-exam-cas-pa-topic-1-question-78-discussion/",
     "/discussions/servicenow/view/137457-exam-cas-pa-topic-1-question-79-discussion/",
@@ -81,5 +82,9 @@
     "/discussions/servicenow/view/137459-exam-cas-pa-topic-1-question-81-discussion/",
     "/discussions/servicenow/view/137460-exam-cas-pa-topic-1-question-82-discussion/",
     "/discussions/servicenow/view/146914-exam-cas-pa-topic-1-question-83-discussion/"
-  ]
+  ],
+  "collected_at": "2025-08-04T20:12:28.189483",
+  "method": "servicenow_batch_collection",
+  "exam_code": "CAS-PA",
+  "links_count": 80
 }

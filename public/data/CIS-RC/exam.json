@@ -5273,6 +5273,48 @@
       "error": null
     },
     {
+      "question": "What is the maximum file size that can be uploaded to OneDrive for policy authoring?",
+      "answers": [
+        "A. No Limit",
+        "B. 4 MB",
+        "C. 5 MB",
+        "D. 6 MB"
+      ],
+      "comments": [
+        {
+          "content": "https://www.servicenow.com/docs/bundle/yokohama-integrate-applications/page/administer/integrationhub-store-spokes/concept/onedrive-spoke.html",
+          "selected_answer": "B",
+          "replies": []
+        }
+      ],
+      "question_number": "180",
+      "link": "https://www.examtopics.com/discussions/servicenow/view/305404-exam-cis-rc-topic-1-question-180-discussion/",
+      "most_voted": "B",
+      "images": {},
+      "error": null
+    },
+    {
+      "question": "Where does a user configure the Impact Assessment record?",
+      "answers": [
+        "A. Impact Assessment Flow in Flow Designer",
+        "B. Regulatory Change Assessment Templates module",
+        "C. Risk Assessment Methodologies module",
+        "D. Risk Assessment Templates module"
+      ],
+      "comments": [
+        {
+          "content": "Correct",
+          "selected_answer": "B",
+          "replies": []
+        }
+      ],
+      "question_number": "182",
+      "link": "https://www.examtopics.com/discussions/servicenow/view/305405-exam-cis-rc-topic-1-question-182-discussion/",
+      "most_voted": "B",
+      "images": {},
+      "error": null
+    },
+    {
       "question": "What table is an implementer’s starting point to meet a customer requirement to generate a report related to a specific policy acknowledgement campaign?",
       "answers": [
         "A. sn_compliance_policy_acknowledgement_instance",
@@ -5523,6 +5565,27 @@
       "question_number": "225",
       "link": "https://www.examtopics.com/discussions/servicenow/view/305354-exam-cis-rc-topic-1-question-225-discussion/",
       "most_voted": "C",
+      "error": null
+    },
+    {
+      "question": "What happens to the standard control if it is selected to become a reliant entity on a common control?",
+      "answers": [
+        "A. Standard control is deleted",
+        "B. Standard control state changes to Converted",
+        "C. Standard control state changes to Retired",
+        "D. Standard control continues in its current state"
+      ],
+      "comments": [
+        {
+          "content": "According to the servicenow docs, \" the existing control is retired and its associated entity is added as reliant entity. The control is treated as manually retired control.\nhttps://www.servicenow.com/docs/bundle/yokohama-governance-risk-compliance/page/product/grc-workspace-compliance/task/convert-standard-control-common.html",
+          "selected_answer": "C",
+          "replies": []
+        }
+      ],
+      "question_number": "227",
+      "link": "https://www.examtopics.com/discussions/servicenow/view/305372-exam-cis-rc-topic-1-question-227-discussion/",
+      "most_voted": "C",
+      "images": {},
       "error": null
     },
     {

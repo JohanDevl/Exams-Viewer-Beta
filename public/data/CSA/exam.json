@@ -19591,6 +19591,28 @@
       "error": null
     },
     {
+      "question": "A manager is complaining that they can't get the data they need on a report, because the data resides in two different tables. This data is used for many different reports in their department. You have checked to see if dot-walking will meet the requirement, and it is not possible. What else might you try to help this manager?",
+      "answers": [
+        "A. Export the tables to spreadsheet",
+        "B. Create a Database View",
+        "C. Create a Report Template",
+        "D. Create a Report Source",
+        "E. Create a custom table"
+      ],
+      "comments": [
+        {
+          "content": "A Database View in ServiceNow allows you to join data from multiple tables (e.g., Incident + Task SLA). It acts like a virtual table that can be used in reporting.\nPerfect for scenarios where dot-walking can’t access the necessary related records.",
+          "selected_answer": "B",
+          "replies": []
+        }
+      ],
+      "question_number": "377",
+      "link": "https://www.examtopics.com/discussions/servicenow/view/306709-exam-csa-topic-1-question-377-discussion/",
+      "most_voted": "B",
+      "images": {},
+      "error": null
+    },
+    {
       "question": "Which storefront is a single location for accessing pre-built spokes, to quickly integrate with third party services to build and share content?",
       "answers": [
         "A. ServiceNow Store",
@@ -19625,6 +19647,28 @@
       "question_number": "380",
       "link": "https://www.examtopics.com/discussions/servicenow/view/156800-exam-csa-topic-1-question-380-discussion/",
       "most_voted": "A",
+      "images": {},
+      "error": null
+    },
+    {
+      "question": "Which actions would you take to edit the title on an application menu? (Choose two.)",
+      "answers": [
+        "A. Select the Application name on the Navigator, then select the pencil icon",
+        "B. Select System Definition > Dictionary > Application",
+        "C. Select System Definitions > Application Menus then select the application",
+        "D. Select Configuration > Applications, then select the application",
+        "E. Select the form for the Application, then right-click, Configure > Form Designer"
+      ],
+      "comments": [
+        {
+          "content": "edit the title of an application menu in ServiceNow, you can use either of the following valid methods:\n\n✅ C. System Definition > Application Menus\nGo to All → System Definition → Application Menus\n\nThis shows a list of all application menus.\n\nOpen the record and update the \"Title\" field.\n\n✅ D. Configuration > Applications\nGo to All → Configuration → Applications\n\nThis module is used in scoped application development.\n\nSelecting the application allows you to update metadata, including the title and description.",
+          "selected_answer": "CD",
+          "replies": []
+        }
+      ],
+      "question_number": "382",
+      "link": "https://www.examtopics.com/discussions/servicenow/view/307179-exam-csa-topic-1-question-382-discussion/",
+      "most_voted": "CD",
       "images": {},
       "error": null
     }

@@ -1,5 +1,5 @@
 {
-  "page_num": 128,
+  "page_num": 129,
   "status": "complete",
   "links": [
     "/discussions/servicenow/view/111352-exam-cis-discovery-topic-1-question-1-discussion/",
@@ -106,5 +106,9 @@
     "/discussions/servicenow/view/148636-exam-cis-discovery-topic-1-question-110-discussion/",
     "/discussions/servicenow/view/155732-exam-cis-discovery-topic-1-question-112-discussion/",
     "/discussions/servicenow/view/146371-exam-cis-discovery-topic-1-question-113-discussion/"
-  ]
+  ],
+  "collected_at": "2025-08-04T21:00:32.689006",
+  "method": "servicenow_batch_collection",
+  "exam_code": "CIS-Discovery",
+  "links_count": 104
 }

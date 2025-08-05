@@ -1,5 +1,5 @@
 {
-  "page_num": 128,
+  "page_num": "all_servicenow_pages",
   "status": "complete",
   "links": [
     "/discussions/servicenow/view/89832-exam-cis-em-topic-1-question-1-discussion/",
@@ -111,5 +111,9 @@
     "/discussions/servicenow/view/97338-exam-cis-em-topic-1-question-107-discussion/",
     "/discussions/servicenow/view/97339-exam-cis-em-topic-1-question-108-discussion/",
     "/discussions/servicenow/view/97340-exam-cis-em-topic-1-question-109-discussion/"
-  ]
+  ],
+  "collected_at": "2025-08-04T20:12:28.190716",
+  "method": "servicenow_batch_collection",
+  "exam_code": "CIS-EM",
+  "links_count": 109
 }

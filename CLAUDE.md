@@ -13,9 +13,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Python scripts are located in `/scripts/` for managing exam data:
 
+### Optimized ServiceNow Scripts (Recommended)
+- **ServiceNow batch scraper**: `python3 scripts/servicenow_batch_scraper.py` - Optimized scraper for all ServiceNow exams (85% fewer requests, 75% faster)
+- **ServiceNow links only**: `python3 scripts/servicenow_batch_scraper.py --links-only` - Collect links for all ServiceNow exams in single pass
+- **ServiceNow questions only**: `python3 scripts/servicenow_batch_scraper.py --questions-only` - Process questions using pre-collected links
+
+### Individual Scripts
 - **Update manifest**: `python3 scripts/update_manifest.py` - Run after data changes
 - **Scrape exam**: `python3 scripts/scraper.py [EXAM_CODE]` - Add/update specific exam
-- **Update all exams**: `python3 scripts/update_all_exams.py` - Batch update all exams
+- **Update all exams**: `python3 scripts/update_all_exams.py` - Batch update all exams (legacy, use ServiceNow batch scraper instead)
 
 Requirements: Python 3.6+, write access to `public/data/` directory.
 

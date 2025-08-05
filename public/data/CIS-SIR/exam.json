@@ -1709,6 +1709,11 @@
       ],
       "comments": [
         {
+          "content": "\"C\" is correct based on the documentation",
+          "selected_answer": "C",
+          "replies": []
+        },
+        {
           "content": "The sn_si.external role is designed for external users or teams allowing them to view and work on assigned security incident tasks without granting broader access. Since David is a part of the Network team, this role gives him the ability to do his job without giving him broader access roles that Security Analyst and Basic allows. The read role allows David to view the task but not actively work the task. This is a tricky question but C is the best answer.",
           "selected_answer": "C",
           "replies": []
@@ -1743,7 +1748,8 @@
       ],
       "question_number": "52",
       "link": "https://www.examtopics.com/discussions/servicenow/view/114792-exam-cis-sir-topic-1-question-52-discussion/",
-      "most_voted": "A",
+      "most_voted": "C",
+      "images": {},
       "error": null
     },
     {

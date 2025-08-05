@@ -9338,6 +9338,27 @@
       "most_voted": "B",
       "images": {},
       "error": null
+    },
+    {
+      "question": "Which table stores consumer addresses?",
+      "answers": [
+        "A. cmn_location",
+        "B. csm_consumer_user",
+        "C. csm_consumer_address",
+        "D. cmn_location_type"
+      ],
+      "comments": [
+        {
+          "content": "cmn_location",
+          "selected_answer": "A",
+          "replies": []
+        }
+      ],
+      "question_number": "246",
+      "link": "https://www.examtopics.com/discussions/servicenow/view/306429-exam-cis-csm-topic-1-question-246-discussion/",
+      "most_voted": "A",
+      "images": {},
+      "error": null
     }
   ]
 }

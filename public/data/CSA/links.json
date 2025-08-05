@@ -1,5 +1,5 @@
 {
-  "page_num": 128,
+  "page_num": "all_servicenow_pages",
   "status": "complete",
   "links": [
     "/discussions/servicenow/view/71003-exam-csa-topic-1-question-1-discussion/",
@@ -370,6 +370,12 @@
     "/discussions/servicenow/view/155835-exam-csa-topic-1-question-369-discussion/",
     "/discussions/servicenow/view/157526-exam-csa-topic-1-question-372-discussion/",
     "/discussions/servicenow/view/156801-exam-csa-topic-1-question-376-discussion/",
-    "/discussions/servicenow/view/156800-exam-csa-topic-1-question-380-discussion/"
-  ]
+    "/discussions/servicenow/view/306709-exam-csa-topic-1-question-377-discussion/",
+    "/discussions/servicenow/view/156800-exam-csa-topic-1-question-380-discussion/",
+    "/discussions/servicenow/view/307179-exam-csa-topic-1-question-382-discussion/"
+  ],
+  "collected_at": "2025-08-04T20:12:28.195716",
+  "method": "servicenow_batch_collection",
+  "exam_code": "CSA",
+  "links_count": 371
 }

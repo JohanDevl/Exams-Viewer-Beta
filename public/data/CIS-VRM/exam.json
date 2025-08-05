@@ -1399,6 +1399,11 @@
       ],
       "comments": [
         {
+          "content": "Though B looks convincing, answers are C and D\nRefer TPRM Book - Third Party Risk Issues - Issues are created to document observations, remediations, and/or to accept risks.",
+          "selected_answer": "CD",
+          "replies": []
+        },
+        {
           "content": "ServiceNow official eBook: Third-party Risk Management Implementation > Third-party Risk Issues",
           "selected_answer": "CD",
           "replies": []
@@ -1416,7 +1421,8 @@
       ],
       "question_number": "44",
       "link": "https://www.examtopics.com/discussions/servicenow/view/112963-exam-cis-vrm-topic-1-question-44-discussion/",
-      "most_voted": "BD",
+      "most_voted": "CD",
+      "images": {},
       "error": null
     },
     {

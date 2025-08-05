@@ -1,5 +1,5 @@
 {
-  "page_num": 129,
+  "page_num": "all_servicenow_pages",
   "status": "complete",
   "links": [
     "/discussions/servicenow/view/138515-exam-cis-sm-topic-1-question-5-discussion/",
@@ -41,5 +41,9 @@
     "/discussions/servicenow/view/138715-exam-cis-sm-topic-1-question-58-discussion/",
     "/discussions/servicenow/view/104399-exam-cis-sm-topic-1-question-59-discussion/",
     "/discussions/servicenow/view/104400-exam-cis-sm-topic-1-question-60-discussion/"
-  ]
+  ],
+  "collected_at": "2025-08-04T20:12:28.194615",
+  "method": "servicenow_batch_collection",
+  "exam_code": "CIS-SM",
+  "links_count": 39
 }

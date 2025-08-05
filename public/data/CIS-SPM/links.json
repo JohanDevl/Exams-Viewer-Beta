@@ -1,5 +1,5 @@
 {
-  "page_num": 128,
+  "page_num": "all_servicenow_pages",
   "status": "complete",
   "links": [
     "/discussions/servicenow/view/155552-exam-cis-spm-topic-1-question-1-discussion/",
@@ -15,9 +15,12 @@
     "/discussions/servicenow/view/155964-exam-cis-spm-topic-1-question-12-discussion/",
     "/discussions/servicenow/view/155428-exam-cis-spm-topic-1-question-14-discussion/",
     "/discussions/servicenow/view/302481-exam-cis-spm-topic-1-question-15-discussion/",
+    "/discussions/servicenow/view/307258-exam-cis-spm-topic-1-question-16-discussion/",
     "/discussions/servicenow/view/304036-exam-cis-spm-topic-1-question-17-discussion/",
     "/discussions/servicenow/view/304038-exam-cis-spm-topic-1-question-18-discussion/",
+    "/discussions/servicenow/view/307259-exam-cis-spm-topic-1-question-19-discussion/",
     "/discussions/servicenow/view/304040-exam-cis-spm-topic-1-question-20-discussion/",
+    "/discussions/servicenow/view/307260-exam-cis-spm-topic-1-question-21-discussion/",
     "/discussions/servicenow/view/304041-exam-cis-spm-topic-1-question-22-discussion/",
     "/discussions/servicenow/view/304042-exam-cis-spm-topic-1-question-23-discussion/",
     "/discussions/servicenow/view/304043-exam-cis-spm-topic-1-question-24-discussion/",
@@ -51,5 +54,9 @@
     "/discussions/servicenow/view/304506-exam-cis-spm-topic-1-question-99-discussion/",
     "/discussions/servicenow/view/303715-exam-cis-spm-topic-1-question-102-discussion/",
     "/discussions/servicenow/view/304313-exam-cis-spm-topic-1-question-104-discussion/"
-  ]
+  ],
+  "collected_at": "2025-08-04T20:12:28.194957",
+  "method": "servicenow_batch_collection",
+  "exam_code": "CIS-SPM",
+  "links_count": 52
 }

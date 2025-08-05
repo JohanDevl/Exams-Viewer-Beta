@@ -338,6 +338,27 @@
       "error": null
     },
     {
+      "question": "Depending on the execution type selected for a particular project, one of these dashboards will also be available:",
+      "answers": [
+        "A. User Manager Dashboard",
+        "B. Timecard Dashboard",
+        "C. PMO Dashboard",
+        "D. Project Summary - Waterfall Dashboard"
+      ],
+      "comments": [
+        {
+          "content": "This is correct answer",
+          "selected_answer": "D",
+          "replies": []
+        }
+      ],
+      "question_number": "16",
+      "link": "https://www.examtopics.com/discussions/servicenow/view/307258-exam-cis-spm-topic-1-question-16-discussion/",
+      "most_voted": "D",
+      "images": {},
+      "error": null
+    },
+    {
       "question": "The Project management application supports two types of external dependencies. What are they? (Choose two.)",
       "answers": [
         "A. Change Dependency.",
@@ -379,6 +400,27 @@
       "error": null
     },
     {
+      "question": "Where do you define ‘Roles’ requested via resource plans?",
+      "answers": [
+        "A. Roles under system security.",
+        "B. Resource roles under resource management.",
+        "C. Under skill management modules.",
+        "D. No need to define it differently, they are same as system roles."
+      ],
+      "comments": [
+        {
+          "content": "This is correct answer",
+          "selected_answer": "B",
+          "replies": []
+        }
+      ],
+      "question_number": "19",
+      "link": "https://www.examtopics.com/discussions/servicenow/view/307259-exam-cis-spm-topic-1-question-19-discussion/",
+      "most_voted": "B",
+      "images": {},
+      "error": null
+    },
+    {
       "question": "Where is planned cost calculated from when requesting resources from a group and when resource role is specified?",
       "answers": [
         "A. The task rate cards.",
@@ -396,6 +438,27 @@
       "question_number": "20",
       "link": "https://www.examtopics.com/discussions/servicenow/view/304040-exam-cis-spm-topic-1-question-20-discussion/",
       "most_voted": "C",
+      "error": null
+    },
+    {
+      "question": "Which is the minimum role that has access to the Project Administration &gt; Settings &gt; Preferences-Project module?",
+      "answers": [
+        "A. it_pps_admin",
+        "B. it_project_manager",
+        "C. it_program_manager",
+        "D. sys_admin"
+      ],
+      "comments": [
+        {
+          "content": "While other roles like it_project_manager might have access to project-related functions, it_pps_admin is the most appropriate for accessing the Preferences-Project module, which is part of the overall project administration settings.",
+          "selected_answer": "A",
+          "replies": []
+        }
+      ],
+      "question_number": "21",
+      "link": "https://www.examtopics.com/discussions/servicenow/view/307260-exam-cis-spm-topic-1-question-21-discussion/",
+      "most_voted": "A",
+      "images": {},
       "error": null
     },
     {

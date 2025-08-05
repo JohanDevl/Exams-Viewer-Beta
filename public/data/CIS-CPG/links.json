@@ -1,5 +1,5 @@
 {
-  "page_num": 128,
+  "page_num": "all_servicenow_pages",
   "status": "complete",
   "links": [
     "/discussions/servicenow/view/109438-exam-cis-cpg-topic-1-question-1-discussion/",
@@ -34,5 +34,9 @@
     "/discussions/servicenow/view/131788-exam-cis-cpg-topic-1-question-42-discussion/",
     "/discussions/servicenow/view/131791-exam-cis-cpg-topic-1-question-44-discussion/",
     "/discussions/servicenow/view/136479-exam-cis-cpg-topic-1-question-45-discussion/"
-  ]
+  ],
+  "collected_at": "2025-08-04T20:12:28.190186",
+  "method": "servicenow_batch_collection",
+  "exam_code": "CIS-CPG",
+  "links_count": 32
 }

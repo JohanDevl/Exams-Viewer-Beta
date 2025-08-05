@@ -800,7 +800,6 @@ def update_exam_data(exam_code, progress, rapid_scraping=False, force_rescan=Fal
     # Create exam directory structure
     exam_dir = f"public/data/{exam_code}"
     os.makedirs(exam_dir, exist_ok=True)
-    os.makedirs(f"{exam_dir}/chunks", exist_ok=True)
     
     questions_path = f"{exam_dir}/exam.json"
     links_path = f"{exam_dir}/links.json"

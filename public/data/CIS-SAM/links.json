@@ -1,5 +1,5 @@
 {
-  "page_num": 128,
+  "page_num": "all_servicenow_pages",
   "status": "complete",
   "links": [
     "/discussions/servicenow/view/108973-exam-cis-sam-topic-1-question-1-discussion/",
@@ -170,6 +170,7 @@
     "/discussions/servicenow/view/150594-exam-cis-sam-topic-6-question-174-discussion/",
     "/discussions/servicenow/view/154338-exam-cis-sam-topic-6-question-175-discussion/",
     "/discussions/servicenow/view/146685-exam-cis-sam-topic-6-question-176-discussion/",
+    "/discussions/servicenow/view/305541-exam-cis-sam-topic-6-question-178-discussion/",
     "/discussions/servicenow/view/169367-exam-cis-sam-topic-6-question-180-discussion/",
     "/discussions/servicenow/view/157488-exam-cis-sam-topic-6-question-181-discussion/",
     "/discussions/servicenow/view/153106-exam-cis-sam-topic-6-question-182-discussion/",
@@ -192,6 +193,11 @@
     "/discussions/servicenow/view/152899-exam-cis-sam-topic-6-question-202-discussion/",
     "/discussions/servicenow/view/152900-exam-cis-sam-topic-6-question-204-discussion/",
     "/discussions/servicenow/view/147617-exam-cis-sam-topic-6-question-205-discussion/",
+    "/discussions/servicenow/view/305544-exam-cis-sam-topic-6-question-207-discussion/",
     "/discussions/servicenow/view/152901-exam-cis-sam-topic-6-question-209-discussion/"
-  ]
+  ],
+  "collected_at": "2025-08-04T20:12:28.193554",
+  "method": "servicenow_batch_collection",
+  "exam_code": "CIS-SAM",
+  "links_count": 193
 }

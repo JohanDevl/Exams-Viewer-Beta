@@ -1,5 +1,5 @@
 {
-  "page_num": 128,
+  "page_num": "all_servicenow_pages",
   "status": "complete",
   "links": [
     "/discussions/servicenow/view/135667-exam-cis-apm-topic-1-question-1-discussion/",
@@ -26,5 +26,9 @@
     "/discussions/servicenow/view/111943-exam-cis-apm-topic-1-question-28-discussion/",
     "/discussions/servicenow/view/116445-exam-cis-apm-topic-1-question-29-discussion/",
     "/discussions/servicenow/view/123010-exam-cis-apm-topic-1-question-30-discussion/"
-  ]
+  ],
+  "collected_at": "2025-08-04T20:12:28.189885",
+  "method": "servicenow_batch_collection",
+  "exam_code": "CIS-APM",
+  "links_count": 24
 }
