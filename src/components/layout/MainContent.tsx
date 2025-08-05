@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { ChevronLeft } from 'lucide-react';
-import { useExamStore } from '@/stores/examStore';
-import { ExamSelector } from '@/components/exam/ExamSelector';
-import { ExamViewer } from '@/components/exam/ExamViewer';
-import { Sidebar } from '@/components/navigation/Sidebar';
-import { MobileNavigationBar } from '@/components/navigation/MobileNavigationBar';
-import { useSettingsStore } from '@/stores/settingsStore';
-import { useManifest } from '@/hooks/useManifest';
+import { ChevronLeft } from "lucide-react";
+import { useExamStore } from "@/stores/examStore";
+import { ExamSelector } from "@/components/exam/ExamSelector";
+import { ExamViewer } from "@/components/exam/ExamViewer";
+import { Sidebar } from "@/components/navigation/Sidebar";
+import { MobileNavigationBar } from "@/components/navigation/MobileNavigationBar";
+import { useSettingsStore } from "@/stores/settingsStore";
+import { useManifest } from "@/hooks/useManifest";
 
 export function MainContent() {
   const { currentExam } = useExamStore();
@@ -28,25 +28,38 @@ export function MainContent() {
                     Choose your exam
                   </h2>
                   <p className="text-muted-foreground text-lg">
-                    Select a ServiceNow certification exam to begin your training
+                    Select a ServiceNow certification exam to begin your
+                    training
                   </p>
                 </div>
-                
+
                 <ExamSelector />
-                
+
                 {/* Additional information */}
                 <div className="mt-8 sm:mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                   <div className="text-center p-4 sm:p-6 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold text-foreground mb-2">{manifest?.totalExams || '20'}</div>
-                    <div className="text-sm text-muted-foreground">Available exams</div>
+                    <div className="text-2xl font-bold text-foreground mb-2">
+                      {manifest?.totalExams || "0"}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Available exams
+                    </div>
                   </div>
                   <div className="text-center p-4 sm:p-6 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold text-foreground mb-2">{manifest?.totalQuestions || '2605'}</div>
-                    <div className="text-sm text-muted-foreground">Total questions</div>
+                    <div className="text-2xl font-bold text-foreground mb-2">
+                      {manifest?.totalQuestions || "0"}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Total questions
+                    </div>
                   </div>
                   <div className="text-center p-4 sm:p-6 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold text-foreground mb-2">100%</div>
-                    <div className="text-sm text-muted-foreground">Free and open source</div>
+                    <div className="text-2xl font-bold text-foreground mb-2">
+                      100%
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Free and open source
+                    </div>
                   </div>
                 </div>
 
@@ -59,43 +72,67 @@ export function MainContent() {
                     <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 border rounded-lg">
                       <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
                       <div>
-                        <div className="font-medium text-foreground">Progress tracking</div>
-                        <div className="text-sm text-muted-foreground">Track your answers and success rate</div>
+                        <div className="font-medium text-foreground">
+                          Progress tracking
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Track your answers and success rate
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 border rounded-lg">
                       <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
                       <div>
-                        <div className="font-medium text-foreground">Favorites system</div>
-                        <div className="text-sm text-muted-foreground">Mark important questions</div>
+                        <div className="font-medium text-foreground">
+                          Favorites system
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Mark important questions
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 border rounded-lg">
                       <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
                       <div>
-                        <div className="font-medium text-foreground">Advanced search</div>
-                        <div className="text-sm text-muted-foreground">Filter by status, difficulty and content</div>
+                        <div className="font-medium text-foreground">
+                          Advanced search
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Filter by status, difficulty and content
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 border rounded-lg">
                       <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
                       <div>
-                        <div className="font-medium text-foreground">Dark mode</div>
-                        <div className="text-sm text-muted-foreground">Interface adapted to your preferences</div>
+                        <div className="font-medium text-foreground">
+                          Dark mode
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Interface adapted to your preferences
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 border rounded-lg">
                       <div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
                       <div>
-                        <div className="font-medium text-foreground">Detailed statistics</div>
-                        <div className="text-sm text-muted-foreground">Analyze your performance</div>
+                        <div className="font-medium text-foreground">
+                          Detailed statistics
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Analyze your performance
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 border rounded-lg">
                       <div className="w-2 h-2 bg-teal-500 rounded-full mt-2 flex-shrink-0"></div>
                       <div>
-                        <div className="font-medium text-foreground">Responsive</div>
-                        <div className="text-sm text-muted-foreground">Optimized for all devices</div>
+                        <div className="font-medium text-foreground">
+                          Responsive
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Optimized for all devices
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -110,9 +147,7 @@ export function MainContent() {
       </div>
 
       {/* Navigation sidebar (only if exam is loaded and sidebar is visible) */}
-      {currentExam && sidebarVisible && (
-        <Sidebar />
-      )}
+      {currentExam && sidebarVisible && <Sidebar />}
 
       {/* Button to show sidebar when hidden (desktop only) */}
       {currentExam && !sidebarVisible && (
