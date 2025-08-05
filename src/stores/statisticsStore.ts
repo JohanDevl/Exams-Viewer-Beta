@@ -192,7 +192,7 @@ export const useStatisticsStore = create<StatisticsStore>()(
       },
 
       // Ajouter un favori
-      addFavorite: (examCode: string) => {
+      addFavorite: () => {
         const { statistics } = get();
         set({
           statistics: {
@@ -203,7 +203,7 @@ export const useStatisticsStore = create<StatisticsStore>()(
       },
 
       // Supprimer un favori
-      removeFavorite: (examCode: string) => {
+      removeFavorite: () => {
         const { statistics } = get();
         set({
           statistics: {
@@ -333,7 +333,7 @@ export const useStatisticsStore = create<StatisticsStore>()(
         const { statistics } = get();
         
         return Object.entries(statistics.examProgress)
-          .filter(([_, progress]) => progress.answered > 0)
+          .filter(([, progress]) => progress.answered > 0)
           .map(([examCode, progress]) => ({
             examCode,
             accuracy: (progress.correct / progress.answered) * 100,

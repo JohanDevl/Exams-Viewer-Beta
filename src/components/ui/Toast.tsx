@@ -38,12 +38,15 @@ export function Toast({ type, title, description, duration, onClose }: ToastProp
   useEffect(() => {
     if (duration && duration > 0) {
       const timer = setTimeout(() => {
-        handleClose();
+        setIsLeaving(true);
+        setTimeout(() => {
+          onClose();
+        }, 200);
       }, duration);
       
       return () => clearTimeout(timer);
     }
-  }, [duration]);
+  }, [duration, onClose]);
 
   const handleClose = () => {
     setIsLeaving(true);

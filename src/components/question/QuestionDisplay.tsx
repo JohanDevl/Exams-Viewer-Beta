@@ -5,14 +5,13 @@ import { Heart, MessageCircle, Eye, EyeOff, RotateCcw, ThumbsDown, Minus, Thumbs
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useExamStore } from '@/stores/examStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useToastWithSound } from '@/hooks/useToastWithSound';
 import { useScrollLock } from '@/hooks/useScrollLock';
-import { LinkifiedText, LinkifiedHtml, QuestionContent } from '@/utils/linkUtils';
+import { LinkifiedHtml, QuestionContent } from '@/utils/linkUtils';
 import type { Question, DifficultyLevel } from '@/types';
 import { cn } from '@/lib/utils';
 

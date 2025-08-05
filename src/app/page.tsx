@@ -1,4 +1,3 @@
-import { ExamSelector } from "@/components/exam/ExamSelector";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { MainContent } from "@/components/layout/MainContent";
 import { SessionPersistenceProvider } from "@/components/providers/SessionPersistenceProvider";

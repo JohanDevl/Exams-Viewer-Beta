@@ -26,7 +26,6 @@ export function StatisticsModal() {
     questionStates, 
     getProgress 
   } = useExamStore();
-  const { getSessionHistory } = useStatisticsStore();
 
   // Calculate statistics
   const progress = getProgress();
@@ -50,7 +49,7 @@ export function StatisticsModal() {
     favorites: 0
   };
 
-  Object.entries(questionStates).forEach(([index, state]) => {
+  Object.entries(questionStates).forEach(([, state]) => {
     const difficulty = state.difficulty || 'unrated';
     
     // Stats by difficulty

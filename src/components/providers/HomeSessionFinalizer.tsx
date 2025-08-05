@@ -22,7 +22,7 @@ export function HomeSessionFinalizer({ children }: HomeSessionFinalizerProps) {
         const difficultyBreakdown: Record<string, { answered: number; correct: number; total: number; }> = {};
         
         // Calculate difficulty breakdown
-        Object.entries(questionStates).forEach(([index, state]) => {
+        Object.entries(questionStates).forEach(([, state]) => {
           const difficulty = state.difficulty || 'unrated';
           if (!difficultyBreakdown[difficulty]) {
             difficultyBreakdown[difficulty] = { answered: 0, correct: 0, total: 0 };

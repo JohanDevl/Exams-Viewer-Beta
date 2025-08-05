@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, FileText, Target, Clock } from 'lucide-react';
+import { ArrowLeft, FileText, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useExamStore } from '@/stores/examStore';

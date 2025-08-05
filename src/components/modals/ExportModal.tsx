@@ -10,7 +10,6 @@ import {
   List,
   Star,
   CheckCircle,
-  MessageSquare,
   Filter,
   Settings as SettingsIcon,
   Info
@@ -26,7 +25,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { ClientOnly } from '@/components/ui/ClientOnly';
@@ -70,33 +68,7 @@ const exportFormats: ExportFormatOption[] = [
   }
 ];
 
-interface ContentFilterOption {
-  key: keyof ExportOptions;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  description: string;
-}
 
-const contentFilters: ContentFilterOption[] = [
-  {
-    key: 'includeAnswers',
-    label: 'Include Answers',
-    icon: CheckCircle,
-    description: 'Include answer choices for each question'
-  },
-  {
-    key: 'includeExplanations',
-    label: 'Include Correct Answers',
-    icon: CheckCircle,
-    description: 'Include correct answer indicators'
-  },
-  {
-    key: 'includeStatistics',
-    label: 'Include Discussions',
-    icon: MessageSquare,
-    description: 'Include community comments and discussions'
-  }
-];
 
 export function ExportModal() {
   const { 
@@ -116,7 +88,7 @@ export function ExportModal() {
     filterByDifficulty: undefined
   });
   
-  const [contentFilter, setContentFilter] = useState<'all' | 'favorites' | 'answered'>('all');
+  const [contentFilter] = useState<'all' | 'favorites' | 'answered'>('all');
   const [includeQuestions, setIncludeQuestions] = useState(true);
   const [includeImages, setIncludeImages] = useState(true);
   const [includeMetadata, setIncludeMetadata] = useState(true);
@@ -129,9 +101,6 @@ export function ExportModal() {
     setExportOptions(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleContentFilterChange = (filter: 'all' | 'favorites' | 'answered') => {
-    setContentFilter(filter);
-  };
 
   const getQuestionCount = () => {
     if (!currentExam) return 0;

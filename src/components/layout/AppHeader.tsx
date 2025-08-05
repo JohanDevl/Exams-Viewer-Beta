@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Moon, Sun, Settings, BarChart3, Heart, Menu, Github, ExternalLink, Download, Code, Bug } from 'lucide-react';
+import { Moon, Sun, Settings, BarChart3, Heart, Menu, Github, Download, Code, Bug } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ClientOnly } from '@/components/ui/ClientOnly';
 import { RaycastLogo } from '@/components/ui/RaycastLogo';
@@ -27,7 +27,6 @@ export function AppHeader() {
   
   // Check if we have data to enable/disable certain buttons
   const hasExamData = !!currentExam;
-  const hasFavorites = hasExamData && Object.values(questionStates).some(state => state?.isFavorite);
   const hasUserActivity = hasExamData && Object.values(questionStates).some(state => state?.userAnswer || state?.isFavorite);
 
   const toggleTheme = () => {

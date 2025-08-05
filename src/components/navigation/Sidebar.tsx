@@ -29,7 +29,6 @@ export function Sidebar() {
     filteredQuestionIndices,
     questionStates,
     setCurrentQuestion,
-    getQuestionStatus,
     getFirstAnswerStatus,
   } = useExamStore();
 
