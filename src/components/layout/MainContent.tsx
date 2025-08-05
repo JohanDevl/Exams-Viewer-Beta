@@ -7,10 +7,12 @@ import { ExamViewer } from '@/components/exam/ExamViewer';
 import { Sidebar } from '@/components/navigation/Sidebar';
 import { MobileNavigationBar } from '@/components/navigation/MobileNavigationBar';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useManifest } from '@/hooks/useManifest';
 
 export function MainContent() {
   const { currentExam } = useExamStore();
   const { sidebarVisible } = useSettingsStore();
+  const { manifest } = useManifest();
 
   return (
     <div className="flex-1 flex">
@@ -35,11 +37,11 @@ export function MainContent() {
                 {/* Additional information */}
                 <div className="mt-8 sm:mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                   <div className="text-center p-4 sm:p-6 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold text-foreground mb-2">20+</div>
+                    <div className="text-2xl font-bold text-foreground mb-2">{manifest?.totalExams || '20'}</div>
                     <div className="text-sm text-muted-foreground">Available exams</div>
                   </div>
                   <div className="text-center p-4 sm:p-6 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold text-foreground mb-2">2593</div>
+                    <div className="text-2xl font-bold text-foreground mb-2">{manifest?.totalQuestions || '2605'}</div>
                     <div className="text-sm text-muted-foreground">Total questions</div>
                   </div>
                   <div className="text-center p-4 sm:p-6 bg-muted/50 rounded-lg">
