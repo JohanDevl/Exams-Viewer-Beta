@@ -14,15 +14,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Python scripts are located in `/scripts/` for managing exam data:
 
 ### Batch Processing (Recommended)
-- **ServiceNow batch scraper**: `python3 scripts/servicenow_batch_scraper.py` - Optimized scraper for all ServiceNow exams (85% fewer requests, 75% faster)
+- **ServiceNow batch scraper**: `python3 scripts/servicenow_batch_scraper.py` - Optimized scraper for all ServiceNow exams with multi-level progress bars and detailed update summaries
 - **ServiceNow links only**: `python3 scripts/servicenow_batch_scraper.py --links-only` - Collect links for all ServiceNow exams in single pass
 - **ServiceNow questions only**: `python3 scripts/servicenow_batch_scraper.py --questions-only` - Process questions using pre-collected links
+- **Single exam**: `python3 scripts/servicenow_batch_scraper.py --exam [EXAM_CODE]` - Process specific exam with progress tracking
 
 ### Individual Scripts
 - **Update manifest**: `python3 scripts/update_manifest.py` - Run after data changes
-- **Scrape exam**: `python3 scripts/scraper.py [EXAM_CODE]` - Add/update specific exam
+- **Scrape exam**: `python3 scripts/scraper.py [EXAM_CODE]` - Add/update specific exam with smart update detection
 
-Requirements: Python 3.6+, write access to `public/data/` directory.
+### Progress Tracking Features
+- **Multi-level progress bars**: Main progress for overall workflow, sub-progress for individual phases
+- **ETA calculations**: Precise time estimates based on observed delays (2-4s between pages, 5-10s between questions, 15s between exams)
+- **Detailed update summaries**: After each exam processing, displays counts of new, updated, and skipped questions
+- **Global statistics**: Final summary showing total changes across all processed exams
+
+### Update Summary Format
+After processing each exam, the scraper displays:
+```
+📊 Update Summary:
+   ✅ New questions added: X
+   🔄 Existing questions updated: X
+   ⏭️ Questions skipped (no changes): X
+✅ EXAM-CODE: X questions updated successfully
+```
+
+Requirements: Python 3.6+, `tqdm` library, write access to `public/data/` directory.
 
 ## Architecture Overview
 
