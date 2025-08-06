@@ -1,6 +1,6 @@
 {
   "status": "complete",
-  "error": "",
+  "error": "Error: Request or parsing failed: Failed to get response",
   "questions": [
     {
       "question": "Which of the following statements is true for the Form Designer? a) To add a field to the form layout, drag the field from the Fields tab to the desired destination on the form. b) To create a new field on a form's table, drag the appropriate data type from the Field Types tab to the form and then configure the new field. c) To remove a field from the form layout, hover over the field to enable the Action buttons, and select the Delete (X) button. d) To add a section to the form layout, drag it from the Field Types tab to the desired destination on the form.<br/>",
@@ -7131,5 +7131,11 @@
       "images": {},
       "error": null
     }
-  ]
+  ],
+  "update_stats": {
+    "new_count": 0,
+    "updated_count": 0,
+    "skipped_count": 86,
+    "total_processed": 158
+  }
 }

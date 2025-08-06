@@ -6349,5 +6349,11 @@
       "most_voted": "C",
       "error": null
     }
-  ]
+  ],
+  "update_stats": {
+    "new_count": 0,
+    "updated_count": 0,
+    "skipped_count": 180,
+    "total_processed": 180
+  }
 }

@@ -1,6 +1,6 @@
 {
   "version": "3.0",
-  "generated": "2025-08-05T02:46:11.742261",
+  "generated": "2025-08-06T07:05:07.733012",
   "totalExams": 20,
   "totalQuestions": 2605,
   "exams": [
@@ -9,140 +9,140 @@
       "name": "CAD",
       "description": "Certified Application Developer",
       "questionCount": 158,
-      "lastUpdated": "2025-08-04T20:35:01.201502"
+      "lastUpdated": "2025-08-06T00:08:01.173336"
     },
     {
       "code": "CAS-PA",
       "name": "CAS-PA",
       "description": "Certified Application Specialist – Performance Analytics",
       "questionCount": 80,
-      "lastUpdated": "2025-08-04T20:46:44.483550"
+      "lastUpdated": "2025-08-06T01:24:29.248467"
     },
     {
       "code": "CIS-APM",
       "name": "CIS-APM",
       "description": "Certified Implementation Specialist - Application Portfolio Management",
       "questionCount": 24,
-      "lastUpdated": "2025-08-04T20:50:24.714418"
+      "lastUpdated": "2025-08-06T01:27:57.577699"
     },
     {
       "code": "CIS-CPG",
       "name": "CIS-CPG",
       "description": "Certified Implementation Specialist - Cloud Provisioning and Governance",
       "questionCount": 32,
-      "lastUpdated": "2025-08-04T20:55:21.320180"
+      "lastUpdated": "2025-08-06T01:32:39.761653"
     },
     {
       "code": "CIS-CSM",
       "name": "CIS-CSM",
       "description": "Certified Implementation Specialist - Customer Service Management",
       "questionCount": 241,
-      "lastUpdated": "2025-08-04T21:30:39.396322"
+      "lastUpdated": "2025-08-06T02:06:59.615058"
     },
     {
       "code": "CIS-Discovery",
       "name": "CIS-Discovery",
       "description": "Certified Implementation Specialist - Discovery",
       "questionCount": 104,
-      "lastUpdated": "2025-08-04T21:46:06.870065"
+      "lastUpdated": "2025-08-06T02:22:51.022752"
     },
     {
       "code": "CIS-EM",
       "name": "CIS-EM",
       "description": "Certified Implementation Specialist - Event Management",
       "questionCount": 109,
-      "lastUpdated": "2025-08-04T22:02:28.423641"
+      "lastUpdated": "2025-08-06T02:38:52.460588"
     },
     {
       "code": "CIS-FSM",
       "name": "CIS-FSM",
       "description": "Certified Implementation Specialist - Field Service Management",
       "questionCount": 44,
-      "lastUpdated": "2025-08-04T22:09:10.712578"
+      "lastUpdated": "2025-08-06T02:45:22.468217"
     },
     {
       "code": "CIS-HAM",
       "name": "CIS-HAM",
       "description": "Certified Implementation Specialist – Hardware Asset Management",
       "questionCount": 180,
-      "lastUpdated": "2025-08-04T22:34:49.263544"
+      "lastUpdated": "2025-08-06T03:11:57.572564"
     },
     {
       "code": "CIS-HR",
       "name": "CIS-HR",
       "description": "Certified Implementation Specialist - Human Resources",
       "questionCount": 169,
-      "lastUpdated": "2025-08-04T22:58:58.810461"
+      "lastUpdated": "2025-08-06T03:36:43.535444"
     },
     {
       "code": "CIS-ITSM",
       "name": "CIS-ITSM",
       "description": "Certified Implementation Specialist - IT Service Management",
       "questionCount": 224,
-      "lastUpdated": "2025-08-04T23:31:36.156366"
+      "lastUpdated": "2025-08-06T04:08:38.238448"
     },
     {
       "code": "CIS-PPM",
       "name": "CIS-PPM",
       "description": "Certified Implementation Specialist - Project Portfolio Management",
       "questionCount": 166,
-      "lastUpdated": "2025-08-04T23:58:54.629617"
+      "lastUpdated": "2025-08-06T04:32:06.502552"
     },
     {
       "code": "CIS-RC",
       "name": "CIS-RC",
       "description": "Certified Implementation Specialist - Risk and Compliance",
       "questionCount": 182,
-      "lastUpdated": "2025-08-05T00:25:03.664978"
+      "lastUpdated": "2025-08-06T04:57:37.414475"
     },
     {
       "code": "CIS-SAM",
       "name": "CIS-SAM",
       "description": "Certified Implementation Specialist - Software Asset Management",
       "questionCount": 193,
-      "lastUpdated": "2025-08-05T00:52:51.006021"
+      "lastUpdated": "2025-08-06T05:26:02.045380"
     },
     {
       "code": "CIS-SIR",
       "name": "CIS-SIR",
       "description": "Certified Implementation Specialist - Security Incident Response",
       "questionCount": 117,
-      "lastUpdated": "2025-08-05T01:09:41.060282"
+      "lastUpdated": "2025-08-06T05:43:17.919105"
     },
     {
       "code": "CIS-SM",
       "name": "CIS-SM",
       "description": "Certified Implementation Specialist - Service Mapping",
       "questionCount": 39,
-      "lastUpdated": "2025-08-05T01:15:26.986644"
+      "lastUpdated": "2025-08-06T05:49:02.985654"
     },
     {
       "code": "CIS-SPM",
       "name": "CIS-SPM",
       "description": "Certified Implementation Specialist - Strategic Portfolio Management",
       "questionCount": 54,
-      "lastUpdated": "2025-08-05T01:22:59.585732"
+      "lastUpdated": "2025-08-06T05:56:54.135975"
     },
     {
       "code": "CIS-VR",
       "name": "CIS-VR",
       "description": "Certified Implementation Specialist - Vulnerability Response",
       "questionCount": 59,
-      "lastUpdated": "2025-08-05T01:27:40.323452"
+      "lastUpdated": "2025-08-06T06:01:32.717874"
     },
     {
       "code": "CIS-VRM",
       "name": "CIS-VRM",
       "description": "Certified Implementation Specialist - Vendor Risk Management",
       "questionCount": 59,
-      "lastUpdated": "2025-08-05T01:36:16.623281"
+      "lastUpdated": "2025-08-06T06:10:46.085192"
     },
     {
       "code": "CSA",
       "name": "CSA",
       "description": "Certified System Administrator",
       "questionCount": 371,
-      "lastUpdated": "2025-08-05T02:46:11.702225"
+      "lastUpdated": "2025-08-06T07:05:07.673874"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "page_num": "all_servicenow_pages",
+  "page_num": 129,
   "status": "complete",
   "links": [
     "/discussions/servicenow/view/93937-exam-cis-rc-topic-1-question-1-discussion/",
@@ -185,7 +185,7 @@
     "/discussions/servicenow/view/305372-exam-cis-rc-topic-1-question-227-discussion/",
     "/discussions/servicenow/view/303859-exam-cis-rc-topic-1-question-229-discussion/"
   ],
-  "collected_at": "2025-08-04T20:12:28.193246",
+  "collected_at": "2025-08-05T23:39:08.737769",
   "method": "servicenow_batch_collection",
   "exam_code": "CIS-RC",
   "links_count": 182

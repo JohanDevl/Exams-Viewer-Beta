@@ -1,5 +1,5 @@
 {
-  "page_num": "all_servicenow_pages",
+  "page_num": 129,
   "status": "complete",
   "links": [
     "/discussions/servicenow/view/91460-exam-cis-csm-topic-1-question-1-discussion/",
@@ -243,7 +243,7 @@
     "/discussions/servicenow/view/168938-exam-cis-csm-topic-1-question-241-discussion/",
     "/discussions/servicenow/view/306429-exam-cis-csm-topic-1-question-246-discussion/"
   ],
-  "collected_at": "2025-08-04T20:12:28.190332",
+  "collected_at": "2025-08-05T23:39:08.735209",
   "method": "servicenow_batch_collection",
   "exam_code": "CIS-CSM",
   "links_count": 240

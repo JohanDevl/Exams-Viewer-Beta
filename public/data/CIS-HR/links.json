@@ -1,5 +1,5 @@
 {
-  "page_num": "all_servicenow_pages",
+  "page_num": 129,
   "status": "complete",
   "links": [
     "/discussions/servicenow/view/102059-exam-cis-hr-topic-1-question-1-discussion/",
@@ -172,7 +172,7 @@
     "/discussions/servicenow/view/148093-exam-cis-hr-topic-1-question-194-discussion/",
     "/discussions/servicenow/view/148094-exam-cis-hr-topic-1-question-197-discussion/"
   ],
-  "collected_at": "2025-08-04T20:12:28.192015",
+  "collected_at": "2025-08-05T23:39:08.736995",
   "method": "servicenow_batch_collection",
   "exam_code": "CIS-HR",
   "links_count": 169

@@ -441,7 +441,17 @@ def scrape_questions(question_links, json_path, progress, rapid_scraping=False, 
     
     questions.sort(key=lambda x: int(x["question_number"]) if x["question_number"].isdigit() else float('inf'))
     status = "complete" if len(questions) == questions_num else "in progress"
-    questions_obj = {"status": status, "error": error_string, "questions": questions}
+    questions_obj = {
+        "status": status, 
+        "error": error_string, 
+        "questions": questions,
+        "update_stats": {
+            "new_count": new_count,
+            "updated_count": updated_count,
+            "skipped_count": skipped_count,
+            "total_processed": len(question_links)
+        }
+    }
     save_json(questions_obj, json_path)
     
     # Print summary if there were updates

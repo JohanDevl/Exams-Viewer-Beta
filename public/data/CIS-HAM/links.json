@@ -1,5 +1,5 @@
 {
-  "page_num": "all_servicenow_pages",
+  "page_num": 129,
   "status": "complete",
   "links": [
     "/discussions/servicenow/view/93173-exam-cis-ham-topic-1-question-1-discussion/",
@@ -183,7 +183,7 @@
     "/discussions/servicenow/view/157661-exam-cis-ham-topic-1-question-183-discussion/",
     "/discussions/servicenow/view/157104-exam-cis-ham-topic-1-question-184-discussion/"
   ],
-  "collected_at": "2025-08-04T20:12:28.191567",
+  "collected_at": "2025-08-05T23:39:08.736636",
   "method": "servicenow_batch_collection",
   "exam_code": "CIS-HAM",
   "links_count": 180

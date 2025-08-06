@@ -1,5 +1,5 @@
 {
-  "page_num": "all_servicenow_pages",
+  "page_num": 129,
   "status": "complete",
   "links": [
     "/discussions/servicenow/view/105781-exam-cis-ppm-topic-1-question-1-discussion/",
@@ -169,7 +169,7 @@
     "/discussions/servicenow/view/129826-exam-cis-ppm-topic-1-question-168-discussion/",
     "/discussions/servicenow/view/117270-exam-cis-ppm-topic-1-question-169-discussion/"
   ],
-  "collected_at": "2025-08-04T20:12:28.192808",
+  "collected_at": "2025-08-05T23:39:08.737554",
   "method": "servicenow_batch_collection",
   "exam_code": "CIS-PPM",
   "links_count": 166

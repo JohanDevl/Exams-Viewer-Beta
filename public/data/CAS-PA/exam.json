@@ -2187,5 +2187,11 @@
       },
       "error": null
     }
-  ]
+  ],
+  "update_stats": {
+    "new_count": 0,
+    "updated_count": 0,
+    "skipped_count": 80,
+    "total_processed": 80
+  }
 }
