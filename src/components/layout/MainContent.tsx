@@ -153,6 +153,12 @@ export function MainContent() {
         <button
           onClick={() => useSettingsStore.getState().setSidebarVisible(true)}
           className="hidden md:block fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-primary text-primary-foreground hover:bg-primary/90 rounded-l-lg p-2 shadow-lg transition-all duration-200"
+          style={{
+            // Prevent any mobile scroll issues even though this is desktop-only
+            WebkitTouchCallout: 'none',
+            WebkitTapHighlightColor: 'transparent',
+            touchAction: 'manipulation'
+          }}
           title="Show sidebar"
         >
           <ChevronLeft className="h-5 w-5" />

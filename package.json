@@ -1,6 +1,6 @@
 {
   "name": "exams-viewer",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "Modern exam practice platform for ServiceNow certification study materials",
   "homepage": "https://JohanDevl.github.io/Exams-Viewer/",
   "repository": {
@@ -57,6 +57,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/mcp": "^0.0.32",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20.19.9",
     "@types/react": "^19",
@@ -65,6 +66,6 @@
     "eslint-config-next": "15.4.5",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.6",
-    "typescript": "^5"
+    "typescript": "^5.8.3"
   }
 }

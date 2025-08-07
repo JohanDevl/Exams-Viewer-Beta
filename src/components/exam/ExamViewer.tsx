@@ -32,7 +32,7 @@ export function ExamViewer() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Exam header */}
+      {/* Exam header with integrated timer */}
       <ExamHeader />
 
       {/* Navigation controls */}
@@ -40,7 +40,7 @@ export function ExamViewer() {
 
       {/* Current question */}
       <div className="flex-1 overflow-y-auto">
-        <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-6 pb-20 md:pb-6">
+        <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-6 pb-16 md:pb-6">
           <QuestionDisplay 
             question={currentQuestion}
             questionIndex={currentQuestionIndex}

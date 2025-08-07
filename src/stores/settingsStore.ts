@@ -98,7 +98,10 @@ export const useSettingsStore = create<SettingsStore>()(
 
         // Update current view if defaultView changed
         if (newSettings.defaultView) {
-          set({ currentView: newSettings.defaultView });
+          // Force card view on mobile regardless of defaultView setting
+          const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+          const finalView = isMobile ? "card" : newSettings.defaultView;
+          set({ currentView: finalView });
         }
 
         // Apply sidebar position if changed
@@ -117,9 +120,13 @@ export const useSettingsStore = create<SettingsStore>()(
 
       // Reset settings
       resetSettings: () => {
+        // Force card view on mobile even when resetting
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        const finalView = isMobile ? "card" : defaultSettings.defaultView;
+        
         set({ 
           settings: defaultSettings,
-          currentView: defaultSettings.defaultView 
+          currentView: finalView
         });
         get().applyTheme();
         get().applyDefaultSidebarPosition();
@@ -163,10 +170,25 @@ export const useSettingsStore = create<SettingsStore>()(
 
       // Gestion des vues
       setCurrentView: (view: "list" | "card") => {
-        set({ currentView: view });
+        // Force card view on mobile
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        const finalView = isMobile ? "card" : view;
+        set({ currentView: finalView });
       },
 
       toggleView: () => {
+        // Disable toggle on mobile - always stay in card view
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        if (isMobile) {
+          get().addToast({
+            type: 'info',
+            title: 'Card view optimized for mobile',
+            description: 'List view is not available on mobile devices',
+            duration: 2000
+          });
+          return;
+        }
+
         const { currentView } = get();
         const newView = currentView === "list" ? "card" : "list";
         set({ currentView: newView });
@@ -305,4 +327,18 @@ export const useInitializeSidebar = () => {
   useEffect(() => {
     applyDefaultSidebarPosition();
   }, [settings.defaultSidebarPosition, applyDefaultSidebarPosition]);
+};
+
+// Hook to initialize view mode on mobile
+export const useInitializeViewMode = () => {
+  const { setCurrentView, settings } = useSettingsStore();
+  
+  useEffect(() => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    if (isMobile) {
+      setCurrentView('card');
+    } else {
+      setCurrentView(settings.defaultView);
+    }
+  }, [settings.defaultView, setCurrentView]);
 };

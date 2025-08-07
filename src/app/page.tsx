@@ -9,7 +9,7 @@ export default function Home() {
       <HomeSessionFinalizer>
         <div className="min-h-screen flex flex-col">
           <AppHeader />
-          <main className="flex-1 flex">
+          <main className="flex-1 flex pt-14 sm:pt-16 md:pt-0">
             <MainContent />
           </main>
         </div>

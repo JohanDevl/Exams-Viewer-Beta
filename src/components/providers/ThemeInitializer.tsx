@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
 
 export function ThemeInitializer() {
-  const { applyTheme, applyDefaultSidebarPosition, settings } = useSettingsStore();
+  const { applyTheme, applyDefaultSidebarPosition, setCurrentView, settings } = useSettingsStore();
   
   useEffect(() => {
     // Apply initial theme
@@ -12,6 +12,14 @@ export function ThemeInitializer() {
     
     // Apply initial sidebar position
     applyDefaultSidebarPosition();
+    
+    // Force card view on mobile, respect defaultView on desktop
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      setCurrentView('card');
+    } else {
+      setCurrentView(settings.defaultView);
+    }
     
     // Listen for system preference changes if theme is set to "system"
     if (settings.theme === 'system') {
@@ -21,8 +29,8 @@ export function ThemeInitializer() {
       mediaQuery.addEventListener('change', handleChange);
       return () => mediaQuery.removeEventListener('change', handleChange);
     }
-  }, [settings.theme, settings.defaultSidebarPosition, applyTheme, applyDefaultSidebarPosition]);
+  }, [settings.theme, settings.defaultSidebarPosition, settings.defaultView, applyTheme, applyDefaultSidebarPosition, setCurrentView]);
 
-  // This component renders nothing, it just serves to initialize theme and sidebar
+  // This component renders nothing, it just serves to initialize theme, sidebar and view mode
   return null;
 }

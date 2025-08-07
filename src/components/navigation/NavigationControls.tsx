@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useExamStore } from '@/stores/examStore';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function NavigationControls() {
   const { 
@@ -22,7 +22,8 @@ export function NavigationControls() {
     setSearchFilters,
     goToPreviousQuestion,
     goToNextQuestion,
-    goToRandomQuestion
+    goToRandomQuestion,
+    examState
   } = useExamStore();
 
   const [showFilters, setShowFilters] = useState(false);
@@ -59,6 +60,16 @@ export function NavigationControls() {
                           searchFilters.difficulty !== 'all' ||
                           searchFilters.favorites ||
                           searchFilters.category !== 'all';
+
+  // Hide search and filters during active exam mode
+  const shouldHideSearchAndFilters = examState.mode === 'exam' && examState.phase === 'active';
+
+  // Close filters when entering active exam mode
+  useEffect(() => {
+    if (shouldHideSearchAndFilters) {
+      setShowFilters(false);
+    }
+  }, [shouldHideSearchAndFilters]);
 
   return (
     <div className="border-b bg-background">
@@ -100,50 +111,52 @@ export function NavigationControls() {
             </Button>
           </div>
 
-          {/* Search and filters */}
-          <div className="flex items-center gap-2 w-full sm:flex-1 max-w-md">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search questions..."
-                value={tempQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10 pr-10"
-              />
-              {tempQuery && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleSearch('')}
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              )}
-            </div>
+          {/* Search and filters - Hidden during active exam mode */}
+          {!shouldHideSearchAndFilters && (
+            <div className="flex items-center gap-2 w-full sm:flex-1 max-w-md">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search questions..."
+                  value={tempQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="pl-10 pr-10"
+                />
+                {tempQuery && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleSearch('')}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
 
-            <Button
-              variant={showFilters ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 relative"
-            >
-              <Filter className="h-4 w-4" />
-              <span className="hidden sm:inline">Filters</span>
-              {hasActiveFilters && (
-                <Badge 
-                  variant="secondary" 
-                  className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs"
-                >
-                  !
-                </Badge>
-              )}
-            </Button>
-          </div>
+              <Button
+                variant={showFilters ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2 relative"
+              >
+                <Filter className="h-4 w-4" />
+                <span className="hidden sm:inline">Filters</span>
+                {hasActiveFilters && (
+                  <Badge 
+                    variant="secondary" 
+                    className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs"
+                  >
+                    !
+                  </Badge>
+                )}
+              </Button>
+            </div>
+          )}
         </div>
 
-        {/* Filter panel */}
-        {showFilters && (
+        {/* Filter panel - Hidden during active exam mode */}
+        {!shouldHideSearchAndFilters && showFilters && (
           <div className="mt-3 sm:mt-4 p-3 sm:p-4 border rounded-lg bg-muted/50">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {/* Filter by status */}

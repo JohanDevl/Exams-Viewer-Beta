@@ -6,12 +6,60 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Summary
 
+- [5.1.0] - 2025-08-07: Mobile Experience Enhancement & Exam Mode Improvements
 - [5.0.0] - 2025-08-04: Complete Architecture Overhaul - GitHub Pages & Mobile Experience Revolution
 - [4.3.0] - 2025-07-29: User-Perceived Difficulty Rating System
 - [4.2.0] - 2025-07-28: Enhanced Keyboard Shortcuts with Visual Feedback
 - [4.1.2] - 2025-07-28: Mobile Navigation & Performance Fixes
 - [4.1.1] - 2025-07-28: Performance Optimization - Removed Obsolete Exam Preloading
-- [4.1.0] - 2025-07-28: Smart Cache Strategy & Deployment Optimization
+
+## [5.1.0] - 2025-08-07
+
+### 📱 Mobile Experience Revolution
+
+- **🔄 Complete Sidebar Navigation Overhaul**: Revolutionary mobile navigation experience
+  - **Native Scroll Integration**: Replaced Radix ScrollArea with native scroll for superior mobile compatibility
+  - **Scroll Isolation System**: Implemented body scroll lock when sidebar is open to prevent background scrolling
+  - **Touch Event Optimization**: Advanced touch and wheel event isolation with proper propagation control
+  - **Flexbox Layout Restructure**: Complete sidebar layout redesign with precise height management for all screen sizes
+  - **Platform-Specific Rendering**: Separate mobile and desktop rendering paths for optimal UX on each platform
+  - **Fixed Positioning**: Sidebar stays perfectly positioned during page scroll with hardware acceleration
+  - **Precise Height Calculations**: Smart mobile height accounting for header, navigation bars, and system UI elements
+
+- **🎯 Enhanced Mobile Input Experience**: Optimized user interaction for touch devices
+  - **Numeric Keyboard Support**: Custom exam inputs automatically trigger numeric keyboards on mobile devices
+  - **Force Card View on Mobile**: Automatic card view activation for optimal mobile browsing experience
+  - **Responsive Modal Layouts**: Settings modal and other dialogs fully optimized for mobile screen sizes
+  - **Touch-Friendly Controls**: All interactive elements sized and spaced for comfortable touch interaction
+
+### 🎓 Exam Mode Enhancements
+
+- **⏰ Timer Flexibility Improvements**: Enhanced exam completion options
+  - **No Time Limit Support**: Added "Finish Exam" button that remains visible even when timer is disabled
+  - **Consistent UI Experience**: Maintains same confirmation flow regardless of timer state
+  - **Clear Visual Indicators**: "No Time Limit" interface with "Finish when ready" messaging
+  - **Double-Click Confirmation**: Same security measures apply to manual finish as timed exams
+
+- **📊 Smart Question Selection**: Intelligent exam configuration for optimal study experience  
+  - **Auto-Select for Small Exams**: Automatically selects all questions for exams with less than 60 questions
+  - **Optimal Study Flow**: Eliminates unnecessary configuration steps for comprehensive smaller exams
+  - **Maintains Manual Control**: Preserves custom selection options for larger question sets
+
+### 🛠️ UI/UX Improvements
+
+- **🎨 Responsive Design Enhancements**: Cross-device compatibility improvements
+  - **Settings Modal Optimization**: Fully responsive settings interface with improved mobile layout
+  - **Custom Exam Configuration**: Resolved configuration options not working properly in exam setup
+  - **Header Optimization**: Improved mobile header behavior with better scroll interaction
+  - **Visual Consistency**: Maintained design consistency across all device sizes and orientations
+
+### 🔧 Technical Improvements
+
+- **⚡ Performance Optimizations**: Enhanced application performance and reliability
+  - **Scroll Event Management**: Efficient handling of scroll events with minimal performance impact
+  - **Memory Management**: Proper cleanup of event listeners and DOM modifications
+  - **Hardware Acceleration**: Leveraged CSS transforms for smooth animations and transitions
+  - **Touch Handling**: Optimized touch event processing for responsive mobile interactions
 
 ## [5.0.0] - 2025-08-04
 

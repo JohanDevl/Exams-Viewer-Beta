@@ -1,95 +1,60 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 
+/**
+ * Mobile-safe scroll lock hook
+ * 
+ * Completely bypasses scroll lock on mobile devices to prevent scroll repositioning issues.
+ * On desktop, provides simple scroll lock during button interactions.
+ * 
+ * Mobile detection: User agent + screen width check
+ * Mobile behavior: Direct callback execution without scroll manipulation
+ * Desktop behavior: Simple overflow hidden + position restoration
+ */
 export const useScrollLock = () => {
-  const isLocked = useRef<boolean>(false);
-  const lockQueue = useRef<number>(0);
 
-  // INVISIBLE SCROLL LOCK for mobile - effective but seamless  
+  // SCROLL LOCK - simplified and mobile-safe
   const withUltraScrollLock = useCallback(<T extends unknown[]>(callback: (...args: T) => void) => {
     return (...args: T) => {
-      // Detect mobile
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+      // BULLETPROOF mobile detection - prioritize user agent over window.innerWidth
+      const isIOSDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      const isAndroidDevice = /Android/i.test(navigator.userAgent);
+      const isMobileUA = /webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isMobileScreen = window.innerWidth < 768;
       
-      if (!isMobile) {
-        // Desktop: simple callback execution
+      // If ANY mobile indicator is true, skip scroll lock
+      const isMobile = isIOSDevice || isAndroidDevice || isMobileUA || isMobileScreen;
+      
+      if (isMobile) {
+        // Mobile: Execute callback directly - NO scroll manipulation whatsoever
         callback(...args);
         return;
       }
 
-      // Mobile: SMART INVISIBLE lock
-      const startScrollY = window.scrollY;
+      // Desktop: Simple scroll lock for better UX
       const body = document.body;
       const html = document.documentElement;
+      const startScrollY = window.scrollY;
       
-      // Increment lock queue
-      lockQueue.current++;
-      const currentLockId = lockQueue.current;
-      
-      // Store original overflow only
+      // Store original overflow
       const originalBodyOverflow = body.style.overflow;
       const originalHtmlOverflow = html.style.overflow;
-      const originalBodyTouchAction = body.style.touchAction;
-      const originalHtmlTouchAction = html.style.touchAction;
       
-      // MINIMAL but effective lock - preserve visual appearance
+      // Apply scroll lock
       body.style.overflow = 'hidden';
-      body.style.touchAction = 'none';
       html.style.overflow = 'hidden';
-      html.style.touchAction = 'none';
-      
-      // Smart scroll prevention that maintains position
-      const smartScrollPrevent = (e: Event) => {
-        // Only prevent scroll events, not touch events for buttons
-        if (e.type === 'scroll' || e.type === 'touchmove') {
-          e.preventDefault();
-          e.stopPropagation();
-          // Instantly restore scroll position if it changed
-          if (window.scrollY !== startScrollY) {
-            window.scrollTo(0, startScrollY);
-          }
-        }
-      };
-      
-      const criticalScrollEvents = ['scroll', 'touchmove'];
-      criticalScrollEvents.forEach(event => {
-        document.addEventListener(event, smartScrollPrevent, { passive: false, capture: true });
-        window.addEventListener(event, smartScrollPrevent, { passive: false, capture: true });
-      });
-      
-      isLocked.current = true;
       
       try {
         // Execute callback immediately
         callback(...args);
       } finally {
-        // MINIMAL delay for mobile - just enough
-        const restoreDelay = 100; // 100ms minimum
-        
+        // Restore after a short delay
         setTimeout(() => {
-          // Only restore if we're still the current lock
-          if (lockQueue.current === currentLockId) {
-            // Remove event listeners
-            criticalScrollEvents.forEach(event => {
-              document.removeEventListener(event, smartScrollPrevent, { capture: true });
-              window.removeEventListener(event, smartScrollPrevent, { capture: true });
-            });
-            
-            // Restore original overflow styles only
-            body.style.overflow = originalBodyOverflow;
-            body.style.touchAction = originalBodyTouchAction;
-            html.style.overflow = originalHtmlOverflow;  
-            html.style.touchAction = originalHtmlTouchAction;
-            
-            // Final position check
-            if (window.scrollY !== startScrollY) {
-              window.scrollTo({ top: startScrollY, left: 0, behavior: 'instant' });
-            }
-            
-            isLocked.current = false;
-          }
-        }, restoreDelay);
+          body.style.overflow = originalBodyOverflow;
+          html.style.overflow = originalHtmlOverflow;
+          window.scrollTo({ top: startScrollY, left: 0, behavior: 'instant' });
+        }, 50);
       }
     };
   }, []);

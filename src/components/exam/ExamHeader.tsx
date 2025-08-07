@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { useExamStore } from '@/stores/examStore';
 import { useStatisticsStore } from '@/stores/statisticsStore';
 import { Badge } from '@/components/ui/badge';
+import { ExamTimer } from '@/components/exam/ExamTimer';
 
 export function ExamHeader() {
   const { 
@@ -13,7 +14,8 @@ export function ExamHeader() {
     currentQuestionIndex, 
     filteredQuestionIndices,
     getProgress,
-    resetExam 
+    resetExam,
+    examState
   } = useExamStore();
   
   const { getExamStatistics } = useStatisticsStore();
@@ -83,21 +85,30 @@ export function ExamHeader() {
               </div>
             )}
 
-            {/* Answers */}
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <span className="text-green-600 dark:text-green-400">
-                {progress.correct}
-              </span>
-              <span>/</span>
-              <span>{progress.answered}</span>
-            </div>
+            {/* Answers - hidden in exam mode to not reveal score */}
+            {examState.mode !== 'exam' && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <span className="text-green-600 dark:text-green-400">
+                  {progress.correct}
+                </span>
+                <span>/</span>
+                <span>{progress.answered}</span>
+              </div>
+            )}
           </div>
         </div>
 
+        {/* Timer - only in exam mode */}
+        {examState.mode === 'exam' && (
+          <div className="mt-4">
+            <ExamTimer compact={false} />
+          </div>
+        )}
+
         {/* Progress bar */}
-        <div className="mt-4">
+        <div className={examState.mode === 'exam' ? "mt-2" : "mt-4"}>
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-            <span>Overall progress</span>
+            <span>{examState.mode === 'exam' ? 'Questions progress' : 'Overall progress'}</span>
             <span>
               {progress.total > 0 ? Math.round((progress.answered / progress.total) * 100) : 0}% 
               ({progress.answered}/{progress.total})

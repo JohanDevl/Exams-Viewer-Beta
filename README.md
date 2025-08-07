@@ -44,10 +44,21 @@ A cutting-edge web application for practicing ServiceNow certification exam ques
 
 ### 📱 Mobile-Optimized Experience
 
-- **👆 Touch Gestures**: Swipe navigation with haptic feedback
-- **📱 Mobile Navigation**: Thumb-friendly bottom navigation bar
-- **🔄 Responsive Components**: Adaptive UI with touch optimization
-- **⚡ Performance**: Optimized for mobile devices with efficient rendering
+- **🔄 Revolutionary Sidebar Navigation**: Native scroll with body scroll isolation for perfect mobile navigation
+- **📱 Smart Touch Interfaces**: Automatic numeric keyboards, force card view, and touch-friendly controls
+- **👆 Advanced Touch Gestures**: Swipe navigation with haptic feedback and optimized event handling
+- **📱 Mobile Navigation**: Thumb-friendly bottom navigation bar with responsive positioning
+- **🔄 Platform-Specific UI**: Separate mobile/desktop rendering paths for optimal UX
+- **⚡ Performance**: Hardware-accelerated animations with efficient scroll management
+
+### 🎓 Enhanced Exam Mode
+
+- **⏰ Flexible Timer Options**: Complete exam experience with or without time limits
+- **📊 Smart Question Selection**: Auto-selects all questions for exams with less than 60 questions
+- **🎯 Finish When Ready**: Dedicated finish button available even when timer is disabled
+- **🔒 Anti-Cheating Measures**: Complete answer masking during active exam sessions
+- **📈 Real-time Progress**: Context-aware progress tracking for exam vs study modes
+- **🎯 Manual Completion**: Double-click confirmation system for secure exam submission
 
 ## 📚 Supported Certifications
 

@@ -122,17 +122,20 @@
     -moz-osx-font-smoothing: grayscale;
   }
   
-  /* Prevent horizontal scroll on mobile */
+  /* Prevent horizontal scroll on mobile but allow vertical */
   html, body {
     overflow-x: hidden;
+    overflow-y: auto; /* Explicitly allow vertical scroll */
   }
   
   /* Better text rendering on mobile */
   @media (max-width: 768px) {
     html {
       -webkit-text-size-adjust: 100%;
-      /* Disable smooth scroll on mobile to prevent unwanted movements */
-      scroll-behavior: auto !important;
+      /* Disable smooth scroll on mobile to prevent repositioning issues */
+      scroll-behavior: auto;
+      /* Improve mobile scroll performance */
+      -webkit-overflow-scrolling: touch;
     }
     
     /* Prevent layout shifts that could cause unwanted scrolling */
@@ -140,11 +143,14 @@
       -webkit-tap-highlight-color: transparent;
     }
     
-    /* Stabilize touch interactions - gentle approach */
+    /* Stabilize touch interactions - prevent scroll repositioning */
     button, [role="button"], input[type="checkbox"], input[type="radio"], .answer-option {
-      touch-action: manipulation;
+      touch-action: manipulation; /* Prevent double-tap zoom and scroll repositioning */
       -webkit-touch-callout: none;
       -webkit-tap-highlight-color: transparent;
+      /* Prevent iOS automatic scroll repositioning */
+      -webkit-user-select: none;
+      user-select: none;
     }
     
     /* Prevent toast-related layout shifts on mobile */
@@ -162,6 +168,17 @@
     
     .answer-option:active {
       transform: scale(0.98);
+    }
+    
+    /* Mobile navigation bar - prevent scroll repositioning */
+    .fixed.bottom-0 {
+      /* Force hardware acceleration and stable positioning */
+      will-change: transform;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      /* Prevent iOS safe area adjustments that cause scroll issues */
+      padding-bottom: 0 !important;
+      margin-bottom: 0 !important;
     }
   }
   

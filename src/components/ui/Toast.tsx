@@ -26,14 +26,35 @@ const toastStyles = {
 export function Toast({ type, title, description, duration, onClose }: ToastProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const Icon = toastIcons[type];
 
+  // Static mobile detection to avoid iOS Safari viewport resize issues
   useEffect(() => {
-    // Entry animation
-    const timer = setTimeout(() => setIsVisible(true), 50);
-    return () => clearTimeout(timer);
+    const detectMobile = () => {
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isSmallScreen = window.innerWidth <= 768;
+      setIsMobile(isMobileDevice || isSmallScreen);
+    };
+    
+    // Only detect once on mount - no resize listener to avoid Safari repositioning bug
+    detectMobile();
+    
+    // Don't add resize listener on iOS Safari to prevent scroll repositioning
+    const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (!isIOSSafari) {
+      // Only add resize listener on non-iOS devices
+      window.addEventListener('resize', detectMobile);
+      return () => window.removeEventListener('resize', detectMobile);
+    }
   }, []);
+
+  useEffect(() => {
+    // Entry animation - instant on mobile to prevent scroll repositioning
+    const timer = setTimeout(() => setIsVisible(true), isMobile ? 0 : 50);
+    return () => clearTimeout(timer);
+  }, [isMobile]);
 
   useEffect(() => {
     if (duration && duration > 0) {
@@ -41,36 +62,43 @@ export function Toast({ type, title, description, duration, onClose }: ToastProp
         setIsLeaving(true);
         setTimeout(() => {
           onClose();
-        }, 200);
+        }, isMobile ? 0 : 200); // Instant close on mobile
       }, duration);
       
       return () => clearTimeout(timer);
     }
-  }, [duration, onClose]);
+  }, [duration, onClose, isMobile]);
 
   const handleClose = () => {
     setIsLeaving(true);
     setTimeout(() => {
       onClose();
-    }, 200);
+    }, isMobile ? 0 : 200); // Instant close on mobile
   };
 
   return (
     <div
       className={cn(
-        'transform transition-all duration-200 ease-in-out will-change-transform',
+        // Disable animations on mobile to prevent scroll repositioning
+        isMobile ? '' : 'transform transition-all duration-200 ease-in-out will-change-transform',
         'border rounded-lg shadow-lg p-3 sm:p-4 max-w-sm w-full',
         toastStyles[type],
-        isVisible && !isLeaving ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+        // Only apply transform classes on desktop
+        !isMobile && (isVisible && !isLeaving ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'),
+        // Always show on mobile to prevent animations
+        isMobile && 'opacity-100'
       )}
       role="alert"
       aria-live="polite"
-      style={{ 
-        // Use transform3d for better mobile performance
+      style={isMobile ? {
+        // Simple static positioning on mobile - no transforms
+        position: 'static',
+        zIndex: 'auto'
+      } : { 
+        // Use transform3d for better desktop performance
         transform: isVisible && !isLeaving 
           ? 'translate3d(0, 0, 0)' 
           : 'translate3d(0, -100%, 0)',
-        // Prevent layout shift on mobile
         position: 'relative',
         zIndex: 1
       }}

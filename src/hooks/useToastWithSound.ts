@@ -10,15 +10,24 @@ export const useToastWithSound = () => {
   const { playSound } = useSoundEffects();
   const [isMobile, setIsMobile] = useState(false);
   
-  // Detect mobile on client-side only to avoid SSR mismatch
+  // Static mobile detection to avoid iOS Safari viewport resize issues
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    const detectMobile = () => {
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isSmallScreen = window.innerWidth <= 768;
+      setIsMobile(isMobileDevice || isSmallScreen);
     };
     
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    // Only detect once on mount - no resize listener to avoid Safari repositioning bug
+    detectMobile();
+    
+    // Don't add resize listener on iOS Safari to prevent scroll repositioning
+    const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (!isIOSSafari) {
+      // Only add resize listener on non-iOS devices
+      window.addEventListener('resize', detectMobile);
+      return () => window.removeEventListener('resize', detectMobile);
+    }
   }, []);
 
   const addToastWithSound = (toast: Omit<ToastMessage, 'id'>) => {
