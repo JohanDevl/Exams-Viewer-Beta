@@ -105,7 +105,7 @@ export function SettingsModal() {
                     </p>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 hidden md:block">
                     <Label htmlFor="defaultView">Default view</Label>
                     <Select 
                       value={settings.defaultView} 
@@ -131,6 +131,22 @@ export function SettingsModal() {
                         </SelectItem>
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Choose your preferred question display format
+                    </p>
+                  </div>
+
+                  {/* Mobile notice about card view */}
+                  <div className="md:hidden space-y-2">
+                    <div className="p-3 bg-muted rounded-md">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Grid className="h-4 w-4" />
+                        <span className="font-medium text-sm">View Mode</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Card view is optimized for mobile devices and is always active on mobile
+                      </p>
+                    </div>
                   </div>
 
                   <div className="space-y-2">

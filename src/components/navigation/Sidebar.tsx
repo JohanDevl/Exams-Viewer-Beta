@@ -45,6 +45,10 @@ export function Sidebar() {
   const isExamMode = examState.mode === 'exam';
   const isExamActive = isExamMode && examState.phase === 'active';
 
+  // Force card view on mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const effectiveView = isMobile ? 'card' : currentView;
+
   const getStatusIcon = (status: QuestionStatus, questionIndex: number) => {
     // In exam mode, prioritize review flag over other status
     if (isExamActive && examState.questionsMarkedForReview.has(questionIndex)) {
@@ -168,22 +172,8 @@ export function Sidebar() {
         )}
 
         <div className="flex items-center gap-1">
-          {/* Mobile: always show controls. Desktop: only when not collapsed */}
+          {/* Mobile: only show close button. Desktop: only when not collapsed */}
           <div className="md:hidden flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleView}
-              className="h-8 w-8 p-0"
-              title={`Switch to ${currentView === 'list' ? 'card' : 'list'} view`}
-            >
-              {currentView === "list" ? (
-                <Grid className="h-4 w-4" />
-              ) : (
-                <List className="h-4 w-4" />
-              )}
-            </Button>
-            
             <Button
               variant="ghost"
               size="sm"
@@ -280,7 +270,7 @@ export function Sidebar() {
 
         {/* Full view: always on mobile, on desktop when not collapsed */}
         <div className={cn("block", "md:hidden", !sidebarCollapsed && "md:block")}>
-          {currentView === "list" ? (
+          {effectiveView === "list" ? (
           /* List view */
           <ScrollArea className="h-full">
             <div className="p-2 space-y-2">
