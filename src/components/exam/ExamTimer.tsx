@@ -30,6 +30,11 @@ export function ExamTimer({ className, compact = false }: ExamTimerProps) {
                          examState.phase === 'active' && 
                          examState.timer.isActive &&
                          examState.timer.duration !== null;
+  
+  // Show finish button even without timer in active exam mode
+  const shouldShowFinishOnly = examState.mode === 'exam' && 
+                              examState.phase === 'active' && 
+                              (!examState.timer.isActive || examState.timer.duration === null);
 
   // Format time display
   const formatTime = (milliseconds: number): string => {
@@ -203,6 +208,52 @@ export function ExamTimer({ className, compact = false }: ExamTimerProps) {
       lastWarningRef.current = new Set();
     }
   }, [examState.timer.warningsShown]);
+
+  // Show finish button only when no timer but in exam mode
+  if (shouldShowFinishOnly) {
+    return (
+      <Card className={cn('transition-all duration-300', className)}>
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-blue-600" />
+              <div>
+                <div className="text-xs text-muted-foreground">No Time Limit</div>
+                <div className="text-sm font-medium text-foreground">
+                  Finish when ready
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* Finish Exam Button */}
+              {showConfirm ? (
+                <Button
+                  onClick={handleFinishExam}
+                  size="sm"
+                  variant="destructive"
+                  className="animate-pulse"
+                >
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Confirm Finish
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleFinishExam}
+                  size="sm"
+                  variant="outline"
+                  className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                >
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Finish Exam
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!shouldShowTimer) {
     return null;
