@@ -118,6 +118,8 @@ The application features a comprehensive exam mode system designed to simulate r
 - **Feedback Control**: Complete answer hiding during active exam sessions
 - **Manual Finish**: Early exam completion with double-confirmation safety
 - **Progress Tracking**: Context-aware progress bars (exam questions vs all questions)
+- **No Time Limit Support (v5.1.0)**: Finish Exam button remains available even when timer is disabled
+- **Smart Question Auto-Selection (v5.1.0)**: Automatically selects all questions for exams with less than 60 questions
 - **Security Measures**: Statistics and export features disabled during active exams
 - **Answer Modification**: Ability to change answers during exam using reset-based system
 
@@ -238,6 +240,23 @@ The application features a sophisticated scroll lock system specifically designe
 
 This system ensures users experience zero scroll movement during question interactions, maintaining perfect position stability.
 
+### Revolutionary Sidebar Navigation (v5.1.0)
+The sidebar has been completely redesigned for mobile devices with native scroll integration:
+- **Native Scroll Replacement**: Replaced Radix ScrollArea with native `overflow-y: auto` for superior mobile compatibility
+- **Body Scroll Isolation**: Implemented body scroll lock (`position: fixed`) when sidebar is open to prevent background page scrolling
+- **Advanced Event Management**: Touch and wheel events are captured and prevented from propagating to parent elements
+- **Flexbox Layout Architecture**: Complete restructure using `flex flex-col` for precise height management across all screen sizes
+- **Platform-Specific Rendering**: Separate mobile (`md:hidden`) and desktop (`hidden md:block`) rendering paths for optimal UX
+- **Fixed Positioning with Hardware Acceleration**: Sidebar maintains fixed position during page scroll using `transform: translateZ(0)`
+- **Precise Height Calculations**: Smart mobile height using `calc(100vh - 4rem - 60px - 4rem - 4rem)` accounting for all UI elements
+
+### Enhanced Mobile Input Experience (v5.1.0)
+Optimized touch interactions and input handling for mobile devices:
+- **Automatic Numeric Keyboards**: Custom exam inputs trigger `inputMode="numeric"` for seamless number entry
+- **Force Card View**: Mobile devices automatically use card view layout for optimal touch browsing
+- **Responsive Modal System**: All dialogs and modals fully optimized for mobile screen constraints
+- **Touch Event Optimization**: Advanced touch handling with proper event propagation control and performance optimization
+
 ## Documentation
 
 Comprehensive documentation is available in the `/docs/` directory:
@@ -263,4 +282,4 @@ All stores use Zustand with:
 - Action-based mutations for predictable updates
 - TypeScript integration for type safety
 
-Last updated: January 2025 - Complete exam mode system with comprehensive feedback control and anti-cheating measures
+Last updated: January 2025 - Mobile experience revolution with native sidebar navigation, enhanced exam mode with flexible timer options, and optimized responsive design (v5.1.0)
