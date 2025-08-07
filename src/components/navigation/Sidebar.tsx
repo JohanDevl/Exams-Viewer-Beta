@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -34,10 +35,38 @@ export function Sidebar() {
     examState,
   } = useExamStore();
 
-  const { sidebarCollapsed, setSidebarCollapsed, toggleSidebarVisibility, currentView, toggleView, settings } =
+  const { sidebarCollapsed, setSidebarCollapsed, toggleSidebarVisibility, currentView, toggleView, settings, sidebarVisible } =
     useSettingsStore();
   
   const { playSound } = useSoundEffects();
+
+  // Block body scroll when sidebar is open on mobile
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const isMobile = window.innerWidth < 768;
+    if (isMobile && sidebarVisible) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      
+      // Block scroll on body
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+      
+      return () => {
+        // Restore scroll when sidebar closes
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [sidebarVisible]);
 
   if (!currentExam) return null;
 
@@ -130,6 +159,14 @@ export function Sidebar() {
     playSound('navigation');
   };
 
+  const handleScrollAreaTouch = (e: React.TouchEvent) => {
+    e.stopPropagation();
+  };
+
+  const handleScrollAreaWheel = (e: React.WheelEvent) => {
+    e.stopPropagation();
+  };
+
   const toggleCollapse = () => {
     setSidebarCollapsed(!sidebarCollapsed);
   };
@@ -137,10 +174,10 @@ export function Sidebar() {
   return (
     <div
       className={cn(
-        // Mobile: use absolute positioning to avoid iOS scroll issues
-        "absolute md:fixed right-0 top-16 bg-background transition-all duration-300 z-30 overflow-hidden",
-        // Mobile-safe height - avoid 100vh on mobile to prevent scroll repositioning on iOS
-        "h-[80vh] max-h-screen",
+        // Mobile: use fixed positioning to stay in place during scroll
+        "fixed md:fixed right-0 top-16 bg-background transition-all duration-300 z-30 flex flex-col",
+        // Mobile: take almost full screen height minus header and mobile nav bar
+        "h-[calc(100vh-4rem-60px)] max-h-screen",
         // Desktop: use more stable viewport units when available
         "md:h-[calc(100vh-4rem)]",
         "border-l",
@@ -150,6 +187,12 @@ export function Sidebar() {
         "md:w-auto",
         sidebarCollapsed ? "md:w-16" : "md:w-64 lg:w-72 xl:w-80"
       )}
+      style={{
+        // Additional mobile-specific positioning
+        WebkitTransform: 'translateZ(0)', // Force hardware acceleration
+        transform: 'translateZ(0)',
+        WebkitOverflowScrolling: 'touch' // Enable smooth scrolling on iOS
+      }}
     >
       {/* Header */}
       <div className="h-16 border-b flex items-center justify-between px-2 overflow-hidden">
@@ -231,7 +274,7 @@ export function Sidebar() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 h-[calc(80vh-8rem)] md:h-[calc(100vh-8rem)]">
+      <div className="flex-1 min-h-0 overflow-hidden">
         {/* Compact view: only on desktop when collapsed */}
         <div className={cn("hidden", sidebarCollapsed && "md:block")}>
           <ScrollArea className="h-full">
@@ -270,10 +313,132 @@ export function Sidebar() {
 
         {/* Full view: always on mobile, on desktop when not collapsed */}
         <div className={cn("block", "md:hidden", !sidebarCollapsed && "md:block")}>
+          {/* Mobile: Simple scrollable container */}
+          <div 
+            className="md:hidden overflow-y-auto"
+            style={{
+              height: 'calc(100vh - 4rem - 60px - 4rem - 4rem)', // sidebar height minus header minus stats
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehavior: 'contain'
+            }}
+            onTouchStart={handleScrollAreaTouch}
+            onTouchMove={handleScrollAreaTouch}
+            onWheel={handleScrollAreaWheel}
+          >
+            {effectiveView === "list" ? (
+              <div className="p-2 space-y-2">
+                {filteredQuestionIndices.map((questionIndex) => {
+                  const status = getFirstAnswerStatus(questionIndex);
+                  const questionState = questionStates[questionIndex];
+                  const isActive = questionIndex === currentQuestionIndex;
+                  const isFavorite = questionState?.isFavorite;
+                  const difficulty = questionState?.difficulty;
+
+                  return (
+                    <Button
+                      key={questionIndex}
+                      variant="ghost"
+                      onClick={() => handleQuestionClick(questionIndex)}
+                      className={cn(
+                        "w-full h-auto p-2 border justify-start text-left overflow-hidden",
+                        getStatusColor(status, isActive, questionIndex)
+                      )}
+                    >
+                      <div className="flex items-center gap-2 w-full overflow-hidden">
+                        <div className="flex-shrink-0">
+                          {getStatusIcon(status, questionIndex)}
+                        </div>
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-medium text-sm truncate">
+                              Question {questionIndex + 1}
+                            </span>
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              {difficulty && settings.showDifficulty && getDifficultyIcon(difficulty)}
+                              {isFavorite && (
+                                <Heart className="h-3 w-3 text-red-500 fill-current" />
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1 truncate overflow-hidden">
+                            {currentExam.questions[questionIndex]?.question
+                              .replace(/<[^>]*>/g, "")
+                              .substring(0, 40)}
+                            ...
+                          </div>
+                        </div>
+                      </div>
+                    </Button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="p-2 grid grid-cols-2 gap-2">
+                {filteredQuestionIndices.map((questionIndex) => {
+                  const status = getFirstAnswerStatus(questionIndex);
+                  const questionState = questionStates[questionIndex];
+                  const isActive = questionIndex === currentQuestionIndex;
+                  const isFavorite = questionState?.isFavorite;
+                  const difficulty = questionState?.difficulty;
+
+                  return (
+                    <Button
+                      key={questionIndex}
+                      variant="ghost"
+                      onClick={() => handleQuestionClick(questionIndex)}
+                      className={cn(
+                        "w-full h-20 p-2 border justify-start text-left overflow-hidden flex-col",
+                        getStatusColor(status, isActive, questionIndex)
+                      )}
+                    >
+                      <div className="flex items-center justify-between w-full mb-1">
+                        <div className="flex items-center gap-1">
+                          <div className="flex-shrink-0">
+                            {getStatusIcon(status, questionIndex)}
+                          </div>
+                          <span className="font-medium text-xs truncate">
+                            Q{questionIndex + 1}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          {difficulty && settings.showDifficulty && getDifficultyIcon(difficulty)}
+                          {isFavorite && (
+                            <Heart className="h-2 w-2 text-red-500 fill-current" />
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-xs text-muted-foreground text-left w-full overflow-hidden" style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical'
+                      }}>
+                        {currentExam.questions[questionIndex]?.question
+                          .replace(/<[^>]*>/g, "")
+                          .substring(0, 60)}
+                        ...
+                      </div>
+                    </Button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          
+          {/* Desktop view with ScrollArea */}
           {effectiveView === "list" ? (
           /* List view */
-          <ScrollArea className="h-full">
-            <div className="p-2 space-y-2">
+          <div 
+            className="hidden md:block h-full overflow-auto md:overflow-hidden"
+            style={{
+              WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+              overscrollBehavior: 'contain' // Prevent scroll chaining to parent
+            }}
+            onTouchStart={handleScrollAreaTouch}
+            onTouchMove={handleScrollAreaTouch}
+            onWheel={handleScrollAreaWheel}
+          >
+            <ScrollArea className="h-full">
+              <div className="p-2 space-y-2">
               {filteredQuestionIndices.map((questionIndex) => {
                 const status = getFirstAnswerStatus(questionIndex);
                 const questionState = questionStates[questionIndex];
@@ -324,12 +489,84 @@ export function Sidebar() {
                   </Button>
                 );
               })}
-            </div>
-          </ScrollArea>
+              </div>
+            </ScrollArea>
+          </div>
         ) : (
           /* Card view */
-          <ScrollArea className="h-full">
-            <div className="p-2 grid grid-cols-2 gap-2">
+          <div 
+            className="h-full overflow-auto md:overflow-hidden"
+            style={{
+              WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+              overscrollBehavior: 'contain' // Prevent scroll chaining to parent
+            }}
+            onTouchStart={handleScrollAreaTouch}
+            onTouchMove={handleScrollAreaTouch}
+            onWheel={handleScrollAreaWheel}
+          >
+            <ScrollArea className="hidden md:block h-full">
+              <div className="p-2 grid grid-cols-2 gap-2">
+              {filteredQuestionIndices.map((questionIndex) => {
+                const status = getFirstAnswerStatus(questionIndex);
+                const questionState = questionStates[questionIndex];
+                const isActive = questionIndex === currentQuestionIndex;
+                const isFavorite = questionState?.isFavorite;
+                const difficulty = questionState?.difficulty;
+
+                return (
+                  <Button
+                    key={questionIndex}
+                    variant="ghost"
+                    onClick={() => handleQuestionClick(questionIndex)}
+                    className={cn(
+                      "w-full h-20 p-2 border justify-start text-left overflow-hidden flex-col",
+                      getStatusColor(status, isActive, questionIndex)
+                    )}
+                  >
+                    <div className="flex items-center justify-between w-full mb-1">
+                      <div className="flex items-center gap-1">
+                        <div className="flex-shrink-0">
+                          {getStatusIcon(status, questionIndex)}
+                        </div>
+                        <span className="font-medium text-xs truncate">
+                          Q{questionIndex + 1}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        {difficulty && settings.showDifficulty && getDifficultyIcon(difficulty)}
+                        {isFavorite && (
+                          <Heart className="h-2 w-2 text-red-500 fill-current" />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Question excerpt */}
+                    <div className="text-xs text-muted-foreground text-left w-full overflow-hidden" style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical'
+                    }}>
+                      {currentExam.questions[questionIndex]?.question
+                        .replace(/<[^>]*>/g, "") // Remove HTML tags
+                        .substring(0, 60)}
+                      ...
+                    </div>
+                  </Button>
+                );
+              })}
+              </div>
+            </ScrollArea>
+            {/* Mobile native scroll version */}
+            <div 
+              className="md:hidden p-2 grid grid-cols-2 gap-2"
+              style={{
+                height: 'auto',
+                maxHeight: '100%',
+                minHeight: '100px', // Force minimum height to trigger scroll
+                overflowY: 'auto'
+              }}
+            >
               {filteredQuestionIndices.map((questionIndex) => {
                 const status = getFirstAnswerStatus(questionIndex);
                 const questionState = questionStates[questionIndex];
@@ -380,13 +617,13 @@ export function Sidebar() {
                 );
               })}
             </div>
-          </ScrollArea>
+          </div>
         )}
         </div>
       </div>
 
       {/* Bottom statistics: always on mobile, on desktop when not collapsed */}
-      <div className={cn("block", "md:hidden", !sidebarCollapsed && "md:block")}>
+      <div className={cn("block flex-shrink-0", "md:hidden", !sidebarCollapsed && "md:block")}>
         <div className="border-t p-2 bg-muted/50 overflow-hidden">
           <div className="space-y-2 text-xs">
             <div className="flex items-center justify-between">
