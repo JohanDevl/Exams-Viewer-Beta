@@ -40,9 +40,11 @@ export function ExamConfigModal({ isOpen, onClose, onStart, examInfo }: ExamConf
   // Configuration state
   const [timeLimit, setTimeLimit] = useState<number | null>(90); // Default 90 minutes
   const [customTimeLimit, setCustomTimeLimit] = useState<string>('');
+  const [isCustomTimeLimit, setIsCustomTimeLimit] = useState<boolean>(false);
   const [questionCount, setQuestionCount] = useState<number>(60); // Default 60 questions
   const [questionSelection, setQuestionSelection] = useState<'all' | 'random' | 'custom'>('random');
   const [customQuestionCount, setCustomQuestionCount] = useState<string>('');
+  const [isCustomQuestionCount, setIsCustomQuestionCount] = useState<boolean>(false);
 
   // Predefined options
   const timeLimitOptions = [
@@ -67,9 +69,11 @@ export function ExamConfigModal({ isOpen, onClose, onStart, examInfo }: ExamConf
     if (isOpen) {
       setTimeLimit(90);
       setCustomTimeLimit('');
+      setIsCustomTimeLimit(false);
       setQuestionCount(60);
       setQuestionSelection('random');
       setCustomQuestionCount('');
+      setIsCustomQuestionCount(false);
     }
   }, [isOpen]);
 
@@ -79,8 +83,7 @@ export function ExamConfigModal({ isOpen, onClose, onStart, examInfo }: ExamConf
 
   // Validation
   const isValidTimeLimit = timeLimit === null || (timeLimit >= 5 && timeLimit <= 300);
-  const isValidQuestionCount = questionSelection === 'all' || 
-                               (questionCount > 0 && questionCount <= availableQuestions);
+  const isValidQuestionCount = questionCount > 0 && questionCount <= availableQuestions;
   const isValidConfig = isValidTimeLimit && isValidQuestionCount;
 
   // Calculate estimated time per question
@@ -91,10 +94,22 @@ export function ExamConfigModal({ isOpen, onClose, onStart, examInfo }: ExamConf
   const handleTimeLimitChange = (value: string) => {
     if (value === 'none') {
       setTimeLimit(null);
+      setIsCustomTimeLimit(false);
     } else if (value === 'custom') {
-      setTimeLimit(parseInt(customTimeLimit) || 90);
+      setIsCustomTimeLimit(true);
+      // Keep current timeLimit or use a default if switching to custom
+      const customValue = parseInt(customTimeLimit);
+      if (customValue >= 5 && customValue <= 300) {
+        setTimeLimit(customValue);
+      } else {
+        // Use current timeLimit as default or fallback to 90
+        const defaultValue = (timeLimit && timeLimit >= 5 && timeLimit <= 300) ? timeLimit : 90;
+        setTimeLimit(defaultValue);
+        setCustomTimeLimit(defaultValue.toString());
+      }
     } else {
       setTimeLimit(parseInt(value));
+      setIsCustomTimeLimit(false);
     }
   };
 
@@ -111,12 +126,24 @@ export function ExamConfigModal({ isOpen, onClose, onStart, examInfo }: ExamConf
     if (value === 'all') {
       setQuestionSelection('all');
       setQuestionCount(availableQuestions);
+      setIsCustomQuestionCount(false);
     } else if (value === 'custom') {
       setQuestionSelection('custom');
-      setQuestionCount(parseInt(customQuestionCount) || 60);
+      setIsCustomQuestionCount(true);
+      // Keep current questionCount or use a default if switching to custom
+      const customValue = parseInt(customQuestionCount);
+      if (customValue > 0 && customValue <= availableQuestions) {
+        setQuestionCount(customValue);
+      } else {
+        // Use current questionCount as default or fallback to 60
+        const defaultValue = (questionCount > 0 && questionCount <= availableQuestions) ? questionCount : Math.min(60, availableQuestions);
+        setQuestionCount(defaultValue);
+        setCustomQuestionCount(defaultValue.toString());
+      }
     } else {
       setQuestionSelection('random');
       setQuestionCount(parseInt(value));
+      setIsCustomQuestionCount(false);
     }
   };
 
@@ -141,7 +168,7 @@ export function ExamConfigModal({ isOpen, onClose, onStart, examInfo }: ExamConf
 
     const config: ExamConfig = {
       timeLimit,
-      questionCount: questionSelection === 'all' ? availableQuestions : questionCount,
+      questionCount,
       questionSelection,
       randomSeed: Date.now().toString() // For reproducible random selection
     };
@@ -202,7 +229,7 @@ export function ExamConfigModal({ isOpen, onClose, onStart, examInfo }: ExamConf
                 <div className="space-y-2">
                   <Label>Select Time Limit</Label>
                   <Select 
-                    value={timeLimit === null ? 'none' : timeLimit.toString()}
+                    value={timeLimit === null ? 'none' : isCustomTimeLimit ? 'custom' : timeLimit.toString()}
                     onValueChange={handleTimeLimitChange}
                   >
                     <SelectTrigger>
@@ -221,7 +248,7 @@ export function ExamConfigModal({ isOpen, onClose, onStart, examInfo }: ExamConf
                 </div>
 
                 {/* Custom time limit input */}
-                {timeLimit !== null && !timeLimitOptions.find(opt => opt.value === timeLimit) && (
+                {isCustomTimeLimit && (
                   <div className="space-y-2">
                     <Label htmlFor="customTime">Custom Time Limit (minutes)</Label>
                     <Input
@@ -260,7 +287,7 @@ export function ExamConfigModal({ isOpen, onClose, onStart, examInfo }: ExamConf
                 <div className="space-y-2">
                   <Label>Number of Questions</Label>
                   <Select 
-                    value={questionSelection === 'all' ? 'all' : questionSelection === 'custom' ? 'custom' : questionCount.toString()}
+                    value={questionSelection === 'all' ? 'all' : isCustomQuestionCount ? 'custom' : questionCount.toString()}
                     onValueChange={handleQuestionCountChange}
                   >
                     <SelectTrigger>
@@ -283,7 +310,7 @@ export function ExamConfigModal({ isOpen, onClose, onStart, examInfo }: ExamConf
                 </div>
 
                 {/* Custom question count input */}
-                {questionSelection === 'custom' && (
+                {isCustomQuestionCount && (
                   <div className="space-y-2">
                     <Label htmlFor="customQuestions">Custom Question Count</Label>
                     <Input
@@ -339,7 +366,7 @@ export function ExamConfigModal({ isOpen, onClose, onStart, examInfo }: ExamConf
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Questions:</span>
                     <span className="font-medium">
-                      {questionSelection === 'all' ? availableQuestions : questionCount} questions
+                      {questionCount} questions
                     </span>
                   </div>
                   <div className="flex justify-between items-center">

@@ -733,13 +733,16 @@ export const useExamStore = create<ExamStore>()(
         
         if (config.questionSelection === 'all') {
           selectedQuestionIndices = Array.from({ length: currentExam.questions.length }, (_, i) => i);
-        } else if (config.questionSelection === 'random') {
-          // Smart random selection with domain balance
+        } else if (config.questionSelection === 'random' || config.questionSelection === 'custom') {
+          // Random selection for both 'random' and 'custom' (custom just means custom count)
           const allIndices = Array.from({ length: currentExam.questions.length }, (_, i) => i);
           const shuffled = allIndices.sort(() => Math.random() - 0.5);
           selectedQuestionIndices = shuffled.slice(0, config.questionCount);
         } else {
-          selectedQuestionIndices = config.customQuestionIndices || [];
+          // Fallback to random selection
+          const allIndices = Array.from({ length: currentExam.questions.length }, (_, i) => i);
+          const shuffled = allIndices.sort(() => Math.random() - 0.5);
+          selectedQuestionIndices = shuffled.slice(0, config.questionCount);
         }
 
         const startTime = Date.now();
