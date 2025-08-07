@@ -66,16 +66,24 @@ export function ExamConfigModal({ isOpen, onClose, onStart, examInfo }: ExamConf
 
   // Reset state when modal opens
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && examInfo) {
       setTimeLimit(90);
       setCustomTimeLimit('');
       setIsCustomTimeLimit(false);
-      setQuestionCount(60);
-      setQuestionSelection('random');
+      
+      // Auto-select "all" if exam has less than 60 questions
+      if (examInfo.questionCount < 60) {
+        setQuestionSelection('all');
+        setQuestionCount(examInfo.questionCount);
+      } else {
+        setQuestionSelection('random');
+        setQuestionCount(60);
+      }
+      
       setCustomQuestionCount('');
       setIsCustomQuestionCount(false);
     }
-  }, [isOpen]);
+  }, [isOpen, examInfo]);
 
   // Calculate available questions
   const availableQuestions = examInfo?.questionCount || 0;
