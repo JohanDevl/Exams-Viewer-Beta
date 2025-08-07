@@ -262,6 +262,8 @@ export function ExamConfigModal({ isOpen, onClose, onStart, examInfo }: ExamConf
                     <Input
                       id="customTime"
                       type="number"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       min="5"
                       max="300"
                       value={customTimeLimit}
@@ -324,6 +326,8 @@ export function ExamConfigModal({ isOpen, onClose, onStart, examInfo }: ExamConf
                     <Input
                       id="customQuestions"
                       type="number"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       min="1"
                       max={availableQuestions}
                       value={customQuestionCount}
