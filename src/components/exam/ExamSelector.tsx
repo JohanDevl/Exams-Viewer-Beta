@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Search, Calendar, FileText, Loader2, Grid, List } from 'lucide-react';
+import { Search, Calendar, FileText, Loader2, Grid, List, BookOpen, Timer } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,9 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { useExamStore } from '@/stores/examStore';
 import { useStatisticsStore } from '@/stores/statisticsStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import type { Manifest, ExamInfo } from '@/types';
+import type { Manifest, ExamInfo, ExamMode, ExamConfig } from '@/types';
 import { cn } from '@/lib/utils';
 import { getDataPath } from '@/lib/assets';
+import { ExamConfigModal } from '@/components/modals/ExamConfigModal';
 
 export function ExamSelector() {
   const [manifest, setManifest] = useState<Manifest | null>(null);
@@ -19,8 +20,11 @@ export function ExamSelector() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [loadingExam, setLoadingExam] = useState<string | null>(null);
+  const [selectedExam, setSelectedExam] = useState<string | null>(null);
+  const [selectedMode, setSelectedMode] = useState<ExamMode>('study');
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
 
-  const { loadExam } = useExamStore();
+  const { loadExam, setExamMode, startExam } = useExamStore();
   const { getExamStatistics } = useStatisticsStore();
   const { currentView, toggleView } = useSettingsStore();
 
@@ -61,14 +65,39 @@ export function ExamSelector() {
     setFilteredExams(filtered);
   }, [searchQuery, manifest]);
 
-  const handleSelectExam = async (examCode: string) => {
-    setLoadingExam(examCode);
+  const handleSelectExam = async (examCode: string, mode: ExamMode) => {
+    if (mode === 'exam') {
+      // For exam mode, show configuration modal
+      setSelectedExam(examCode);
+      setSelectedMode(mode);
+      setIsConfigModalOpen(true);
+    } else {
+      // For study mode, load directly
+      setLoadingExam(examCode);
+      try {
+        setExamMode('study');
+        await loadExam(examCode);
+      } catch (error) {
+        console.error('Error loading exam:', error);
+      } finally {
+        setLoadingExam(null);
+      }
+    }
+  };
+
+  const handleExamConfigStart = async (config: ExamConfig) => {
+    if (!selectedExam) return;
+    
+    setLoadingExam(selectedExam);
     try {
-      await loadExam(examCode);
+      setExamMode('exam');
+      await loadExam(selectedExam);
+      startExam(config);
     } catch (error) {
-      console.error('Error loading exam:', error);
+      console.error('Error starting exam:', error);
     } finally {
       setLoadingExam(null);
+      setIsConfigModalOpen(false);
     }
   };
 
@@ -174,11 +203,10 @@ export function ExamSelector() {
                 <Card 
                   key={exam.code} 
                   className={cn(
-                    "cursor-pointer transition-all duration-200 hover:shadow-lg border-2",
+                    "transition-all duration-200 hover:shadow-lg border-2",
                     "hover:border-primary/20 group",
-                    isLoadingThis && "opacity-75 cursor-not-allowed"
+                    isLoadingThis && "opacity-75"
                   )}
-                  onClick={() => !isLoadingThis && handleSelectExam(exam.code)}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-2">
@@ -239,26 +267,51 @@ export function ExamSelector() {
                         <span>Updated on {formatDate(exam.lastUpdated)}</span>
                       </div>
 
-                      {/* Button */}
-                      <Button 
-                        className="w-full mt-4" 
-                        disabled={isLoadingThis}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (!isLoadingThis) handleSelectExam(exam.code);
-                        }}
-                      >
-                        {isLoadingThis ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin"  />
-                            Loading...
-                          </>
-                        ) : stats.answered > 0 ? (
-                          'Continue'
-                        ) : (
-                          'Start'
-                        )}
-                      </Button>
+                      {/* Mode Selection Buttons */}
+                      <div className="space-y-2 mt-4">
+                        <Button 
+                          className="w-full" 
+                          disabled={isLoadingThis}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isLoadingThis) handleSelectExam(exam.code, 'study');
+                          }}
+                        >
+                          {isLoadingThis && selectedMode === 'study' ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Loading...
+                            </>
+                          ) : (
+                            <>
+                              <BookOpen className="h-4 w-4 mr-2" />
+                              {stats.answered > 0 ? 'Continue Study' : 'Study Mode'}
+                            </>
+                          )}
+                        </Button>
+                        
+                        <Button 
+                          variant="outline"
+                          className="w-full border-orange-200 text-orange-700 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-300 dark:hover:bg-orange-900/20" 
+                          disabled={isLoadingThis}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isLoadingThis) handleSelectExam(exam.code, 'exam');
+                          }}
+                        >
+                          {isLoadingThis && selectedMode === 'exam' ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Loading...
+                            </>
+                          ) : (
+                            <>
+                              <Timer className="h-4 w-4 mr-2" />
+                              Exam Mode
+                            </>
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -267,11 +320,10 @@ export function ExamSelector() {
                 <Card
                   key={exam.code}
                   className={cn(
-                    "cursor-pointer transition-all duration-200 hover:shadow-md border-2",
+                    "transition-all duration-200 hover:shadow-md border-2",
                     "hover:border-primary/20 group",
-                    isLoadingThis && "opacity-75 cursor-not-allowed"
+                    isLoadingThis && "opacity-75"
                   )}
-                  onClick={() => !isLoadingThis && handleSelectExam(exam.code)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between gap-4">
@@ -330,24 +382,51 @@ export function ExamSelector() {
                           </div>
                         )}
                         
-                        <Button 
-                          disabled={isLoadingThis}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (!isLoadingThis) handleSelectExam(exam.code);
-                          }}
-                        >
-                          {isLoadingThis ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin"  />
-                              Loading...
-                            </>
-                          ) : stats.answered > 0 ? (
-                            'Continue'
-                          ) : (
-                            'Start'
-                          )}
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm"
+                            disabled={isLoadingThis}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!isLoadingThis) handleSelectExam(exam.code, 'study');
+                            }}
+                          >
+                            {isLoadingThis && selectedMode === 'study' ? (
+                              <>
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                Loading...
+                              </>
+                            ) : (
+                              <>
+                                <BookOpen className="h-3 w-3 mr-1" />
+                                {stats.answered > 0 ? 'Study' : 'Study'}
+                              </>
+                            )}
+                          </Button>
+                          
+                          <Button 
+                            size="sm"
+                            variant="outline"
+                            className="border-orange-200 text-orange-700 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-300 dark:hover:bg-orange-900/20"
+                            disabled={isLoadingThis}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!isLoadingThis) handleSelectExam(exam.code, 'exam');
+                            }}
+                          >
+                            {isLoadingThis && selectedMode === 'exam' ? (
+                              <>
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                Loading...
+                              </>
+                            ) : (
+                              <>
+                                <Timer className="h-3 w-3 mr-1" />
+                                Exam
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -357,6 +436,14 @@ export function ExamSelector() {
           </div>
         </>
       )}
+      
+      {/* Exam Configuration Modal */}
+      <ExamConfigModal
+        isOpen={isConfigModalOpen}
+        onClose={() => setIsConfigModalOpen(false)}
+        onStart={handleExamConfigStart}
+        examInfo={selectedExam ? manifest?.exams.find(exam => exam.code === selectedExam) || null : null}
+      />
     </div>
   );
 }

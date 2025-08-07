@@ -4,12 +4,16 @@ import { getDataPath } from '@/lib/assets';
 import type { 
   ExamData, 
   ExamInfo, 
- 
   QuestionState, 
   QuestionStatus, 
   UserAnswer,
   DifficultyLevel,
-  SearchFilters
+  SearchFilters,
+  ExamMode,
+  ExamPhase,
+  ExamConfig,
+  ExamState,
+  ExamResult
 } from '@/types';
 
 interface ExamStore {
@@ -29,6 +33,9 @@ interface ExamStore {
   // Filters and search
   searchFilters: SearchFilters;
   filteredQuestionIndices: number[];
+
+  // Exam mode state
+  examState: ExamState;
 
   // Actions to load data
   loadExam: (examCode: string) => Promise<void>;
@@ -59,6 +66,21 @@ interface ExamStore {
   goToNextQuestion: () => void;
   goToPreviousQuestion: () => void;
   goToRandomQuestion: () => void;
+
+  // Exam mode actions
+  setExamMode: (mode: ExamMode) => void;
+  setExamPhase: (phase: ExamPhase) => void;
+  setExamConfig: (config: ExamConfig) => void;
+  startExam: (config: ExamConfig) => void;
+  toggleQuestionForReview: (questionIndex: number) => void;
+  startTimer: () => void;
+  pauseTimer: () => void;
+  resumeTimer: () => void;
+  updateTimer: () => void;
+  addTimerWarning: (minutes: number) => void;
+  submitExam: () => ExamResult | null;
+  finishExam: () => void;
+  resetExamState: () => void;
 }
 
 export const useExamStore = create<ExamStore>()(
@@ -81,10 +103,33 @@ export const useExamStore = create<ExamStore>()(
         category: 'all'
       },
       filteredQuestionIndices: [],
+      
+      // Initial exam mode state
+      examState: {
+        mode: 'study',
+        phase: 'configuration',
+        config: null,
+        timer: {
+          isActive: false,
+          startTime: null,
+          duration: null,
+          remainingTime: null,
+          isPaused: false,
+          warningsShown: new Set()
+        },
+        questionsMarkedForReview: new Set(),
+        startTime: null,
+        submissionTime: null,
+        finalScore: null,
+        isSubmitted: false
+      },
 
-      // Charger un examen
+      // Charger un examen  
       loadExam: async (examCode: string) => {
         set({ isLoading: true, error: null });
+        
+        // Reset exam state when loading a new exam
+        get().resetExamState();
         
         try {
           // Charger les infos de l'examen depuis le manifest
@@ -544,6 +589,9 @@ export const useExamStore = create<ExamStore>()(
           });
         }
         
+        // Reset exam state including exam mode
+        get().resetExamState();
+        
         set({
           currentExam: null,
           currentExamInfo: null,
@@ -592,18 +640,24 @@ export const useExamStore = create<ExamStore>()(
 
       // Get progress
       getProgress: () => {
-        const { currentExam, questionStates } = get();
+        const { currentExam, questionStates, filteredQuestionIndices, examState } = get();
         if (!currentExam) return { answered: 0, correct: 0, total: 0 };
 
-        const total = currentExam.questions.length;
+        // In exam mode, use filtered questions, otherwise use all questions
+        const relevantIndices = examState.mode === 'exam' ? filteredQuestionIndices : Array.from({ length: currentExam.questions.length }, (_, i) => i);
+        const total = relevantIndices.length;
         let answered = 0;
         let correct = 0;
 
-        Object.values(questionStates).forEach(state => {
-          // Utilise firstAnswer pour les statistiques permanentes
-          if (state.firstAnswer) {
+        relevantIndices.forEach(questionIndex => {
+          const state = questionStates[questionIndex];
+          // In exam mode, use current userAnswer for progress tracking (allows reset)
+          // In study mode, use firstAnswer for permanent statistics
+          const answerToCheck = examState.mode === 'exam' ? state?.userAnswer : state?.firstAnswer;
+          
+          if (answerToCheck) {
             answered++;
-            if (state.firstAnswer.isCorrect) {
+            if (answerToCheck.isCorrect) {
               correct++;
             }
           }
@@ -640,6 +694,285 @@ export const useExamStore = create<ExamStore>()(
           const questionIndex = filteredQuestionIndices[randomIndex];
           set({ currentQuestionIndex: questionIndex });
         }
+      },
+
+      // Exam mode actions
+      setExamMode: (mode: ExamMode) => {
+        set(state => ({ 
+          examState: { 
+            ...state.examState, 
+            mode,
+            phase: 'configuration'
+          } 
+        }));
+      },
+
+      setExamPhase: (phase: ExamPhase) => {
+        set(state => ({ 
+          examState: { 
+            ...state.examState, 
+            phase 
+          } 
+        }));
+      },
+
+      setExamConfig: (config: ExamConfig) => {
+        set(state => ({ 
+          examState: { 
+            ...state.examState, 
+            config 
+          } 
+        }));
+      },
+
+      startExam: (config: ExamConfig) => {
+        const { currentExam } = get();
+        if (!currentExam) return;
+
+        let selectedQuestionIndices: number[];
+        
+        if (config.questionSelection === 'all') {
+          selectedQuestionIndices = Array.from({ length: currentExam.questions.length }, (_, i) => i);
+        } else if (config.questionSelection === 'random') {
+          // Smart random selection with domain balance
+          const allIndices = Array.from({ length: currentExam.questions.length }, (_, i) => i);
+          const shuffled = allIndices.sort(() => Math.random() - 0.5);
+          selectedQuestionIndices = shuffled.slice(0, config.questionCount);
+        } else {
+          selectedQuestionIndices = config.customQuestionIndices || [];
+        }
+
+        const startTime = Date.now();
+        const duration = config.timeLimit ? config.timeLimit * 60 * 1000 : null; // convert minutes to milliseconds
+
+        set(state => ({
+          examState: {
+            ...state.examState,
+            mode: 'exam',
+            phase: 'active',
+            config,
+            startTime,
+            timer: {
+              isActive: Boolean(duration),
+              startTime: duration ? startTime : null,
+              duration,
+              remainingTime: duration,
+              isPaused: false,
+              warningsShown: new Set()
+            },
+            questionsMarkedForReview: new Set(),
+            isSubmitted: false
+          },
+          filteredQuestionIndices: selectedQuestionIndices,
+          currentQuestionIndex: selectedQuestionIndices[0] || 0
+        }));
+
+        // Start timer if time limit is set
+        if (duration) {
+          get().startTimer();
+        }
+      },
+
+      toggleQuestionForReview: (questionIndex: number) => {
+        set(state => {
+          const newMarkedQuestions = new Set(state.examState.questionsMarkedForReview);
+          if (newMarkedQuestions.has(questionIndex)) {
+            newMarkedQuestions.delete(questionIndex);
+          } else {
+            newMarkedQuestions.add(questionIndex);
+          }
+          
+          return {
+            examState: {
+              ...state.examState,
+              questionsMarkedForReview: newMarkedQuestions
+            }
+          };
+        });
+      },
+
+      startTimer: () => {
+        const { examState } = get();
+        if (!examState.timer.duration) return;
+
+        const startTime = Date.now();
+        set(state => ({
+          examState: {
+            ...state.examState,
+            timer: {
+              ...state.examState.timer,
+              isActive: true,
+              startTime,
+              isPaused: false
+            }
+          }
+        }));
+      },
+
+      pauseTimer: () => {
+        set(state => ({
+          examState: {
+            ...state.examState,
+            timer: {
+              ...state.examState.timer,
+              isPaused: true
+            }
+          }
+        }));
+      },
+
+      resumeTimer: () => {
+        set(state => ({
+          examState: {
+            ...state.examState,
+            timer: {
+              ...state.examState.timer,
+              isPaused: false
+            }
+          }
+        }));
+      },
+
+      updateTimer: () => {
+        const { examState } = get();
+        if (!examState.timer.isActive || examState.timer.isPaused || !examState.timer.startTime || !examState.timer.duration) {
+          return;
+        }
+
+        const now = Date.now();
+        const elapsed = now - examState.timer.startTime;
+        const remainingTime = Math.max(0, examState.timer.duration - elapsed);
+
+        set(state => ({
+          examState: {
+            ...state.examState,
+            timer: {
+              ...state.examState.timer,
+              remainingTime
+            }
+          }
+        }));
+
+        // Auto submit when time is up
+        if (remainingTime <= 0) {
+          get().submitExam();
+        }
+      },
+
+      addTimerWarning: (minutes: number) => {
+        set(state => {
+          const newWarnings = new Set(state.examState.timer.warningsShown);
+          newWarnings.add(minutes);
+          
+          return {
+            examState: {
+              ...state.examState,
+              timer: {
+                ...state.examState.timer,
+                warningsShown: newWarnings
+              }
+            }
+          };
+        });
+      },
+
+      submitExam: (): ExamResult | null => {
+        const { currentExam, currentExamInfo, questionStates, examState, filteredQuestionIndices } = get();
+        if (!currentExam || !currentExamInfo || !examState.config) return null;
+
+        const submissionTime = Date.now();
+        const totalQuestions = filteredQuestionIndices.length;
+        let answeredQuestions = 0;
+        let correctAnswers = 0;
+
+        // Calculate results
+        const questionResults = filteredQuestionIndices.map(questionIndex => {
+          const state = questionStates[questionIndex];
+          const question = currentExam.questions[questionIndex];
+          const wasAnswered = Boolean(state?.userAnswer);
+          const wasCorrect = Boolean(state?.userAnswer?.isCorrect);
+          
+          if (wasAnswered) answeredQuestions++;
+          if (wasCorrect) correctAnswers++;
+
+          return {
+            questionIndex,
+            wasCorrect,
+            timeSpent: 0, // TODO: implement per-question timing
+            attempts: 1,
+            finalAnswer: state?.userAnswer?.selectedAnswers || [],
+            correctAnswer: question.most_voted ? question.most_voted.split('') : []
+          };
+        });
+
+        const score = totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
+        const passed = score >= 70; // ServiceNow typical passing score
+
+        const result: ExamResult = {
+          examCode: currentExamInfo.code,
+          examName: currentExamInfo.name,
+          mode: examState.mode,
+          config: examState.config,
+          startTime: new Date(examState.startTime || submissionTime),
+          endTime: new Date(submissionTime),
+          timeSpent: examState.startTime ? submissionTime - examState.startTime : 0,
+          totalQuestions,
+          answeredQuestions,
+          correctAnswers,
+          score,
+          passed,
+          domainBreakdown: {}, // TODO: implement domain analysis
+          questionResults
+        };
+
+        // Update exam state
+        set(state => ({
+          examState: {
+            ...state.examState,
+            phase: 'completed',
+            submissionTime,
+            finalScore: score,
+            isSubmitted: true,
+            timer: {
+              ...state.examState.timer,
+              isActive: false
+            }
+          }
+        }));
+
+        return result;
+      },
+
+      finishExam: () => {
+        set(state => ({
+          examState: {
+            ...state.examState,
+            phase: 'completed'
+          }
+        }));
+      },
+
+      resetExamState: () => {
+        set(() => ({
+          examState: {
+            mode: 'study',
+            phase: 'configuration',
+            config: null,
+            timer: {
+              isActive: false,
+              startTime: null,
+              duration: null,
+              remainingTime: null,
+              isPaused: false,
+              warningsShown: new Set()
+            },
+            questionsMarkedForReview: new Set(),
+            startTime: null,
+            submissionTime: null,
+            finalScore: null,
+            isSubmitted: false
+          }
+        }));
       }
     }),
     {

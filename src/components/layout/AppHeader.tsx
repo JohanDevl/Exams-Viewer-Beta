@@ -20,7 +20,7 @@ export function AppHeader() {
     getThemePreference 
   } = useSettingsStore();
   
-  const { currentExam, questionStates } = useExamStore();
+  const { currentExam, questionStates, examState } = useExamStore();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const projectLinks = getProjectLinks();
@@ -28,6 +28,9 @@ export function AppHeader() {
   // Check if we have data to enable/disable certain buttons
   const hasExamData = !!currentExam;
   const hasUserActivity = hasExamData && Object.values(questionStates).some(state => state?.userAnswer || state?.isFavorite);
+  
+  // Disable certain features during active exam mode
+  const isExamActive = examState.mode === 'exam' && examState.phase === 'active' && !examState.isSubmitted;
 
   const toggleTheme = () => {
     const currentTheme = getThemePreference();
@@ -40,13 +43,15 @@ export function AppHeader() {
     icon: Icon, 
     label, 
     className,
-    disabled = false
+    disabled = false,
+    title
   }: { 
     onClick: () => void; 
     icon: React.ComponentType<{ className?: string }>; 
     label: string; 
     className?: string;
     disabled?: boolean;
+    title?: string;
   }) => (
     <Button
       variant="ghost"
@@ -54,7 +59,7 @@ export function AppHeader() {
       onClick={onClick}
       disabled={disabled}
       className={cn("h-9 w-9 p-0", className)}
-      title={disabled ? `${label} (No data available)` : label}
+      title={title || (disabled ? `${label} (No data available)` : label)}
       aria-label={label}
     >
       <Icon className={cn("h-4 w-4", disabled && "opacity-50")} />
@@ -68,16 +73,18 @@ export function AppHeader() {
           {/* Logo and title */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" className="h-8 w-8">
-                  <rect width="32" height="32" fill="#2563eb" rx="4"/>
-                  <rect x="6" y="8" width="20" height="16" fill="white" rx="2"/>
-                  <rect x="9" y="12" width="14" height="1" fill="#2563eb"/>
-                  <rect x="9" y="15" width="10" height="1" fill="#2563eb"/>
-                  <rect x="9" y="18" width="12" height="1" fill="#2563eb"/>
-                  <circle cx="20" cy="18" r="2" fill="#10b981"/>
-                </svg>
-              </div>
+              <ClientOnly>
+                <div className="h-8 w-8">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" className="h-8 w-8">
+                    <rect width="32" height="32" fill="#2563eb" rx="4"/>
+                    <rect x="6" y="8" width="20" height="16" fill="white" rx="2"/>
+                    <rect x="9" y="12" width="14" height="1" fill="#2563eb"/>
+                    <rect x="9" y="15" width="10" height="1" fill="#2563eb"/>
+                    <rect x="9" y="18" width="12" height="1" fill="#2563eb"/>
+                    <circle cx="20" cy="18" r="2" fill="#10b981"/>
+                  </svg>
+                </div>
+              </ClientOnly>
               <div className="hidden sm:block">
                 <h1 className="text-xl font-bold text-foreground">
                   Exams Viewer
@@ -106,14 +113,16 @@ export function AppHeader() {
               onClick={openStatisticsModal}
               icon={BarChart3}
               label="Statistics"
-              disabled={!hasUserActivity}
+              disabled={!hasUserActivity || isExamActive}
+              title={isExamActive ? "Statistics (Disabled during exam mode)" : !hasUserActivity ? "Statistics (No data available)" : "Statistics"}
             />
 
             <HeaderButton
               onClick={openExportModal}
               icon={Download}
               label="Export"
-              disabled={!hasExamData}
+              disabled={!hasExamData || isExamActive}
+              title={isExamActive ? "Export (Disabled during exam mode)" : !hasExamData ? "Export (No data available)" : "Export"}
             />
 
             <ClientOnly>
@@ -233,7 +242,8 @@ export function AppHeader() {
                   }}
                   icon={BarChart3}
                   label="Statistics"
-                  disabled={!hasUserActivity}
+                  disabled={!hasUserActivity || isExamActive}
+                  title={isExamActive ? "Statistics (Disabled during exam mode)" : !hasUserActivity ? "Statistics (No data available)" : "Statistics"}
                   className="w-10 h-10"
                 />
 
@@ -244,7 +254,8 @@ export function AppHeader() {
                   }}
                   icon={Download}
                   label="Export"
-                  disabled={!hasExamData}
+                  disabled={!hasExamData || isExamActive}
+                  title={isExamActive ? "Export (Disabled during exam mode)" : !hasExamData ? "Export (No data available)" : "Export"}
                   className="w-10 h-10"
                 />
 

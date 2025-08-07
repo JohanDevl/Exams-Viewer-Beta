@@ -64,6 +64,7 @@ export interface QuestionState {
   difficulty?: DifficultyLevel;
   notes?: string;
   category?: string;
+  isMarkedForReview?: boolean; // For exam mode review flagging
 }
 
 export interface ExamProgress {
@@ -158,6 +159,70 @@ export interface ToastMessage {
   title: string;
   description?: string;
   duration?: number;
+}
+
+// Types for exam mode
+
+export type ExamMode = "study" | "exam";
+
+export type ExamPhase = "configuration" | "active" | "review" | "completed";
+
+export interface ExamConfig {
+  timeLimit: number | null; // minutes, null for no limit
+  questionCount: number; // number of questions to include
+  questionSelection: "all" | "random" | "custom";
+  customQuestionIndices?: number[]; // for custom selection
+  randomSeed?: string; // for reproducible random selection
+}
+
+export interface TimerState {
+  isActive: boolean;
+  startTime: number | null; // timestamp
+  duration: number | null; // duration in milliseconds
+  remainingTime: number | null; // remaining time in milliseconds
+  isPaused: boolean;
+  warningsShown: Set<number>; // track shown warnings (15, 5, 1 minutes)
+}
+
+export interface ExamState {
+  mode: ExamMode;
+  phase: ExamPhase;
+  config: ExamConfig | null;
+  timer: TimerState;
+  questionsMarkedForReview: Set<number>;
+  startTime: number | null;
+  submissionTime: number | null;
+  finalScore: number | null;
+  isSubmitted: boolean;
+}
+
+export interface ExamResult {
+  examCode: string;
+  examName: string;
+  mode: ExamMode;
+  config: ExamConfig;
+  startTime: Date;
+  endTime: Date;
+  timeSpent: number; // milliseconds
+  totalQuestions: number;
+  answeredQuestions: number;
+  correctAnswers: number;
+  score: number; // percentage
+  passed: boolean;
+  domainBreakdown: Record<string, {
+    total: number;
+    answered: number;
+    correct: number;
+    accuracy: number;
+  }>;
+  questionResults: Array<{
+    questionIndex: number;
+    wasCorrect: boolean;
+    timeSpent: number;
+    attempts: number;
+    finalAnswer: string[];
+    correctAnswer: string[];
+  }>;
 }
 
 // Types for data export

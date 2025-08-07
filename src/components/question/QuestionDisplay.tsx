@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Heart, MessageCircle, Eye, EyeOff, RotateCcw, ThumbsDown, Minus, ThumbsUp, ChevronDown, ChevronRight } from 'lucide-react';
+import { Heart, MessageCircle, Eye, EyeOff, RotateCcw, ThumbsDown, Minus, ThumbsUp, ChevronDown, ChevronRight, Flag } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +30,9 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     resetQuestion,
     getQuestionStatus,
     goToNextQuestion,
-    currentExam
+    currentExam,
+    examState,
+    toggleQuestionForReview
   } = useExamStore();
 
   const { settings } = useSettingsStore();
@@ -51,6 +53,15 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
   const status = getQuestionStatus(questionIndex);
   const isFavorite = questionState?.isFavorite || false;
   const difficulty = questionState?.difficulty;
+  
+  // Exam mode specific state
+  const isExamMode = examState.mode === 'exam';
+  const isExamActive = isExamMode && examState.phase === 'active';
+  const isMarkedForReview = examState.questionsMarkedForReview.has(questionIndex);
+  const shouldHideFeedback = isExamActive && !examState.isSubmitted;
+  
+  // Debug log to check state (disabled)
+  // console.log('Exam State Debug:', { mode: examState.mode, phase: examState.phase, isExamMode, isExamActive, isSubmitted: examState.isSubmitted, shouldHideFeedback });
 
   // Determine if this is a multiple choice question
   const isMultipleChoice = question.most_voted && question.most_voted.length > 1;
@@ -92,6 +103,15 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
   useEffect(() => {
     setCommentsExpanded(settings.showComments);
   }, [settings.showComments]);
+
+  // Auto-reveal answers for unanswered questions when exam is finished
+  useEffect(() => {
+    if (isExamMode && (examState.phase !== 'active' || examState.isSubmitted) && !questionState?.userAnswer) {
+      // Exam is finished and this question was not answered - auto-reveal the answer
+      markQuestionAsPreview(questionIndex);
+      setShowExplanation(true);
+    }
+  }, [isExamMode, examState.phase, examState.isSubmitted, questionState?.userAnswer, questionIndex, markQuestionAsPreview]);
 
   const handleAnswerSelect = withInvisibleScrollLock((answerLetter: string, event?: React.MouseEvent) => {
     if (isSubmitted) return;
@@ -266,6 +286,26 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     });
   };
 
+  const handleToggleReviewFlag = (event?: React.MouseEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
+    if (!isExamMode) return; // Only available in exam mode
+    
+    toggleQuestionForReview(questionIndex);
+    
+    addToast({
+      type: 'success',
+      title: isMarkedForReview ? 'Removed from review' : 'Marked for review',
+      description: isMarkedForReview 
+        ? 'This question has been removed from review list.'
+        : 'This question has been marked for review.',
+      duration: 2000
+    });
+  };
+
   const toggleComments = (event?: React.MouseEvent) => {
     if (event) {
       event.preventDefault();
@@ -298,7 +338,12 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     const isSelected = selectedAnswers.includes(answerLetter);
     const isCorrect = isAnswerCorrect(answerLetter);
     
-    // Show answer feedback if explanation is shown OR if answer has been submitted
+    // In exam mode, only show selection feedback, never correct/incorrect
+    if (shouldHideFeedback) {
+      return isSelected ? 'border-primary bg-primary/10' : '';
+    }
+    
+    // Show answer feedback if explanation is shown OR if answer has been submitted (study mode or completed exam)
     if (showExplanation || isSubmitted) {
       if (isCorrect) {
         return 'border-green-500 bg-green-50 dark:bg-green-900/20';
@@ -343,12 +388,15 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
               )}
               
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <Badge variant="outline" className={statusColors[status]}>
-                  {status === 'unanswered' ? 'Unanswered' :
-                   status === 'answered' ? 'Answered' :
-                   status === 'correct' ? 'Correct' :
-                   status === 'incorrect' ? 'Incorrect' :
-                   'Preview'}
+                <Badge variant="outline" className={statusColors[shouldHideFeedback ? 'answered' : status]}>
+                  {shouldHideFeedback ? 
+                    (questionState?.userAnswer ? 'Answered' : 'Unanswered') :
+                    (status === 'unanswered' ? 'Unanswered' :
+                     status === 'answered' ? 'Answered' :
+                     status === 'correct' ? 'Correct' :
+                     status === 'incorrect' ? 'Incorrect' :
+                     'Preview')
+                  }
                 </Badge>
                 
                 {difficulty && settings.showDifficulty && (
@@ -368,12 +416,36 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                     Multiple choice
                   </Badge>
                 )}
+
+                {isExamMode && isMarkedForReview && (
+                  <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-800">
+                    <Flag className="h-3 w-3 mr-1" />
+                    Flagged for Review
+                  </Badge>
+                )}
               </div>
 
               <QuestionContent content={question.question} images={question.images} />
             </div>
 
             <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Mark for Review button - only in exam mode */}
+              {isExamMode && (
+                <Button
+                  variant={isMarkedForReview ? "default" : "outline"}
+                  size="sm"
+                  onClick={(e) => handleToggleReviewFlag(e)}
+                  className={cn(
+                    "h-9 w-9 p-0",
+                    isMarkedForReview && "text-orange-600 border-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                  )}
+                  title={isMarkedForReview ? "Remove from review" : "Mark for review"}
+                >
+                  <Flag className={cn("h-4 w-4", isMarkedForReview && "fill-current")} />
+                </Button>
+              )}
+
+              {/* Favorite button - always available */}
               <Button
                 variant={isFavorite ? "default" : "outline"}
                 size="sm"
@@ -382,6 +454,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                   "h-9 w-9 p-0",
                   isFavorite && "text-red-500 border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                 )}
+                title={isFavorite ? "Remove from favorites" : "Add to favorites"}
               >
                 <Heart className={cn("h-4 w-4", isFavorite && "fill-current")} />
               </Button>
@@ -431,7 +504,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                       <div className="flex items-start gap-2">
                         <span className="flex-1">{answer}</span>
                         
-                        {(showExplanation || isSubmitted) && isAnswerCorrect(answerLetter) && (
+                        {(showExplanation || isSubmitted) && isAnswerCorrect(answerLetter) && !shouldHideFeedback && (
                           <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
                             Correct
                           </Badge>
@@ -475,7 +548,19 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
             </div>
 
             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
-              {!isSubmitted && status !== 'preview' && (
+              {/* Exam mode: only show Submit button when not submitted */}
+              {shouldHideFeedback && !isSubmitted && (
+                <Button 
+                  onClick={(e) => handleSubmit(e)}
+                  disabled={selectedAnswers.length === 0}
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+                >
+                  Submit Answer
+                </Button>
+              )}
+
+              {/* Study mode: show all options */}
+              {!shouldHideFeedback && !isSubmitted && status !== 'preview' && (
                 <>
                   <Button
                     variant="outline"
@@ -498,9 +583,9 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                 </>
               )}
 
-              {status === 'preview' && !isSubmitted && (
+              {!shouldHideFeedback && status === 'preview' && !isSubmitted && (
                 <>
-                  {showExplanation ? (
+                  {showExplanation && !(isExamMode && examState.phase !== 'active' && !questionState?.userAnswer) ? (
                     <Button
                       variant="outline"
                       size="sm"
@@ -512,31 +597,35 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                       <span className="sm:hidden">Hide</span>
                     </Button>
                   ) : (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => handlePreview(e)}
-                        className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
-                      >
-                        <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                        <span className="hidden sm:inline">View answer</span>
-                        <span className="sm:hidden">View</span>
-                      </Button>
-                      
-                      <Button 
-                        onClick={(e) => handleSubmit(e)}
-                        disabled={selectedAnswers.length === 0}
-                        className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
-                      >
-                        Submit
-                      </Button>
-                    </>
+                    // Hide View Answer and Submit buttons for auto-revealed questions after exam completion
+                    !(isExamMode && examState.phase !== 'active' && !questionState?.userAnswer) && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handlePreview(e)}
+                          className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+                        >
+                          <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <span className="hidden sm:inline">View answer</span>
+                          <span className="sm:hidden">View</span>
+                        </Button>
+                        
+                        <Button 
+                          onClick={(e) => handleSubmit(e)}
+                          disabled={selectedAnswers.length === 0}
+                          className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+                        >
+                          Submit
+                        </Button>
+                      </>
+                    )
                   )}
                 </>
               )}
               
-              {isSubmitted && (
+              {/* Change Answer button: available in study mode or during active exam (not after exam completion) */}
+              {isSubmitted && (!isExamMode || (isExamMode && examState.phase === 'active')) && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -544,8 +633,8 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
                   className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
                 >
                   <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Retry</span>
-                  <span className="sm:hidden">Retry</span>
+                  <span className="hidden sm:inline">{shouldHideFeedback ? 'Change Answer' : 'Retry'}</span>
+                  <span className="sm:hidden">{shouldHideFeedback ? 'Change' : 'Retry'}</span>
                 </Button>
               )}
             </div>
@@ -553,8 +642,8 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
         </CardContent>
       </Card>
 
-      {/* Explanation */}
-      {showExplanation && question.explanation && (
+      {/* Explanation - hidden in active exam mode */}
+      {showExplanation && question.explanation && !shouldHideFeedback && (
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -572,8 +661,8 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
         </Card>
       )}
 
-      {/* Community comments */}
-      {question.comments && question.comments.length > 0 && (
+      {/* Community comments - hidden in active exam mode */}
+      {question.comments && question.comments.length > 0 && !shouldHideFeedback && (
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">

@@ -32,7 +32,7 @@ export function ExamViewer() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Exam header */}
+      {/* Exam header with integrated timer */}
       <ExamHeader />
 
       {/* Navigation controls */}

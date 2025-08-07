@@ -157,6 +157,7 @@ exports/
 # Claude AI (but keep CLAUDE.md for the repository)
 .claude/
 *log.md
+.mcp.json
 
 # Keep CLAUDE.md - it's important for the repository
 !CLAUDE.md

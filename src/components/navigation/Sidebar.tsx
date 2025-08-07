@@ -13,6 +13,7 @@ import {
   ThumbsDown,
   Minus,
   ThumbsUp,
+  Flag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -30,6 +31,7 @@ export function Sidebar() {
     questionStates,
     setCurrentQuestion,
     getFirstAnswerStatus,
+    examState,
   } = useExamStore();
 
   const { sidebarCollapsed, setSidebarCollapsed, toggleSidebarVisibility, currentView, toggleView, settings } =
@@ -39,7 +41,25 @@ export function Sidebar() {
 
   if (!currentExam) return null;
 
-  const getStatusIcon = (status: QuestionStatus) => {
+  // Exam mode state
+  const isExamMode = examState.mode === 'exam';
+  const isExamActive = isExamMode && examState.phase === 'active';
+
+  const getStatusIcon = (status: QuestionStatus, questionIndex: number) => {
+    // In exam mode, prioritize review flag over other status
+    if (isExamActive && examState.questionsMarkedForReview.has(questionIndex)) {
+      return <Flag className="h-3 w-3 text-orange-600 fill-current" />;
+    }
+
+    // In exam mode active, don't show correct/incorrect icons
+    if (isExamActive && !examState.isSubmitted) {
+      const hasAnswer = questionStates[questionIndex]?.userAnswer;
+      return hasAnswer 
+        ? <Circle className="h-3 w-3 text-blue-600 fill-current" />
+        : <Circle className="h-3 w-3 text-gray-400" />;
+    }
+
+    // Study mode or completed exam: show all status icons
     switch (status) {
       case "correct":
         return <Check className="h-3 w-3 text-green-600" />;
@@ -54,9 +74,24 @@ export function Sidebar() {
     }
   };
 
-  const getStatusColor = (status: QuestionStatus, isActive: boolean) => {
+  const getStatusColor = (status: QuestionStatus, isActive: boolean, questionIndex: number) => {
     if (isActive) return "bg-primary text-primary-foreground border-primary";
 
+    // In exam mode, don't show correct/incorrect colors until exam is submitted
+    if (isExamActive && !examState.isSubmitted) {
+      const hasAnswer = questionStates[questionIndex]?.userAnswer;
+      const isMarkedForReview = examState.questionsMarkedForReview.has(questionIndex);
+      
+      if (isMarkedForReview) {
+        return "bg-orange-50 hover:bg-orange-100 border-orange-200 dark:bg-orange-900/20 dark:hover:bg-orange-900/30 dark:border-orange-800";
+      }
+      
+      return hasAnswer 
+        ? "bg-blue-50 hover:bg-blue-100 border-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:border-blue-800"
+        : "bg-muted hover:bg-muted/80 border-border";
+    }
+
+    // Study mode or completed exam: show all status colors
     switch (status) {
       case "correct":
         return "bg-green-50 hover:bg-green-100 border-green-200 dark:bg-green-900/20 dark:hover:bg-green-900/30 dark:border-green-800";
@@ -220,12 +255,12 @@ export function Sidebar() {
                     onClick={() => handleQuestionClick(questionIndex)}
                     className={cn(
                       "w-full h-10 p-0 border relative",
-                      getStatusColor(status, isActive)
+                      getStatusColor(status, isActive, questionIndex)
                     )}
                     title={`Question ${questionIndex + 1} - ${status}`}
                   >
                     <div className="flex items-center justify-center w-full">
-                      {getStatusIcon(status)}
+                      {getStatusIcon(status, questionIndex)}
                     </div>
 
                     {isFavorite && (
@@ -258,13 +293,13 @@ export function Sidebar() {
                     onClick={() => handleQuestionClick(questionIndex)}
                     className={cn(
                       "w-full h-auto p-2 border justify-start text-left overflow-hidden",
-                      getStatusColor(status, isActive)
+                      getStatusColor(status, isActive, questionIndex)
                     )}
                   >
                     <div className="flex items-center gap-2 w-full overflow-hidden">
                       {/* Status icon */}
                       <div className="flex-shrink-0">
-                        {getStatusIcon(status)}
+                        {getStatusIcon(status, questionIndex)}
                       </div>
 
                       {/* Content */}
@@ -314,13 +349,13 @@ export function Sidebar() {
                     onClick={() => handleQuestionClick(questionIndex)}
                     className={cn(
                       "w-full h-20 p-2 border justify-start text-left overflow-hidden flex-col",
-                      getStatusColor(status, isActive)
+                      getStatusColor(status, isActive, questionIndex)
                     )}
                   >
                     <div className="flex items-center justify-between w-full mb-1">
                       <div className="flex items-center gap-1">
                         <div className="flex-shrink-0">
-                          {getStatusIcon(status)}
+                          {getStatusIcon(status, questionIndex)}
                         </div>
                         <span className="font-medium text-xs truncate">
                           Q{questionIndex + 1}
@@ -374,46 +409,85 @@ export function Sidebar() {
             </div>
 
             <div className="flex items-center gap-4 text-xs">
-              <div className="flex items-center gap-1">
-                <Check className="h-3 w-3 text-green-600" />
-                <span>
-                  {
-                    filteredQuestionIndices.filter(
-                      (i) => getFirstAnswerStatus(i) === "correct"
-                    ).length
-                  }
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <X className="h-3 w-3 text-red-600" />
-                <span>
-                  {
-                    filteredQuestionIndices.filter(
-                      (i) => getFirstAnswerStatus(i) === "incorrect"
-                    ).length
-                  }
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Eye className="h-3 w-3 text-orange-600" />
-                <span>
-                  {
-                    filteredQuestionIndices.filter(
-                      (i) => getFirstAnswerStatus(i) === "preview"
-                    ).length
-                  }
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Heart className="h-3 w-3 text-red-500" />
-                <span>
-                  {
-                    filteredQuestionIndices.filter(
-                      (i) => questionStates[i]?.isFavorite
-                    ).length
-                  }
-                </span>
-              </div>
+              {/* In exam mode, show different stats */}
+              {isExamActive ? (
+                <>
+                  <div className="flex items-center gap-1">
+                    <Circle className="h-3 w-3 text-blue-600 fill-current" />
+                    <span>
+                      {
+                        filteredQuestionIndices.filter(
+                          (i) => questionStates[i]?.userAnswer
+                        ).length
+                      }
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Flag className="h-3 w-3 text-orange-600" />
+                    <span>
+                      {
+                        filteredQuestionIndices.filter(
+                          (i) => examState.questionsMarkedForReview.has(i)
+                        ).length
+                      }
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Heart className="h-3 w-3 text-red-500" />
+                    <span>
+                      {
+                        filteredQuestionIndices.filter(
+                          (i) => questionStates[i]?.isFavorite
+                        ).length
+                      }
+                    </span>
+                  </div>
+                </>
+              ) : (
+                // Study mode: show traditional stats
+                <>
+                  <div className="flex items-center gap-1">
+                    <Check className="h-3 w-3 text-green-600" />
+                    <span>
+                      {
+                        filteredQuestionIndices.filter(
+                          (i) => getFirstAnswerStatus(i) === "correct"
+                        ).length
+                      }
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <X className="h-3 w-3 text-red-600" />
+                    <span>
+                      {
+                        filteredQuestionIndices.filter(
+                          (i) => getFirstAnswerStatus(i) === "incorrect"
+                        ).length
+                      }
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Eye className="h-3 w-3 text-orange-600" />
+                    <span>
+                      {
+                        filteredQuestionIndices.filter(
+                          (i) => getFirstAnswerStatus(i) === "preview"
+                        ).length
+                      }
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Heart className="h-3 w-3 text-red-500" />
+                    <span>
+                      {
+                        filteredQuestionIndices.filter(
+                          (i) => questionStates[i]?.isFavorite
+                        ).length
+                      }
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
