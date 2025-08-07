@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Clock, AlertTriangle, Timer, CheckCircle } from 'lucide-react';
+import { Clock, AlertTriangle, Timer, CheckCircle, Check, X, Circle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,14 @@ interface ExamTimerProps {
 }
 
 export function ExamTimer({ className, compact = false }: ExamTimerProps) {
-  const { examState, updateTimer, addTimerWarning, submitExam } = useExamStore();
+  const { 
+    examState, 
+    updateTimer, 
+    addTimerWarning, 
+    submitExam, 
+    filteredQuestionIndices,
+    getFirstAnswerStatus 
+  } = useExamStore();
   const { addToast } = useSettingsStore();
   const { playSound } = useSoundEffects();
   const [showConfirm, setShowConfirm] = useState(false);
@@ -35,6 +42,32 @@ export function ExamTimer({ className, compact = false }: ExamTimerProps) {
   const shouldShowFinishOnly = examState.mode === 'exam' && 
                               examState.phase === 'active' && 
                               (!examState.timer.isActive || examState.timer.duration === null);
+
+  // Show exam results when exam is completed
+  const shouldShowResults = examState.mode === 'exam' && examState.phase === 'completed';
+
+  // Calculate exam statistics
+  const calculateExamStats = () => {
+    const stats = {
+      correct: 0,
+      incorrect: 0,
+      unanswered: 0,
+      total: filteredQuestionIndices.length
+    };
+
+    filteredQuestionIndices.forEach(questionIndex => {
+      const status = getFirstAnswerStatus(questionIndex);
+      if (status === 'correct') {
+        stats.correct++;
+      } else if (status === 'incorrect') {
+        stats.incorrect++;
+      } else {
+        stats.unanswered++;
+      }
+    });
+
+    return stats;
+  };
 
   // Format time display
   const formatTime = (milliseconds: number): string => {
@@ -208,6 +241,81 @@ export function ExamTimer({ className, compact = false }: ExamTimerProps) {
       lastWarningRef.current = new Set();
     }
   }, [examState.timer.warningsShown]);
+
+  // Show exam results when completed
+  if (shouldShowResults) {
+    const stats = calculateExamStats();
+    const percentage = stats.total > 0 ? ((stats.correct / stats.total) * 100).toFixed(1) : '0.0';
+    
+    return (
+      <Card className={cn('transition-all duration-300', className)}>
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <div>
+                <div className="text-xs text-muted-foreground">Exam Completed</div>
+                <div className="text-sm font-medium text-foreground">
+                  Score: {percentage}% ({stats.correct}/{stats.total})
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 text-sm">
+              {/* Correct answers */}
+              <div className="flex items-center gap-1">
+                <Check className="h-4 w-4 text-green-600" />
+                <span className="text-green-600 font-medium">{stats.correct}</span>
+              </div>
+              
+              {/* Incorrect answers */}
+              <div className="flex items-center gap-1">
+                <X className="h-4 w-4 text-red-600" />
+                <span className="text-red-600 font-medium">{stats.incorrect}</span>
+              </div>
+              
+              {/* Unanswered */}
+              <div className="flex items-center gap-1">
+                <Circle className="h-4 w-4 text-gray-400" />
+                <span className="text-gray-600 dark:text-gray-400 font-medium">{stats.unanswered}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress bar showing results */}
+          <div className="mt-3">
+            <div className="h-2 bg-muted rounded-full overflow-hidden flex">
+              {/* Correct portion */}
+              {stats.correct > 0 && (
+                <div 
+                  className="bg-green-500"
+                  style={{ width: `${(stats.correct / stats.total) * 100}%` }}
+                />
+              )}
+              {/* Incorrect portion */}
+              {stats.incorrect > 0 && (
+                <div 
+                  className="bg-red-500"
+                  style={{ width: `${(stats.incorrect / stats.total) * 100}%` }}
+                />
+              )}
+              {/* Unanswered portion */}
+              {stats.unanswered > 0 && (
+                <div 
+                  className="bg-gray-400"
+                  style={{ width: `${(stats.unanswered / stats.total) * 100}%` }}
+                />
+              )}
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>Results Breakdown</span>
+              <span>{stats.total} questions total</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Show finish button only when no timer but in exam mode
   if (shouldShowFinishOnly) {
