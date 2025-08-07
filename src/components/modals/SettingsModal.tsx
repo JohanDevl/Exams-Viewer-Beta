@@ -61,7 +61,7 @@ export function SettingsModal() {
   return (
     <ClientOnly>
       <Dialog open={isSettingsModalOpen} onOpenChange={closeSettingsModal}>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] w-full mx-2 sm:mx-auto p-3 sm:p-6">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Settings className="h-5 w-5 text-gray-500" />
@@ -72,17 +72,17 @@ export function SettingsModal() {
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="h-[500px] w-full pr-4">
-            <div className="space-y-6">
+          <ScrollArea className="h-[60vh] sm:h-[500px] w-full pr-0 sm:pr-4">
+            <div className="space-y-3 sm:space-y-6 px-1 sm:px-0">
               {/* Appearance */}
-              <Card>
-                <CardHeader>
+              <Card className="py-3 sm:py-6">
+                <CardHeader className="px-3 sm:px-6">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Palette className="h-4 w-4" />
                     Appearance
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
                   <div className="space-y-2">
                     <Label htmlFor="theme">Theme</Label>
                     <Select 
@@ -138,7 +138,7 @@ export function SettingsModal() {
 
                   {/* Mobile notice about card view */}
                   <div className="md:hidden space-y-2">
-                    <div className="p-3 bg-muted rounded-md">
+                    <div className="p-2 sm:p-3 bg-muted rounded-md">
                       <div className="flex items-center gap-2 mb-1">
                         <Grid className="h-4 w-4" />
                         <span className="font-medium text-sm">View Mode</span>
@@ -192,14 +192,14 @@ export function SettingsModal() {
               </Card>
 
               {/* Display */}
-              <Card>
-                <CardHeader>
+              <Card className="py-3 sm:py-6">
+                <CardHeader className="px-3 sm:px-6">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Eye className="h-4 w-4" />
                     Display
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label htmlFor="showExplanations">Show answers</Label>
@@ -265,14 +265,14 @@ export function SettingsModal() {
               </Card>
 
               {/* Navigation */}
-              <Card>
-                <CardHeader>
+              <Card className="py-3 sm:py-6">
+                <CardHeader className="px-3 sm:px-6">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Navigation className="h-4 w-4" />
                     Navigation
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label htmlFor="autoProgress">Auto progress</Label>
@@ -315,14 +315,14 @@ export function SettingsModal() {
               </Card>
 
               {/* Audio and feedback */}
-              <Card>
-                <CardHeader>
+              <Card className="py-3 sm:py-6">
+                <CardHeader className="px-3 sm:px-6">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Volume2 className="h-4 w-4" />
                     Audio and Feedback
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label htmlFor="soundEffects">Sound effects</Label>
@@ -343,8 +343,8 @@ export function SettingsModal() {
 
               {/* Available keyboard shortcuts */}
               {settings.keyboardShortcuts && (
-                <Card>
-                  <CardHeader>
+                <Card className="py-3 sm:py-6">
+                  <CardHeader className="px-3 sm:px-6">
                     <CardTitle className="flex items-center gap-2 text-base">
                       <Keyboard className="h-4 w-4" />
                       Available Keyboard Shortcuts
@@ -364,14 +364,14 @@ export function SettingsModal() {
               )}
 
               {/* About */}
-              <Card>
-                <CardHeader>
+              <Card className="py-3 sm:py-6">
+                <CardHeader className="px-3 sm:px-6">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <User className="h-4 w-4" />
                     About
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
                   <div className="text-sm text-muted-foreground">
                     <p className="mb-3">
                       ServiceNow Certification Exam Viewer - A comprehensive tool for exam preparation with advanced features and analytics.
@@ -504,16 +504,16 @@ export function SettingsModal() {
             </div>
           </ScrollArea>
 
-          <DialogFooter className="flex justify-between">
+          <DialogFooter className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-0 pt-4">
             <Button
               variant="outline"
               onClick={handleReset}
-              className="flex items-center gap-2"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               <RotateCcw className="h-4 w-4" />
               Reset
             </Button>
-            <Button onClick={closeSettingsModal}>
+            <Button onClick={closeSettingsModal} className="w-full sm:w-auto">
               Close
             </Button>
           </DialogFooter>
