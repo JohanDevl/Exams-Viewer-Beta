@@ -38,15 +38,29 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
   const { settings } = useSettingsStore();
   const { playSound } = useSoundEffects();
   const { addToast } = useToastWithSound();
-  const { withScrollLock, withInvisibleScrollLock } = useScrollLock();
+  const { withScrollLock } = useScrollLock();
 
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
   const [showExplanation, setShowExplanation] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [commentsExpanded, setCommentsExpanded] = useState(settings.showComments);
+  const [isMobile, setIsMobile] = useState(false);
   
   // Ref to maintain scroll position on mobile
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // STABLE mobile detection - only once on mount to prevent withScrollLock issues
+  useEffect(() => {
+    const detectMobile = () => {
+      // Use user agent as primary detection (more reliable than window.innerWidth)
+      const isMobileDevice = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      const isSmallScreen = window.innerWidth < 768;
+      setIsMobile(isMobileDevice || isSmallScreen);
+    };
+    
+    detectMobile();
+    // NO resize listener to prevent iOS Safari issues
+  }, []);
   
 
   const questionState = questionStates[questionIndex];
@@ -113,7 +127,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     }
   }, [isExamMode, examState.phase, examState.isSubmitted, questionState?.userAnswer, questionIndex, markQuestionAsPreview]);
 
-  const handleAnswerSelect = withInvisibleScrollLock((answerLetter: string, event?: React.MouseEvent) => {
+  const handleAnswerSelect = (answerLetter: string, event?: React.MouseEvent) => {
     if (isSubmitted) return;
     
     // Prevent default behavior and stop propagation to avoid scroll issues on mobile
@@ -131,7 +145,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
     } else {
       setSelectedAnswers([answerLetter]);
     }
-  });
+  };
 
   const checkAnswerCorrectness = (userAnswers: string[], question: Question): boolean => {
     const correctAnswers = question.correct_answers || (question.correct_answer ? [question.correct_answer] : []);
@@ -161,7 +175,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
       return;
     }
 
-    withScrollLock(() => {
+    const executeSubmit = () => {
       submitAnswer(questionIndex, selectedAnswers);
       setIsSubmitted(true);
       
@@ -181,7 +195,13 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
           : 'Your answer has been saved successfully.',
         duration: 2000
       });
-    })();
+    };
+
+    if (isMobile) {
+      executeSubmit();
+    } else {
+      withScrollLock(executeSubmit)();
+    }
 
     // Auto progress: move to next question if enabled
     if (settings.autoProgress && currentExam && questionIndex < currentExam.questions.length - 1) {
@@ -197,7 +217,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
       event.stopPropagation();
     }
     
-    withScrollLock(() => {
+    const executePreview = () => {
       markQuestionAsPreview(questionIndex);
       setShowExplanation(true);
       
@@ -207,7 +227,13 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
         description: 'The correct answer is now visible.',
         duration: 2000
       });
-    })();
+    };
+
+    if (isMobile) {
+      executePreview();
+    } else {
+      withScrollLock(executePreview)();
+    }
   };
 
   const handleHideAnswer = (event?: React.MouseEvent) => {
@@ -216,7 +242,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
       event.stopPropagation();
     }
     
-    withScrollLock(() => {
+    const executeHideAnswer = () => {
       setShowExplanation(false);
       
       addToast({
@@ -225,7 +251,13 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
         description: 'You can now answer this question.',
         duration: 2000
       });
-    })();
+    };
+
+    if (isMobile) {
+      executeHideAnswer();
+    } else {
+      withScrollLock(executeHideAnswer)();
+    }
   };
 
   const handleReset = (event?: React.MouseEvent) => {
@@ -234,7 +266,7 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
       event.stopPropagation();
     }
     
-    withScrollLock(() => {
+    const executeReset = () => {
       resetQuestion(questionIndex);
       setSelectedAnswers([]);
       setIsSubmitted(false);
@@ -246,7 +278,13 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
         description: 'You can now answer this question again.',
         duration: 2000
       });
-    })();
+    };
+
+    if (isMobile) {
+      executeReset();
+    } else {
+      withScrollLock(executeReset)();
+    }
   };
 
   const handleToggleFavorite = (event?: React.MouseEvent) => {
@@ -642,9 +680,12 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
         </CardContent>
       </Card>
 
-      {/* Explanation - hidden in active exam mode */}
-      {showExplanation && question.explanation && !shouldHideFeedback && (
-        <Card>
+      {/* Explanation - invisible in active exam mode (maintains height) */}
+      {question.explanation && (
+        <Card className={cn(
+          shouldHideFeedback && "invisible pointer-events-none",
+          !showExplanation && !shouldHideFeedback && "invisible pointer-events-none"
+        )}>
           <CardHeader>
             <div className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />
@@ -661,9 +702,9 @@ export function QuestionDisplay({ question, questionIndex }: QuestionDisplayProp
         </Card>
       )}
 
-      {/* Community comments - hidden in active exam mode */}
-      {question.comments && question.comments.length > 0 && !shouldHideFeedback && (
-        <Card>
+      {/* Community comments - invisible in active exam mode (maintains height) */}
+      {question.comments && question.comments.length > 0 && (
+        <Card className={cn(shouldHideFeedback && "invisible pointer-events-none")}>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">

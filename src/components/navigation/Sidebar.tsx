@@ -133,9 +133,14 @@ export function Sidebar() {
   return (
     <div
       className={cn(
-        "fixed right-0 top-16 h-[calc(100vh-4rem)] bg-background transition-all duration-300 z-30 overflow-hidden",
+        // Mobile: use absolute positioning to avoid iOS scroll issues
+        "absolute md:fixed right-0 top-16 bg-background transition-all duration-300 z-30 overflow-hidden",
+        // Mobile-safe height - avoid 100vh on mobile to prevent scroll repositioning on iOS
+        "h-[80vh] max-h-screen",
+        // Desktop: use more stable viewport units when available
+        "md:h-[calc(100vh-4rem)]",
         "border-l",
-        "md:relative md:top-0 md:h-[calc(100vh-4rem)]",
+        "md:relative md:top-0",
         // On mobile: always full width when visible. On desktop: respect collapsed state
         "w-full",
         "md:w-auto",
@@ -236,7 +241,7 @@ export function Sidebar() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 h-[calc(100vh-8rem)]">
+      <div className="flex-1 h-[calc(80vh-8rem)] md:h-[calc(100vh-8rem)]">
         {/* Compact view: only on desktop when collapsed */}
         <div className={cn("hidden", sidebarCollapsed && "md:block")}>
           <ScrollArea className="h-full">
