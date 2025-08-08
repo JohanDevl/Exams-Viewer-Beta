@@ -283,3 +283,55 @@ export type DeepPartial<T> = {
 export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
 export type OptionalFields<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+// Types for domain-based performance analytics
+
+export type ServiceNowDomain = 
+  | "ITSM" 
+  | "Security" 
+  | "HR" 
+  | "Asset Management" 
+  | "Service Management" 
+  | "Portfolio Management" 
+  | "Development" 
+  | "Infrastructure";
+
+export interface DomainInfo {
+  id: ServiceNowDomain;
+  name: string;
+  description: string;
+  examCodes: string[];
+  color: string; // Tailwind color class for the domain
+}
+
+export interface DomainStatistics {
+  domain: ServiceNowDomain;
+  totalQuestions: number;
+  answeredQuestions: number;
+  correctAnswers: number;
+  accuracy: number; // percentage 0-100
+  averageTimePerQuestion: number; // milliseconds
+  lastAccessed?: Date;
+  improvementTrend: number; // positive/negative percentage change
+  examBreakdown: Record<string, {
+    answered: number;
+    correct: number;
+    total: number;
+    accuracy: number;
+  }>;
+}
+
+export interface HeatmapData {
+  domains: DomainStatistics[];
+  totalDomains: number;
+  overallAccuracy: number;
+  lastUpdated: Date;
+  timeFrame: "7d" | "30d" | "all";
+}
+
+export interface HeatmapCellProps {
+  domain: DomainStatistics;
+  size: "small" | "medium" | "large";
+  onClick?: (domain: ServiceNowDomain) => void;
+  showTooltip?: boolean;
+}
