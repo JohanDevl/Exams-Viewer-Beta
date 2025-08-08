@@ -257,6 +257,67 @@ Optimized touch interactions and input handling for mobile devices:
 - **Responsive Modal System**: All dialogs and modals fully optimized for mobile screen constraints
 - **Touch Event Optimization**: Advanced touch handling with proper event propagation control and performance optimization
 
+## Dynamic Domain Management System (v5.2.0)
+
+The application features a sophisticated, configurable domain management system that automatically categorizes ServiceNow exams into knowledge domains for advanced analytics and performance tracking.
+
+### Three-Tiered Detection System
+1. **Manifest Integration**: Domains explicitly defined in `manifest.json` take highest priority
+2. **Pattern-Based Auto-Detection**: RegExp patterns automatically categorize exams based on exam codes
+3. **Configuration Overrides**: Manual assignments override auto-detection for specific exams
+4. **Fallback System**: Unrecognized exams default to "Development" domain
+
+### Supported ServiceNow Domains
+- **ITSM** (IT Service Management): CIS-ITSM, CIS-EM, CIS-Discovery, CIS-SM
+- **Security**: CIS-SIR, CIS-VR, CIS-VRM, CIS-RC  
+- **HR** (Human Resources): CIS-HR, HR-related exams
+- **Asset Management**: CIS-HAM, CIS-SAM, Asset-related exams
+- **Service Management**: CIS-SM, Service-related certifications
+- **Portfolio Management**: CIS-PPM, Portfolio-related exams
+- **Development**: CAD, CSA, CIS-CSM, Development-related exams
+- **Infrastructure**: Server-related and infrastructure exams
+
+### Auto-Detection Patterns (`src/utils/domainMapping.ts`)
+```typescript
+export const DOMAIN_DETECTION_PATTERNS: Record<ServiceNowDomain, DomainPattern> = {
+  "ITSM": { pattern: /^(CIS-ITSM|CIS-EM|CIS-Discovery|CIS-SM)$/i, priority: 10 },
+  "Security": { pattern: /^(CIS-SIR|CIS-VR|CIS-VRM|CIS-RC)$/i, priority: 9 },
+  // ... other patterns with priority-based matching
+};
+```
+
+### Domain Management Interface
+- **Settings Integration**: Access via Settings → Domain Management
+- **Visual Domain Overview**: Grid layout showing exam distribution across domains
+- **Real-Time Editing**: Click-to-edit domain assignments with immediate updates
+- **Confidence Indicators**: Visual feedback on auto-detection confidence levels
+- **Reset to Auto-Detected**: Restore original auto-detected domain assignments
+- **Override Management**: View and manage manual domain overrides
+
+### Python Integration (`scripts/update_manifest.py`)
+The manifest generation script automatically detects domains during processing:
+```python
+def detect_servicenow_domain(exam_code):
+    domain_patterns = {
+        'ITSM': [r'^CIS-ITSM', r'^CIS-EM', r'^CIS-Discovery', r'^CIS-SM'],
+        'Security': [r'^CIS-SIR', r'^CIS-VR', r'^CIS-VRM', r'^CIS-RC'],
+        # ... mirrors TypeScript patterns exactly
+    }
+```
+
+### Analytics Integration
+- **Performance Heatmaps**: Visual representation of accuracy across domains
+- **Domain-Specific Statistics**: Detailed metrics per knowledge area
+- **Temporal Filtering**: 7d/30d/all-time analysis per domain
+- **Exam Breakdown**: Individual exam performance within domains
+- **Improvement Tracking**: Trend analysis for focused learning
+
+### Configuration Management
+- **Runtime Updates**: Changes take effect immediately without restart
+- **Persistent Storage**: Domain overrides saved in localStorage
+- **Bulk Operations**: Efficient batch updates for multiple exams
+- **Validation**: Ensures data consistency across all domain assignments
+
 ## Documentation
 
 Comprehensive documentation is available in the `/docs/` directory:
@@ -282,4 +343,4 @@ All stores use Zustand with:
 - Action-based mutations for predictable updates
 - TypeScript integration for type safety
 
-Last updated: January 2025 - Mobile experience revolution with native sidebar navigation, enhanced exam mode with flexible timer options, and optimized responsive design (v5.1.0)
+Last updated: January 2025 - Dynamic Domain Management System with configurable ServiceNow domain analytics, mobile experience revolution with native sidebar navigation, enhanced exam mode with flexible timer options, and optimized responsive design (v5.2.0)

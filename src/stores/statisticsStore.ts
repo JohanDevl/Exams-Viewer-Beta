@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Statistics, ExamSession } from '@/types';
+import type { Statistics, ExamSession, ServiceNowDomain, DomainStatistics, HeatmapData } from '@/types';
+import { getExamsForDomain, getAllDomains } from '@/utils/domainMapping';
 
 interface StatisticsStore {
   // Statistical data
@@ -70,6 +71,11 @@ interface StatisticsStore {
     accuracy: number;
     questionsAnswered: number;
   }>;
+  
+  // Domain-based analytics
+  getDomainStatistics: (domain: ServiceNowDomain, timeFrame?: "7d" | "30d" | "all") => DomainStatistics;
+  getAllDomainStatistics: (timeFrame?: "7d" | "30d" | "all") => DomainStatistics[];
+  getHeatmapData: (timeFrame?: "7d" | "30d" | "all") => HeatmapData;
   
   // Actions utilitaires
   resetStatistics: () => void;
@@ -567,6 +573,105 @@ export const useStatisticsStore = create<StatisticsStore>()(
         } catch {
           return false;
         }
+      },
+
+      // Get domain-specific statistics
+      getDomainStatistics: (domain: ServiceNowDomain, timeFrame: "7d" | "30d" | "all" = "all") => {
+        const { statistics } = get();
+        // TODO: Load exam codes from manifest dynamically
+        // For now, fallback to static mapping
+        const examCodes = getExamsForDomain(domain);
+        
+        let totalQuestions = 0;
+        let answeredQuestions = 0;
+        let correctAnswers = 0;
+        let lastAccessed: Date | undefined;
+        
+        const examBreakdown: Record<string, { answered: number; correct: number; total: number; accuracy: number; }> = {};
+        
+        // Calculate cutoff date based on timeFrame
+        const now = new Date();
+        let cutoffDate: Date | null = null;
+        if (timeFrame === "7d") {
+          cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        } else if (timeFrame === "30d") {
+          cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        }
+        
+        // Aggregate statistics for all exams in this domain
+        examCodes.forEach(examCode => {
+          const examProgress = statistics.examProgress[examCode];
+          if (examProgress) {
+            // Check if we should include this exam based on timeFrame
+            if (cutoffDate && examProgress.lastAccessed && new Date(examProgress.lastAccessed) < cutoffDate) {
+              return; // Skip this exam if it's outside the time frame
+            }
+            
+            totalQuestions += examProgress.total;
+            answeredQuestions += examProgress.answered;
+            correctAnswers += examProgress.correct;
+            
+            const accuracy = examProgress.answered > 0 ? (examProgress.correct / examProgress.answered) * 100 : 0;
+            
+            examBreakdown[examCode] = {
+              answered: examProgress.answered,
+              correct: examProgress.correct,
+              total: examProgress.total,
+              accuracy
+            };
+            
+            // Update lastAccessed to most recent
+            if (examProgress.lastAccessed && (!lastAccessed || new Date(examProgress.lastAccessed) > lastAccessed)) {
+              lastAccessed = new Date(examProgress.lastAccessed);
+            }
+          }
+        });
+        
+        // Calculate overall accuracy for this domain
+        const accuracy = answeredQuestions > 0 ? (correctAnswers / answeredQuestions) * 100 : 0;
+        
+        // Calculate average time per question (simplified - using global average)
+        const averageTimePerQuestion = answeredQuestions > 0 ? statistics.timeSpent / statistics.totalQuestionsAnswered : 0;
+        
+        // Calculate improvement trend (simplified - comparing last 7 days vs previous 7 days)
+        const improvementTrend = 0; // TODO: Implement proper trend calculation based on sessions
+        
+        return {
+          domain,
+          totalQuestions,
+          answeredQuestions,
+          correctAnswers,
+          accuracy,
+          averageTimePerQuestion,
+          lastAccessed,
+          improvementTrend,
+          examBreakdown
+        };
+      },
+
+      // Get all domain statistics
+      getAllDomainStatistics: (timeFrame: "7d" | "30d" | "all" = "all") => {
+        const domains = getAllDomains();
+        return domains.map(domain => get().getDomainStatistics(domain, timeFrame));
+      },
+
+      // Get heatmap data
+      getHeatmapData: (timeFrame: "7d" | "30d" | "all" = "all") => {
+        const domainStats = get().getAllDomainStatistics(timeFrame);
+        const totalDomains = domainStats.length;
+        
+        // Calculate overall accuracy across all domains
+        const totalAnswered = domainStats.reduce((sum, domain) => sum + domain.answeredQuestions, 0);
+        const totalCorrect = domainStats.reduce((sum, domain) => sum + domain.correctAnswers, 0);
+        const overallAccuracy = totalAnswered > 0 ? (totalCorrect / totalAnswered) * 100 : 0;
+        
+        return {
+          domains: domainStats,
+          totalDomains,
+          overallAccuracy,
+          lastUpdated: new Date(),
+          timeFrame
+        };
       }
     }),
     {

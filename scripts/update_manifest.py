@@ -27,12 +27,140 @@ Version: 3.0 (Simplified, no categories)
 import os
 import json
 import sys
+import re
 from datetime import datetime
 from pathlib import Path
 
 def get_project_root():
     """Get the project root directory (one level up from scripts)"""
     return Path(__file__).parent.parent
+
+def detect_servicenow_domain(exam_code):
+    """
+    Auto-detect ServiceNow domain based on exam code patterns
+    
+    This function mirrors the domain detection logic from the TypeScript code
+    to ensure consistency between the manifest generation and the frontend.
+    
+    Args:
+        exam_code (str): The exam code to analyze
+        
+    Returns:
+        tuple: (domain_name, confidence) where confidence is 'high', 'medium', or 'low'
+    """
+    
+    # Domain detection patterns (matching TypeScript implementation)
+    domain_patterns = {
+        'ITSM': [
+            r'^CIS-ITSM$',
+            r'^CIS-EM$', 
+            r'^CIS-Discovery$',
+            r'^CIS-SM$'
+        ],
+        'Security': [
+            r'^CIS-SIR$',
+            r'^CIS-VR$',
+            r'^CIS-VRM$',
+            r'^CIS-RC$'
+        ],
+        'HR': [
+            r'^CIS-HR$'
+        ],
+        'Asset Management': [
+            r'^CIS-HAM$',
+            r'^CIS-SAM$'
+        ],
+        'Service Management': [
+            r'^CIS-CSM$',
+            r'^CIS-FSM$'
+        ],
+        'Portfolio Management': [
+            r'^CIS-PPM$',
+            r'^CIS-SPM$',
+            r'^CIS-APM$'
+        ],
+        'Development': [
+            r'^CAD$',
+            r'^CAS-PA$'
+        ],
+        'Infrastructure': [
+            r'^CSA$',
+            r'^CIS-CPG$'
+        ]
+    }
+    
+    # Check patterns for exact matches (high confidence)
+    for domain, patterns in domain_patterns.items():
+        for pattern in patterns:
+            if re.match(pattern, exam_code, re.IGNORECASE):
+                return domain, 'high'
+    
+    # Fallback patterns for potential new exams (medium confidence)
+    fallback_patterns = {
+        'ITSM': r'^CIS-.*ITSM.*$',
+        'Security': r'^CIS-.*(SIR|SEC|VR|VRM|RC).*$',
+        'HR': r'^CIS-.*HR.*$',
+        'Asset Management': r'^CIS-.*(HAM|SAM|ASSET).*$',
+        'Service Management': r'^CIS-.*(CSM|FSM|SERVICE).*$',
+        'Portfolio Management': r'^CIS-.*(PPM|SPM|APM|PORTFOLIO).*$',
+        'Development': r'^(CAD|CAS|DEV).*$',
+        'Infrastructure': r'^(CSA|INFRA|SYS).*$'
+    }
+    
+    for domain, pattern in fallback_patterns.items():
+        if re.match(pattern, exam_code, re.IGNORECASE):
+            return domain, 'medium'
+    
+    # Final fallback to Infrastructure (low confidence)
+    return 'Infrastructure', 'low'
+
+def test_domain_detection():
+    """
+    Test the domain detection system to ensure it works correctly
+    and is consistent with the TypeScript implementation
+    """
+    print("\n🧪 Testing Domain Detection System")
+    print("==================================")
+    
+    test_cases = [
+        ('CIS-ITSM', 'ITSM', 'high'),
+        ('CIS-SIR', 'Security', 'high'),
+        ('CIS-HR', 'HR', 'high'),
+        ('CIS-HAM', 'Asset Management', 'high'),
+        ('CIS-CSM', 'Service Management', 'high'),
+        ('CIS-PPM', 'Portfolio Management', 'high'),
+        ('CAD', 'Development', 'high'),
+        ('CSA', 'Infrastructure', 'high'),
+        ('UNKNOWN-EXAM', 'Infrastructure', 'low'),
+        ('CIS-NEW-SECURITY', 'Security', 'medium'),  # Fallback pattern
+    ]
+    
+    passed = 0
+    failed = 0
+    
+    for exam_code, expected_domain, expected_confidence in test_cases:
+        domain, confidence = detect_servicenow_domain(exam_code)
+        
+        domain_match = domain == expected_domain
+        confidence_match = confidence == expected_confidence
+        success = domain_match and confidence_match
+        
+        if success:
+            passed += 1
+            print(f"✅ {exam_code} → {domain} ({confidence})")
+        else:
+            failed += 1
+            print(f"❌ {exam_code} → {domain} ({confidence}) [Expected: {expected_domain} ({expected_confidence})]")
+    
+    print("==================================")
+    print(f"📊 Test Results: {passed} passed, {failed} failed")
+    
+    if failed == 0:
+        print("🎉 All domain detection tests passed!")
+    else:
+        print(f"⚠️  {failed} tests failed - please review domain patterns")
+    
+    return failed == 0
 
 def scan_exam_directory(exam_path):
     """
@@ -95,13 +223,22 @@ def scan_exam_directory(exam_path):
             except:
                 pass
                 
-        # Create manifest entry
+        # Auto-detect domain for this exam
+        domain, confidence = detect_servicenow_domain(exam_code)
+        
+        # Create manifest entry (description will be preserved/added by update logic)
         manifest_entry = {
             'code': exam_code,
             'name': exam_name,
-            'description': f"{exam_name} certification exam questions",
+            'description': f"{exam_name} certification exam questions",  # Default only for new exams
             'questionCount': question_count,
-            'lastUpdated': last_updated
+            'lastUpdated': last_updated,
+            'domain': domain,
+            'domainDetection': {
+                'confidence': confidence,
+                'autoDetected': True,
+                'detectedAt': datetime.now().isoformat()
+            }
         }
         
         # Add source information if available
@@ -159,13 +296,10 @@ def update_single_exam_in_manifest(exam_code):
     exam_found = False
     for i, exam in enumerate(manifest.get('exams', [])):
         if exam.get('code') == exam_code:
-            # Preserve existing description if it exists and is different from auto-generated
+            # ALWAYS preserve existing description - NEVER overwrite it
             existing_description = exam.get('description', '')
-            auto_generated_description = f"{updated_entry['name']} certification exam questions"
-            
-            # Only preserve description if it's not the auto-generated one
-            if existing_description and existing_description != auto_generated_description:
-                print(f"📝 Preserving custom description for {exam_code}")
+            if existing_description:
+                print(f"📝 Preserving existing description for {exam_code}")
                 updated_entry['description'] = existing_description
             
             # Update the exam entry
@@ -192,17 +326,34 @@ def update_single_exam_in_manifest(exam_code):
 
 def generate_manifest():
     """
-    Generate the complete manifest.json file
+    Generate the complete manifest.json file with description preservation
     
     Returns:
         dict: Generated manifest data
     """
     project_root = get_project_root()
     data_dir = project_root / "public" / "data"
+    manifest_path = data_dir / "manifest.json"
     
     if not data_dir.exists():
         print(f"❌ Data directory not found: {data_dir}")
         return None
+    
+    # Load existing manifest to preserve descriptions
+    existing_manifest = {}
+    if manifest_path.exists():
+        try:
+            with open(manifest_path, 'r', encoding='utf-8') as f:
+                existing_manifest = json.load(f)
+        except Exception as e:
+            print(f"⚠️  Warning: Could not load existing manifest: {e}")
+    
+    # Create a lookup for existing descriptions
+    existing_descriptions = {}
+    for exam in existing_manifest.get('exams', []):
+        exam_code = exam.get('code')
+        if exam_code and exam.get('description'):
+            existing_descriptions[exam_code] = exam['description']
         
     print(f"🔍 Scanning exam directories in: {data_dir}")
     
@@ -214,8 +365,16 @@ def generate_manifest():
         if item.is_dir() and not item.name.startswith('.'):
             entry = scan_exam_directory(item)
             if entry:
+                # Preserve existing description if it exists
+                exam_code = entry['code']
+                if exam_code in existing_descriptions:
+                    print(f"📝 Preserving existing description for {exam_code}")
+                    entry['description'] = existing_descriptions[exam_code]
+                
                 manifest_entries.append(entry)
-                print(f"✅ {entry['code']}: {entry['questionCount']} questions")
+                domain_info = f"→ {entry['domain']}"
+                confidence_icon = "🎯" if entry['domainDetection']['confidence'] == 'high' else "🤔" if entry['domainDetection']['confidence'] == 'medium' else "❓"
+                print(f"✅ {entry['code']}: {entry['questionCount']} questions {domain_info} {confidence_icon}")
             else:
                 skipped_dirs.append(item.name)
                 
@@ -235,8 +394,32 @@ def generate_manifest():
     print(f"   📋 Total exams: {manifest['totalExams']}")
     print(f"   📝 Total questions: {manifest['totalQuestions']}")
     
+    # Domain distribution summary
+    domain_stats = {}
+    confidence_stats = {'high': 0, 'medium': 0, 'low': 0}
+    
+    for entry in manifest_entries:
+        domain = entry['domain']
+        confidence = entry['domainDetection']['confidence']
+        
+        if domain not in domain_stats:
+            domain_stats[domain] = 0
+        domain_stats[domain] += 1
+        confidence_stats[confidence] += 1
+    
+    print(f"\n🎯 Domain Distribution:")
+    for domain, count in sorted(domain_stats.items()):
+        percentage = (count / len(manifest_entries)) * 100
+        print(f"   {domain}: {count} exams ({percentage:.1f}%)")
+    
+    print(f"\n🔍 Detection Confidence:")
+    for confidence, count in confidence_stats.items():
+        percentage = (count / len(manifest_entries)) * 100
+        icon = "🎯" if confidence == 'high' else "🤔" if confidence == 'medium' else "❓"
+        print(f"   {icon} {confidence.title()}: {count} exams ({percentage:.1f}%)")
+    
     if skipped_dirs:
-        print(f"   ⚠️  Skipped directories: {', '.join(skipped_dirs)}")
+        print(f"\n   ⚠️  Skipped directories: {', '.join(skipped_dirs)}")
         
     return manifest
 
@@ -307,7 +490,22 @@ def validate_manifest(manifest):
 
 def main():
     """Main function"""
-    print("🚀 Starting manifest generation")
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Generate manifest with domain detection')
+    parser.add_argument('--test-domains', action='store_true', 
+                       help='Test domain detection patterns instead of generating manifest')
+    
+    args = parser.parse_args()
+    
+    if args.test_domains:
+        # Run domain detection tests
+        print("🧪 Running Domain Detection Tests")
+        print("=================================")
+        success = test_domain_detection()
+        sys.exit(0 if success else 1)
+    
+    print("🚀 Starting manifest generation with domain detection")
     print(f"⏰ Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     # Generate manifest
@@ -329,6 +527,7 @@ def main():
         
     print("\n🎉 Manifest generation completed successfully!")
     print(f"📊 Generated manifest with {manifest['totalExams']} exams and {manifest['totalQuestions']} questions")
+    print("🎯 All exams now include domain classification for enhanced analytics!")
 
 if __name__ == "__main__":
     main()

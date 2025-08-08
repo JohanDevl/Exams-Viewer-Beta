@@ -17,6 +17,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useExamStore } from '@/stores/examStore';
 import { useStatisticsStore } from '@/stores/statisticsStore';
+import { PerformanceHeatmap } from '@/components/statistics/PerformanceHeatmap';
+import { getExamsForDomain } from '@/utils/domainMapping';
+import { useToastWithSound } from '@/hooks/useToastWithSound';
+import type { ServiceNowDomain } from '@/types';
 
 export function StatisticsModal() {
   const { isStatisticsModalOpen, closeStatisticsModal } = useSettingsStore();
@@ -24,8 +28,56 @@ export function StatisticsModal() {
     currentExam, 
     currentExamInfo, 
     questionStates, 
-    getProgress 
+    getProgress,
+    loadExam 
   } = useExamStore();
+  const { addToast } = useToastWithSound();
+
+  // Handle domain navigation
+  const handleDomainClick = async (domain: ServiceNowDomain) => {
+    const examCodes = getExamsForDomain(domain);
+    
+    if (examCodes.length === 0) {
+      addToast({
+        type: 'warning',
+        title: 'No exams found',
+        description: `No exams found for ${domain} domain`
+      });
+      return;
+    }
+
+    // Close the statistics modal
+    closeStatisticsModal();
+    
+    // If the current exam is already from this domain, don't reload
+    if (currentExamInfo && examCodes.includes(currentExamInfo.code)) {
+      // TODO: Implement domain-specific filtering within current exam
+      addToast({
+        type: 'info',
+        title: 'Already in domain',
+        description: `Currently viewing ${currentExamInfo.code} from ${domain} domain. Domain-specific filtering coming soon!`
+      });
+      return;
+    }
+    
+    // Load the first exam from this domain
+    try {
+      await loadExam(examCodes[0]);
+      
+      // Show success message
+      addToast({
+        type: 'success',
+        title: 'Domain loaded',
+        description: `Loaded ${examCodes[0]} from ${domain} domain (${examCodes.length} total exams)`
+      });
+    } catch (error) {
+      addToast({
+        type: 'error',
+        title: 'Loading failed',
+        description: `Error loading exam from ${domain} domain: ${error instanceof Error ? error.message : 'Unknown error'}`
+      });
+    }
+  };
 
   // Calculate statistics
   const progress = getProgress();
@@ -363,7 +415,7 @@ export function StatisticsModal() {
 
   return (
     <Dialog open={isStatisticsModalOpen} onOpenChange={closeStatisticsModal}>
-      <DialogContent className="max-w-6xl max-h-[80vh]">
+      <DialogContent className="max-w-6xl max-h-[80vh]" aria-describedby="statistics-description">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-blue-500" />
@@ -372,7 +424,7 @@ export function StatisticsModal() {
               <Badge variant="outline">{currentExamInfo.name}</Badge>
             )}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="statistics-description">
             View detailed statistics and performance metrics for your exam progress
           </DialogDescription>
         </DialogHeader>
@@ -458,6 +510,11 @@ export function StatisticsModal() {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Domain Performance Heatmap */}
+                <PerformanceHeatmap 
+                  onDomainClick={handleDomainClick}
+                />
 
                 {/* Statistics by difficulty */}
                 <Card>
