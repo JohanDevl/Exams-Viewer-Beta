@@ -363,6 +363,7 @@ export function SettingsModal() {
                 </Card>
               )}
 
+
               {/* About */}
               <Card className="py-3 sm:py-6">
                 <CardHeader className="px-3 sm:px-6">

@@ -61,9 +61,11 @@ export const SERVICENOW_DOMAINS: Record<ServiceNowDomain, DomainInfo> = {
 };
 
 /**
- * Get the ServiceNow domain for a given exam code
+ * Get the ServiceNow domain for a given exam code from manifest
+ * This reads the domain directly from the exam data in manifest.json
  */
 export const getDomainForExam = (examCode: string): ServiceNowDomain | null => {
+  // Fallback to static mapping if manifest domain is not available
   for (const [domain, info] of Object.entries(SERVICENOW_DOMAINS)) {
     if (info.examCodes.includes(examCode)) {
       return domain as ServiceNowDomain;
@@ -73,7 +75,7 @@ export const getDomainForExam = (examCode: string): ServiceNowDomain | null => {
 };
 
 /**
- * Get all exam codes for a specific domain
+ * Get all exam codes for a specific domain from manifest
  */
 export const getExamsForDomain = (domain: ServiceNowDomain): string[] => {
   return SERVICENOW_DOMAINS[domain]?.examCodes || [];

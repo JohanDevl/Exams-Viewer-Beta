@@ -578,6 +578,8 @@ export const useStatisticsStore = create<StatisticsStore>()(
       // Get domain-specific statistics
       getDomainStatistics: (domain: ServiceNowDomain, timeFrame: "7d" | "30d" | "all" = "all") => {
         const { statistics } = get();
+        // TODO: Load exam codes from manifest dynamically
+        // For now, fallback to static mapping
         const examCodes = getExamsForDomain(domain);
         
         let totalQuestions = 0;

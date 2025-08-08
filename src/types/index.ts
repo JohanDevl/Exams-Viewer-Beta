@@ -30,6 +30,12 @@ export interface ExamInfo {
   description: string;
   questionCount: number;
   lastUpdated: string;
+  domain?: ServiceNowDomain; // Auto-detected or manually assigned domain
+  domainDetection?: {
+    confidence: 'high' | 'medium' | 'low';
+    autoDetected: boolean;
+    detectedAt: string;
+  };
 }
 
 export interface Manifest {
@@ -335,3 +341,4 @@ export interface HeatmapCellProps {
   onClick?: (domain: ServiceNowDomain) => void;
   showTooltip?: boolean;
 }
+

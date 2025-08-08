@@ -415,7 +415,7 @@ export function StatisticsModal() {
 
   return (
     <Dialog open={isStatisticsModalOpen} onOpenChange={closeStatisticsModal}>
-      <DialogContent className="max-w-6xl max-h-[80vh]">
+      <DialogContent className="max-w-6xl max-h-[80vh]" aria-describedby="statistics-description">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-blue-500" />
@@ -424,7 +424,7 @@ export function StatisticsModal() {
               <Badge variant="outline">{currentExamInfo.name}</Badge>
             )}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="statistics-description">
             View detailed statistics and performance metrics for your exam progress
           </DialogDescription>
         </DialogHeader>
